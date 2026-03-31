@@ -112,18 +112,17 @@ function escHtml(str) {
 
 // ── API call ──────────────────────────────────────────────────────────────────
 async function searchParking() {
-  const city   = cityInput.value.trim();
-  const street = streetInput.value.trim();
-  if (!street) { streetInput.focus(); return; }
+  const cityValue   = cityInput.value.trim();   // reads #city-input
+  const streetValue = streetInput.value.trim(); // reads #street-input
+  if (!streetValue) { streetInput.focus(); return; }
 
   showSkeletons();
   searchBtn.disabled = true;
   statsBar.hidden = true;
 
-  const now        = new Date();
-  const dayName    = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const timeStr    = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-  const fullStreet = city ? `${street}, ${city}` : street;
+  const now     = new Date();
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
@@ -134,21 +133,21 @@ async function searchParking() {
       fetch('/api/parking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ street: fullStreet, day: dayName, time: timeStr }),
+        body: JSON.stringify({
+          city: cityValue,
+          street: streetValue,
+          day: dayName,
+          time: timeStr
+        })
       }),
       timeoutPromise,
     ]);
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('API error:', response.status, errText);
-      throw new Error(errText);
-    }
-
-    const parsed = await response.json();
-    console.log('API response:', parsed);
-    if (parsed.error) throw new Error(parsed.error);
-    renderResults(parsed, street);
+    if (!response.ok) throw new Error('API failed: ' + response.status);
+    const data = await response.json();
+    console.log('API response:', data);
+    if (data.error) throw new Error(data.error);
+    renderResults(data, streetValue);
   } catch (err) {
     console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {

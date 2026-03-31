@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   if (req.method !== 'POST') return res.status(405).end();
-  const { street, day, time } = req.body;
+  const { city, street, day, time } = req.body;
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -13,7 +13,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 600,
-        messages: [{ role: 'user', content: `Jersey City NJ parking expert. Find 5 free street parking spots near "${street}". Today: ${day} ${time}. Reply ONLY in JSON: {"street":"","neighborhood":"","spots":[{"id":1,"address":"","side":"","status":"FREE","time_limit":"","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":""}],"general_tips":[]}` }]
+        messages: [{ role: 'user', content: `Parking expert for ${city || 'the requested city'}. Find 5 free street parking spots near "${street}", ${city || ''}. Today: ${day} ${time}. Reply ONLY in JSON: {"street":"","neighborhood":"","spots":[{"id":1,"address":"","side":"","status":"FREE","time_limit":"","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":""}],"general_tips":[]}` }]
       })
     });
     const data = await r.json();
