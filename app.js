@@ -1,51 +1,103 @@
 const TIMEOUT_MS = 8000;
 
 const searchBtn   = document.getElementById('search-btn');
-const locationInput = document.getElementById('location');
+const cityInput   = document.getElementById('city-input');
+const streetInput = document.getElementById('street-input');
 const resultsDiv  = document.getElementById('results');
+const statsBar    = document.getElementById('stats-bar');
 
-// ── Skeleton loader (shown instantly on click) ──────────────────────────────
+const LOADING_MSGS = [
+  'Scanning streets…',
+  'Checking permit zones…',
+  'Finding free spots…',
+  'Almost there…',
+];
+
+let loadingTimer = null;
+
+// ── Loading state: animated parking meter ────────────────────────────────────
 function showSkeletons() {
-  const card = `
-    <div class="card skeleton">
-      <div class="skel-row">
-        <div class="skel-line w-70"></div>
-        <div class="skel-line w-20"></div>
+  clearInterval(loadingTimer);
+  let idx = 0;
+  resultsDiv.innerHTML = `
+    <div class="loading-state">
+      <div class="meter-light"></div>
+      <div class="meter-head">
+        <div class="meter-screen">
+          <div class="meter-fill-bar"></div>
+          <span class="meter-p">P</span>
+        </div>
+        <div class="meter-coin-slot"></div>
       </div>
-      <div class="skel-line w-50"></div>
-      <div class="skel-row" style="margin-top:6px">
-        <div class="skel-line w-35"></div>
-        <div class="skel-line w-20" style="height:14px"></div>
-      </div>
+      <div class="meter-neck"></div>
+      <div class="meter-pole"></div>
+      <p id="loading-msg" class="loading-msg">${LOADING_MSGS[0]}</p>
     </div>`;
-  resultsDiv.innerHTML = card.repeat(5);
+
+  loadingTimer = setInterval(() => {
+    idx = (idx + 1) % LOADING_MSGS.length;
+    const el = document.getElementById('loading-msg');
+    if (el) {
+      el.style.animation = 'none';
+      void el.offsetHeight; // force reflow to restart animation
+      el.style.animation = '';
+      el.textContent = LOADING_MSGS[idx];
+    }
+  }, 1700);
 }
 
-// ── Render real results ─────────────────────────────────────────────────────
+// ── Render parking cards ──────────────────────────────────────────────────────
 function renderResults(parsed, street) {
+  clearInterval(loadingTimer);
+
   const spots = parsed.spots;
   if (!Array.isArray(spots) || spots.length === 0) {
     showMessage('No parking spots found. Try a different location.');
     return;
   }
-  resultsDiv.innerHTML = spots.map(s => `
-    <div class="card">
-      <div class="card-header">
-        <h3>${escHtml(s.address)} <span style="font-weight:400;color:#64748b">(${escHtml(s.side)})</span></h3>
-        <span class="badge available">${escHtml(s.status)}</span>
-      </div>
-      <div class="card-meta">${escHtml(s.distance_from_search)}</div>
-      <div class="card-footer">
-        <span class="price">${escHtml(s.time_limit)}</span>
-        <span>${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
-      </div>
-    </div>`).join('');
+
+  // Populate stats bar
+  const freeCount = spots.filter(s => s.status === 'FREE').length;
+  document.getElementById('stat-count').textContent = freeCount;
+  document.getElementById('stat-street').textContent = parsed.street || street;
+  document.getElementById('stat-city').textContent   = parsed.neighborhood || cityInput.value;
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  statsBar.hidden = false;
+
+  const STATUS_COLOR = {
+    'FREE':            '#00C853',
+    'LIMITED':         '#FFB300',
+    'PERMIT REQUIRED': '#F44336',
+  };
+
+  resultsDiv.innerHTML = spots.map((s, i) => {
+    const color = STATUS_COLOR[s.status] || '#00C853';
+    const num   = String(i + 1).padStart(2, '0');
+    return `
+      <div class="parking-card" style="--status-color:${color};--delay:${i * 0.08}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h3 class="card-address">${escHtml(s.address)} <span class="card-side">(${escHtml(s.side)})</span></h3>
+            <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
+          </div>
+          <div class="card-details">
+            <span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>
+            <span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>
+            <span class="detail-item">🔑 ${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
+            <span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>
+            <span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 function showMessage(text, isError = false) {
+  clearInterval(loadingTimer);
   resultsDiv.innerHTML = `
     <div class="msg ${isError ? 'error' : ''}">
-      <div class="icon">${isError ? '⚠️' : 'ℹ️'}</div>
+      <div class="msg-icon">${isError ? '⚠️' : 'ℹ️'}</div>
       <p>${escHtml(text)}</p>
     </div>`;
 }
@@ -58,20 +110,20 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ── API call ────────────────────────────────────────────────────────────────
+// ── API call ──────────────────────────────────────────────────────────────────
 async function searchParking() {
-  const street = locationInput.value.trim();
-  if (!street) {
-    locationInput.focus();
-    return;
-  }
+  const city   = cityInput.value.trim();
+  const street = streetInput.value.trim();
+  if (!street) { streetInput.focus(); return; }
 
-  showSkeletons(); // instant feedback
+  showSkeletons();
   searchBtn.disabled = true;
+  statsBar.hidden = true;
 
-  const now = new Date();
-  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const now        = new Date();
+  const dayName    = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const timeStr    = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const fullStreet = city ? `${street}, ${city}` : street;
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
@@ -82,9 +134,9 @@ async function searchParking() {
       fetch('/api/parking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ street, day: dayName, time: timeStr })
+        body: JSON.stringify({ street: fullStreet, day: dayName, time: timeStr }),
       }),
-      timeoutPromise
+      timeoutPromise,
     ]);
 
     const parsed = await response.json();
@@ -102,8 +154,14 @@ async function searchParking() {
   }
 }
 
-// ── Event listeners ─────────────────────────────────────────────────────────
+// ── Event listeners ───────────────────────────────────────────────────────────
 searchBtn.addEventListener('click', searchParking);
-locationInput.addEventListener('keydown', e => {
-  if (e.key === 'Enter') searchParking();
+streetInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchParking(); });
+cityInput.addEventListener('keydown',   e => { if (e.key === 'Enter') searchParking(); });
+
+document.querySelectorAll('.chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    cityInput.value = chip.dataset.city;
+    streetInput.focus();
+  });
 });
