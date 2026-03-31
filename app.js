@@ -1,5 +1,3 @@
-const API_KEY = 'YOUR_ANTHROPIC_API_KEY'; // Replace with your key
-const API_URL = 'https://api.anthropic.com/v1/messages';
 const TIMEOUT_MS = 8000;
 
 const searchBtn   = document.getElementById('search-btn');
@@ -24,7 +22,8 @@ function showSkeletons() {
 }
 
 // ── Render real results ─────────────────────────────────────────────────────
-function renderResults(spots) {
+function renderResults(parsed, street) {
+  const spots = parsed.spots;
   if (!Array.isArray(spots) || spots.length === 0) {
     showMessage('No parking spots found. Try a different location.');
     return;
@@ -32,15 +31,13 @@ function renderResults(spots) {
   resultsDiv.innerHTML = spots.map(s => `
     <div class="card">
       <div class="card-header">
-        <h3>${escHtml(s.name)}</h3>
-        <span class="badge ${s.available ? 'available' : 'unavailable'}">
-          ${s.available ? 'Available' : 'Full'}
-        </span>
+        <h3>${escHtml(s.address)} <span style="font-weight:400;color:#64748b">(${escHtml(s.side)})</span></h3>
+        <span class="badge available">${escHtml(s.status)}</span>
       </div>
-      <div class="card-meta">${escHtml(s.address)}</div>
+      <div class="card-meta">${escHtml(s.distance_from_search)}</div>
       <div class="card-footer">
-        <span class="price">${escHtml(s.price)}</span>
-        <span>${escHtml(s.distance)} &bull; <span class="type">${escHtml(s.type)}</span></span>
+        <span class="price">${escHtml(s.time_limit)}</span>
+        <span>${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
       </div>
     </div>`).join('');
 }
@@ -63,8 +60,8 @@ function escHtml(str) {
 
 // ── API call ────────────────────────────────────────────────────────────────
 async function searchParking() {
-  const location = locationInput.value.trim();
-  if (!location) {
+  const street = locationInput.value.trim();
+  if (!street) {
     locationInput.focus();
     return;
   }
@@ -72,55 +69,31 @@ async function searchParking() {
   showSkeletons(); // instant feedback
   searchBtn.disabled = true;
 
-  const prompt =
-    `Find 5 nearby parking spots for: ${location}\n\n` +
-    `Return ONLY a valid JSON array — no markdown, no explanation:\n` +
-    `[\n` +
-    `  {\n` +
-    `    "name": "string",\n` +
-    `    "address": "string",\n` +
-    `    "distance": "string (e.g. 0.2 mi)",\n` +
-    `    "price": "string (e.g. $3/hr)",\n` +
-    `    "available": true,\n` +
-    `    "type": "garage|lot|street"\n` +
-    `  }\n` +
-    `]`;
-
-  const fetchPromise = fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 600,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-  });
+  const now = new Date();
+  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
   );
 
   try {
-    const response = await Promise.race([fetchPromise, timeoutPromise]);
+    const response = await Promise.race([
+      fetch('/api/parking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ street, day: dayName, time: timeStr })
+      }),
+      timeoutPromise
+    ]);
 
-    if (!response.ok) {
-      throw new Error(`API error ${response.status}`);
-    }
-
-    const data  = await response.json();
-    const text  = data.content[0].text.trim();
-    const spots = JSON.parse(text);
-    renderResults(spots);
+    const parsed = await response.json();
+    renderResults(parsed, street);
   } catch (err) {
     if (err.message === 'TIMEOUT') {
       showMessage('The search is taking too long. Please try again.', true);
     } else {
-      showMessage('Something went wrong. Please check your API key and try again.', true);
+      showMessage('Something went wrong. Please try again.', true);
     }
   } finally {
     searchBtn.disabled = false;
