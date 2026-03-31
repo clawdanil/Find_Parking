@@ -17,8 +17,16 @@ export default async function handler(req, res) {
       })
     });
     const data = await r.json();
-    const text = data.content[0].text.replace(/```json|```/g,'').trim();
-    res.status(200).json(JSON.parse(text));
+    let text = data.content[0].text;
+    // Strip markdown fences and extract the first JSON object
+    text = text.replace(/```json|```/g, '').trim();
+    const jsonStart = text.indexOf('{');
+    const jsonEnd = text.lastIndexOf('}');
+    if (jsonStart === -1 || jsonEnd === -1) throw new Error('No JSON object in response');
+    const parsed = JSON.parse(text.slice(jsonStart, jsonEnd + 1));
+    // Guarantee the spots key is always an array
+    if (!Array.isArray(parsed.spots)) parsed.spots = [];
+    res.status(200).json(parsed);
   } catch(e) {
     res.status(500).json({ error: e.message });
   }

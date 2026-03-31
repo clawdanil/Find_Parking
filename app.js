@@ -88,6 +88,8 @@ async function searchParking() {
     ]);
 
     const parsed = await response.json();
+    console.log('API response:', parsed);
+    if (parsed.error) throw new Error(parsed.error);
     renderResults(parsed, street);
   } catch (err) {
     if (err.message === 'TIMEOUT') {
