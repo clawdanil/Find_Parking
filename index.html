@@ -8,7 +8,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
-    /* ── Reset & variables ─────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
@@ -35,7 +34,7 @@
       overflow-x: hidden;
     }
 
-    /* ── Animated dot grid background ─────────────────────────────────── */
+    /* ── Animated dot grid ─────────────────────────────────────────────── */
     .bg-dots {
       position: fixed;
       inset: 0;
@@ -59,7 +58,6 @@
       text-align: center;
       overflow: hidden;
     }
-    /* Radial glow behind logo */
     .hero::before {
       content: '';
       position: absolute;
@@ -83,7 +81,6 @@
     }
     .logo-icon svg { position: absolute; top: 0; left: 0; }
 
-    /* Pulsing rings */
     @keyframes pulseRing {
       0%, 100% { transform: scale(0.92); opacity: 0.55; }
       50%       { transform: scale(1.08); opacity: 0.18; }
@@ -105,11 +102,10 @@
       font-size: 1.15rem;
       color: #94A3B8;
       font-weight: 400;
-      letter-spacing: 0.1px;
       margin-top: 4px;
     }
 
-    /* ── Floating search card ──────────────────────────────────────────── */
+    /* ── Search card ───────────────────────────────────────────────────── */
     .search-section {
       position: relative;
       z-index: 10;
@@ -175,26 +171,11 @@
       white-space: nowrap;
       letter-spacing: 0.3px;
       transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
-      position: relative;
-      overflow: hidden;
     }
-    .search-btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(255,255,255,.18), transparent);
-      opacity: 0;
-      transition: opacity 0.2s;
-    }
-    .search-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(0,200,83,.38);
-    }
-    .search-btn:hover::after { opacity: 1; }
-    .search-btn:active         { transform: translateY(0); }
-    .search-btn:disabled       { opacity: 0.55; cursor: default; transform: none; box-shadow: none; }
+    .search-btn:hover  { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,200,83,.38); }
+    .search-btn:active { transform: translateY(0); }
+    .search-btn:disabled { opacity: 0.55; cursor: default; transform: none; box-shadow: none; }
 
-    /* Quick-select chips */
     .chips {
       display: flex;
       flex-wrap: wrap;
@@ -203,7 +184,7 @@
     }
     .chips-label {
       font-size: 0.72rem;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--muted);
       text-transform: uppercase;
       letter-spacing: 0.8px;
@@ -271,7 +252,7 @@
     }
     .stats-div { color: #2d3f55; font-size: 1.1rem; }
 
-    /* ── Results container ─────────────────────────────────────────────── */
+    /* ── Results ───────────────────────────────────────────────────────── */
     #results {
       max-width: 740px;
       margin: 22px auto 64px;
@@ -281,7 +262,7 @@
       gap: 14px;
     }
 
-    /* ── Parking meter loading state ──────────────────────────────────── */
+    /* ── Parking meter loader ──────────────────────────────────────────── */
     .loading-state {
       display: flex;
       flex-direction: column;
@@ -289,7 +270,6 @@
       padding: 52px 16px;
       gap: 22px;
     }
-    /* Top blink light */
     .meter-light {
       width: 14px; height: 14px;
       border-radius: 50%;
@@ -302,7 +282,6 @@
       0%, 100% { opacity: 1; box-shadow: 0 0 14px var(--green); }
       50%       { opacity: 0.3; box-shadow: 0 0 4px var(--green); }
     }
-    /* Meter head */
     .meter-head {
       width: 62px; height: 80px;
       background: var(--navy2);
@@ -351,19 +330,13 @@
       background: #334155;
       border-radius: 2px;
     }
-    /* Neck + pole */
-    .meter-neck {
-      width: 12px; height: 8px;
-      background: #334155;
-      margin: 0 auto;
-    }
+    .meter-neck { width: 12px; height: 8px; background: #334155; margin: 0 auto; }
     .meter-pole {
       width: 8px; height: 52px;
       background: linear-gradient(to right, #475569, #2d3f55, #475569);
       border-radius: 0 0 4px 4px;
       margin: 0 auto;
     }
-    /* Rotating message */
     .loading-msg {
       font-family: 'Syne', sans-serif;
       font-size: 1.05rem;
@@ -376,7 +349,7 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── Parking result card ───────────────────────────────────────────── */
+    /* ── Result cards ──────────────────────────────────────────────────── */
     .parking-card {
       background: white;
       border-radius: 16px;
@@ -390,10 +363,7 @@
       animation-delay: var(--delay, 0s);
       transition: transform 0.22s, box-shadow 0.22s;
     }
-    .parking-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 14px 36px rgba(0,0,0,.1);
-    }
+    .parking-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,.1); }
     @keyframes cardIn {
       from { opacity: 0; transform: translateY(22px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -425,12 +395,7 @@
       font-weight: 700;
       line-height: 1.35;
     }
-    .card-side {
-      font-family: 'Inter', sans-serif;
-      font-weight: 400;
-      color: var(--muted);
-      font-size: 0.87rem;
-    }
+    .card-side { font-family: 'Inter', sans-serif; font-weight: 400; color: var(--muted); font-size: 0.87rem; }
     .status-badge {
       font-size: 0.68rem;
       font-weight: 700;
@@ -441,11 +406,7 @@
       font-family: 'Inter', sans-serif;
       flex-shrink: 0;
     }
-    .card-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 7px;
-    }
+    .card-details { display: flex; flex-wrap: wrap; gap: 7px; }
     .detail-item {
       display: flex;
       align-items: center;
@@ -459,12 +420,8 @@
       white-space: nowrap;
     }
 
-    /* ── General message (error / empty) ──────────────────────────────── */
-    .msg {
-      text-align: center;
-      padding: 52px 16px;
-      color: var(--muted);
-    }
+    /* ── Message states ────────────────────────────────────────────────── */
+    .msg { text-align: center; padding: 52px 16px; color: var(--muted); }
     .msg.error { color: #b91c1c; }
     .msg-icon  { font-size: 2.8rem; margin-bottom: 12px; }
     .msg p     { font-size: 0.95rem; }
@@ -482,35 +439,31 @@
 
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width: 600px) {
-      .hero        { padding: 52px 16px 82px; }
-      .logo-text   { font-size: 2.6rem; }
+      .hero         { padding: 52px 16px 82px; }
+      .logo-text    { font-size: 2.6rem; }
       .hero-tagline { font-size: 0.97rem; }
-      .search-row  { flex-direction: column; }
-      .search-btn  { width: 100%; padding: 14px; text-align: center; }
-      .stats-inner { gap: 6px 14px; padding: 12px 16px; }
-      .stats-div   { display: none; }
-      .parking-card { gap: 12px; padding: 16px 16px; }
+      .search-row   { flex-direction: column; }
+      .search-btn   { width: 100%; padding: 14px; }
+      .stats-inner  { gap: 6px 14px; padding: 12px 16px; }
+      .stats-div    { display: none; }
+      .parking-card { gap: 12px; padding: 16px; }
       .spot-number  { font-size: 1.9rem; min-width: 44px; }
-      .card-details { gap: 6px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Moving dots backdrop -->
   <div class="bg-dots" aria-hidden="true"></div>
 
-  <!-- ── Hero ── -->
+  <!-- Hero -->
   <header class="hero">
     <div class="hero-logo">
       <div class="logo-icon">
-        <!-- Animated P icon -->
         <svg width="68" height="68" viewBox="0 0 68 68" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle class="ring1" cx="34" cy="34" r="30" fill="rgba(0,200,83,0.13)"/>
           <circle class="ring2" cx="34" cy="34" r="22" fill="rgba(0,200,83,0.1)"/>
           <circle cx="34" cy="34" r="28" stroke="#00C853" stroke-width="2.5" fill="none" stroke-dasharray="6 3"/>
-          <text x="34" y="46" text-anchor="middle"
-                font-size="28" font-weight="800"
+          <text x="34" y="46" text-anchor="middle" font-size="28" font-weight="800"
                 fill="#00C853" font-family="Syne, sans-serif">P</text>
         </svg>
       </div>
@@ -519,7 +472,7 @@
     <p class="hero-tagline">Find free street parking anywhere, instantly</p>
   </header>
 
-  <!-- ── Floating search panel ── -->
+  <!-- Search panel -->
   <section class="search-section">
     <div class="search-card">
       <div class="search-row">
@@ -546,7 +499,7 @@
     </div>
   </section>
 
-  <!-- ── Stats bar (hidden until first result) ── -->
+  <!-- Stats bar -->
   <div class="stats-bar" id="stats-bar" hidden>
     <div class="stats-inner">
       <span class="stat-item">
@@ -562,10 +515,10 @@
     </div>
   </div>
 
-  <!-- ── Results ── -->
+  <!-- Results -->
   <div id="results"></div>
 
-  <!-- ── Footer ── -->
+  <!-- Footer -->
   <footer>
     <strong>ParkMe</strong> © 2026 &nbsp;|&nbsp; Always verify posted signs before parking
   </footer>

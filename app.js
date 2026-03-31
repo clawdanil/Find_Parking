@@ -39,7 +39,7 @@ function showSkeletons() {
     const el = document.getElementById('loading-msg');
     if (el) {
       el.style.animation = 'none';
-      void el.offsetHeight; // force reflow to restart animation
+      void el.offsetHeight;
       el.style.animation = '';
       el.textContent = LOADING_MSGS[idx];
     }
@@ -56,7 +56,6 @@ function renderResults(parsed, street) {
     return;
   }
 
-  // Populate stats bar
   const freeCount = spots.filter(s => s.status === 'FREE').length;
   document.getElementById('stat-count').textContent = freeCount;
   document.getElementById('stat-street').textContent = parsed.street || street;
@@ -110,19 +109,16 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ── API call ──────────────────────────────────────────────────────────────────
+// ── Search ────────────────────────────────────────────────────────────────────
 async function searchParking() {
-  const cityValue   = cityInput.value.trim();   // reads #city-input
-  const streetValue = streetInput.value.trim(); // reads #street-input
-  if (!streetValue) { streetInput.focus(); return; }
+  const city   = cityInput.value.trim();   // id="city-input"
+  const street = streetInput.value.trim(); // id="street-input"
+  if (!street) { streetInput.focus(); return; }
+  if (!city)   { cityInput.focus();   return; }
 
   showSkeletons();
   searchBtn.disabled = true;
   statsBar.hidden = true;
-
-  const now     = new Date();
-  const dayName = now.toLocaleDateString('en-US', { weekday: 'long' });
-  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
@@ -134,20 +130,25 @@ async function searchParking() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          city: cityValue,
-          street: streetValue,
-          day: dayName,
-          time: timeStr
+          city,
+          street,
+          day:  new Date().toLocaleDateString('en-US', { weekday: 'long' }),
+          time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
         })
       }),
       timeoutPromise,
     ]);
 
-    if (!response.ok) throw new Error('API failed: ' + response.status);
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('API error:', response.status, errText);
+      throw new Error('API failed: ' + response.status);
+    }
+
     const data = await response.json();
     console.log('API response:', data);
     if (data.error) throw new Error(data.error);
-    renderResults(data, streetValue);
+    renderResults(data, street);
   } catch (err) {
     console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {
