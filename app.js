@@ -139,11 +139,18 @@ async function searchParking() {
       timeoutPromise,
     ]);
 
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('API error:', response.status, errText);
+      throw new Error(errText);
+    }
+
     const parsed = await response.json();
     console.log('API response:', parsed);
     if (parsed.error) throw new Error(parsed.error);
     renderResults(parsed, street);
   } catch (err) {
+    console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {
       showMessage('The search is taking too long. Please try again.', true);
     } else {
