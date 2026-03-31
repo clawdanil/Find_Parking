@@ -1,7 +1,13 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set in environment variables' });
+  }
+
   const { city, street, day, time } = req.body;
   if (!city || !street) return res.status(400).json({ error: 'Missing city or street' });
+
   try {
     const r = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -20,12 +26,25 @@ export default async function handler(req, res) {
         }]
       })
     });
+
     const data = await r.json();
-    if (data.error) return res.status(500).json({ error: data.error.message });
-    const text = data.content[0].text.trim();
-    const json = JSON.parse(text);
+
+    if (data.error) {
+      return res.status(502).json({ error: `Anthropic error: ${data.error.message || JSON.stringify(data.error)}` });
+    }
+
+    // Robustly extract JSON even if Claude wraps it in markdown fences or adds prose
+    let text = data.content[0].text.trim().replace(/```json|```/g, '');
+    const start = text.indexOf('{');
+    const end   = text.lastIndexOf('}');
+    if (start === -1 || end === -1) {
+      return res.status(502).json({ error: `No JSON in response. Raw: ${text.slice(0, 200)}` });
+    }
+    const json = JSON.parse(text.slice(start, end + 1));
+    if (!Array.isArray(json.spots)) json.spots = [];
     res.status(200).json(json);
-  } catch(e) {
+
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 }

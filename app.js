@@ -142,7 +142,7 @@ async function searchParking() {
     if (!response.ok) {
       const errText = await response.text();
       console.error('API error:', response.status, errText);
-      throw new Error('API failed: ' + response.status);
+      throw new Error(errText || 'API failed: ' + response.status);
     }
 
     const data = await response.json();
@@ -154,7 +154,7 @@ async function searchParking() {
     if (err.message === 'TIMEOUT') {
       showMessage('The search is taking too long. Please try again.', true);
     } else {
-      showMessage('Something went wrong. Please try again.', true);
+      showMessage(err.message || 'Something went wrong. Please try again.', true);
     }
   } finally {
     searchBtn.disabled = false;
