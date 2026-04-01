@@ -21,8 +21,16 @@ export default async function handler(req, res) {
         max_tokens: 2000,
         messages: [{
           role: 'user',
-          content: `You are a parking expert for ${city}. Find 5 free street parking spots near "${street}" in ${city}. Today is ${day} at ${time}. Return ONLY valid JSON, no markdown:
-{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block","side":"north/south/east/west side","landmark":"in front of or near a real nearby business or landmark","lat":40.7178,"lng":-74.0431,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"On street"}],"general_tips":["tip1","tip2"]}`
+          content: `You are a street parking expert for ${city}. The user is looking for parking near: "${street}" in ${city}.
+
+Determine if the input is a full address (contains a number, e.g. "340 Grove St") or just a street name (e.g. "Grove Street").
+- If it is a full address: find 5 free parking spots within a 2-street radius of that exact address (include the cross streets on either side).
+- If it is a street name: find 5 free parking spots along or immediately adjacent to that street.
+
+Today is ${day} at ${time}. For each spot include the real approximate coordinates.
+
+Return ONLY valid JSON, no markdown, no explanation:
+{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block (e.g. 300-340 Grove St)","side":"north/south/east/west side","landmark":"real nearby business or landmark","lat":40.7178,"lng":-74.0431,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"e.g. 0.1 mi or On street"}],"general_tips":["tip1","tip2"]}`
         }]
       })
     });
