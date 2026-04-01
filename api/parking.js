@@ -23,15 +23,19 @@ export default async function handler(req, res) {
           role: 'user',
           content: `You are a street parking expert for ${city}. The user wants parking near: "${street}" in ${city}. Today is ${day} at ${time}.
 
-STRICT RADIUS RULE: ALL spots MUST be within 0.15 miles. Prefer spots within 0.1 miles. NEVER return a spot beyond 0.15 miles. If you cannot find 5 spots within 0.15 miles, return fewer spots rather than going further.
+STRICT RADIUS RULE: ALL spots MUST be within 0.15 miles. Prefer 0.1 miles. NEVER go beyond 0.15 miles. Return fewer than 5 spots rather than exceeding this limit.
 
-If the input is a full address (has a number, e.g. "175 2nd St"):
-- Spots on the SAME block get priority (distance_from_search: "On street").
-- Remaining spots come from immediately adjacent blocks or the nearest 1 cross-street only.
+INPUT PARSING:
+- If input contains a business name (e.g. "175 2nd St in front of Mango Mango" or "near Mango Mango restaurant"), use the business name to identify the exact block and prioritize spots directly in front of or adjacent to that business.
+- If input is a full address (has a number): same-block spots first, then immediate cross-streets.
+- If input is a street name only: spots along that street or immediate cross-streets.
 
-If the input is a street name: find spots along that street or its immediate cross-streets only.
-
-For heading: provide the compass degrees (0-359) a person should face TO LOOK AT the parking spot from the street (e.g. facing the curb where cars park).
+HEADING RULE (critical for Street View):
+- heading = the compass direction you face when standing IN THE STREET looking TOWARD the curb where cars park (perpendicular to the street).
+- Parking on the NORTH curb of an east-west street → heading = 0
+- Parking on the SOUTH curb → heading = 180
+- Parking on the EAST curb of a north-south street → heading = 90
+- Parking on the WEST curb → heading = 270
 
 Return ONLY valid JSON, no markdown:
 {"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block","side":"north/south/east/west side","landmark":"real nearby business","lat":40.7178,"lng":-74.0431,"heading":90,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"On street"}],"general_tips":["tip1","tip2"]}`
