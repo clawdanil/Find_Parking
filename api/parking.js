@@ -18,7 +18,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
+        max_tokens: 1500,
         messages: [{
           role: 'user',
           content: `You are a parking expert for ${city}. Find 5 free street parking spots near "${street}" in ${city}. Today is ${day} at ${time}. Return ONLY valid JSON, no markdown:
