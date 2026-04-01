@@ -72,12 +72,6 @@ function renderResults(parsed, street) {
   resultsDiv.innerHTML = spots.map((s, i) => {
     const color = STATUS_COLOR[s.status] || '#00C853';
     const num   = String(i + 1).padStart(2, '0');
-    const fullAddr = encodeURIComponent(`${s.address}, ${parsed.neighborhood || street}, ${cityInput.value}`);
-    const mapImgUrl = (s.lat && s.lng)
-      ? `https://staticmap.openstreetmap.de/staticmap.php?center=${s.lat},${s.lng}&zoom=17&size=600x180&markers=${s.lat},${s.lng},red-pushpin&maptype=mapnik`
-      : null;
-    const mapsUrl      = `https://www.google.com/maps/search/?api=1&query=${fullAddr}`;
-    const streetViewUrl= `https://www.google.com/maps?q=${fullAddr}&layer=c`;
     return `
       <div class="parking-card" style="--status-color:${color};--delay:${i * 0.08}s">
         <div class="spot-number">${num}</div>
@@ -93,11 +87,6 @@ function renderResults(parsed, street) {
             <span class="detail-item">🔑 ${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
             <span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>
             <span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>
-          </div>
-          ${mapImgUrl ? `<img class="card-map" src="${mapImgUrl}" alt="Map of ${escHtml(s.address)}" loading="lazy" onerror="this.style.display='none'">` : ''}
-          <div class="card-map-links">
-            <a href="${mapsUrl}" target="_blank" rel="noopener" class="map-link">🗺️ Open in Maps</a>
-            <a href="${streetViewUrl}" target="_blank" rel="noopener" class="map-link">📷 Street View</a>
           </div>
         </div>
       </div>`;
