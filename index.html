@@ -209,6 +209,26 @@
       background: rgba(0,200,83,.05);
       transform: translateY(-1px);
     }
+    .location-btn {
+      width: 100%;
+      margin-top: 14px;
+      padding: 10px 16px;
+      background: transparent;
+      border: 1.5px dashed var(--green);
+      border-radius: 10px;
+      color: var(--green);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.18s, opacity 0.18s;
+    }
+    .location-btn:hover    { background: rgba(0,200,83,.07); }
+    .location-btn:disabled { opacity: 0.5; cursor: default; }
 
     /* ── Stats bar ─────────────────────────────────────────────────────── */
     .stats-bar {
@@ -408,12 +428,13 @@
       flex-shrink: 0;
     }
     .card-streetview {
-      width: 100%; height: 200px;
+      width: 100%; height: 220px;
       object-fit: cover;
       border-radius: 10px;
-      margin: 10px 0 12px;
+      margin: 12px 0;
       display: block;
       background: var(--bg);
+      border: 1px solid var(--border);
     }
     .card-details { display: flex; flex-wrap: wrap; gap: 7px; }
     .detail-item {
@@ -497,6 +518,7 @@
         </div>
         <button id="search-btn" class="search-btn">Search →</button>
       </div>
+      <button id="location-btn" class="location-btn">📍 Use My Location</button>
       <div class="chips">
         <span class="chips-label">Quick select</span>
         <button class="chip" data-city="Jersey City, NJ">Jersey City, NJ</button>

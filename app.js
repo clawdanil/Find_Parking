@@ -81,7 +81,7 @@ function renderResults(parsed, street) {
             <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
           </div>
           ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
-          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}" alt="Street view of ${escHtml(s.address)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view of ${escHtml(s.address)}" loading="lazy" onerror="this.style.display='none'">` : ''}
           <div class="card-details">
             <span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>
             <span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>
@@ -173,4 +173,52 @@ document.querySelectorAll('.chip').forEach(chip => {
     cityInput.value = chip.dataset.city;
     streetInput.focus();
   });
+});
+
+// ── Current location ──────────────────────────────────────────────────────────
+const locationBtn = document.getElementById('location-btn');
+
+locationBtn.addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    showMessage('Geolocation is not supported by your browser.', true);
+    return;
+  }
+
+  locationBtn.disabled = true;
+  locationBtn.textContent = '⏳ Locating…';
+
+  navigator.geolocation.getCurrentPosition(
+    async ({ coords }) => {
+      const { latitude: lat, longitude: lng } = coords;
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await r.json();
+        const a = data.address;
+
+        const city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
+        const houseNo = a.house_number ? a.house_number + ' ' : '';
+        const street  = houseNo + (a.road || a.pedestrian || a.footway || '');
+
+        cityInput.value   = city;
+        streetInput.value = street;
+      } catch {
+        // Reverse geocode failed — fill coordinates as fallback
+        cityInput.value   = '';
+        streetInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+      }
+
+      locationBtn.textContent = '📍 My Location';
+      locationBtn.disabled = false;
+      searchParking();
+    },
+    () => {
+      locationBtn.textContent = '📍 My Location';
+      locationBtn.disabled = false;
+      showMessage('Location access denied. Please enter your address manually.', true);
+    },
+    { enableHighAccuracy: true, timeout: 10000 }
+  );
 });

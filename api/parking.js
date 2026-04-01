@@ -23,18 +23,18 @@ export default async function handler(req, res) {
           role: 'user',
           content: `You are a street parking expert for ${city}. The user wants parking near: "${street}" in ${city}. Today is ${day} at ${time}.
 
-STRICT RADIUS RULE: ALL spots MUST be within 0.2 miles of the input. Do NOT return any spot further than 0.2 miles away. Prefer spots within 0.1 miles.
+STRICT RADIUS RULE: ALL spots MUST be within 0.15 miles. Prefer spots within 0.1 miles. NEVER return a spot beyond 0.15 miles. If you cannot find 5 spots within 0.15 miles, return fewer spots rather than going further.
 
 If the input is a full address (has a number, e.g. "175 2nd St"):
-- Find spots on the SAME block first (same street, same block range). distance_from_search = "On street" or "0.0 mi".
-- Then fill remaining spots from immediately adjacent blocks on the same street or the nearest 1-2 crossing streets only. distance_from_search must be "0.1 mi" or "0.2 mi" maximum.
-- Do NOT suggest spots on streets that are 3+ blocks away.
+- Spots on the SAME block get priority (distance_from_search: "On street").
+- Remaining spots come from immediately adjacent blocks or the nearest 1 cross-street only.
 
-If the input is a street name only (e.g. "Grove Street"):
-- Find 5 spots along that street or on streets that directly intersect it, all within 0.2 miles.
+If the input is a street name: find spots along that street or its immediate cross-streets only.
 
-Return ONLY valid JSON, no markdown, no explanation:
-{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block (e.g. 150-200 2nd St)","side":"north/south/east/west side","landmark":"real nearby business or landmark","lat":40.7178,"lng":-74.0431,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"On street"}],"general_tips":["tip1","tip2"]}`
+For heading: provide the compass degrees (0-359) a person should face TO LOOK AT the parking spot from the street (e.g. facing the curb where cars park).
+
+Return ONLY valid JSON, no markdown:
+{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block","side":"north/south/east/west side","landmark":"real nearby business","lat":40.7178,"lng":-74.0431,"heading":90,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"On street"}],"general_tips":["tip1","tip2"]}`
         }]
       })
     });
