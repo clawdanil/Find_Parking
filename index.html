@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ParkMe – Find Free Street Parking</title>
+  <title>Park Me – Find Free Street Parking</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -53,19 +53,26 @@
     /* ── Hero ──────────────────────────────────────────────────────────── */
     .hero {
       position: relative;
-      background: linear-gradient(155deg, #0a0f1e 0%, #0F172A 40%, #112240 70%, #0a0f1e 100%);
-      padding: 64px 16px 96px;
+      background: linear-gradient(155deg, #060b17 0%, #0F172A 35%, #0d1f38 65%, #060c1a 100%);
+      padding: 72px 16px 104px;
       text-align: center;
       overflow: hidden;
     }
     .hero::before {
       content: '';
       position: absolute;
-      top: -100px; left: 50%;
+      top: -80px; left: 50%;
       transform: translateX(-50%);
-      width: 640px; height: 640px;
-      background: radial-gradient(circle, rgba(0,200,83,.14) 0%, transparent 65%);
+      width: 720px; height: 720px;
+      background: radial-gradient(circle, rgba(0,200,83,.18) 0%, rgba(0,229,255,.06) 35%, transparent 65%);
       pointer-events: none;
+    }
+    .hero::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(0,200,83,.25), transparent);
     }
 
     .hero-logo {
@@ -90,37 +97,40 @@
 
     .logo-text {
       font-family: 'Syne', sans-serif;
-      font-size: 3.2rem;
+      font-size: 3.4rem;
       font-weight: 800;
       background: linear-gradient(135deg, #00C853 0%, #00e5ff 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      letter-spacing: -1.5px;
+      letter-spacing: -2px;
     }
     .hero-tagline {
-      font-size: 1.15rem;
-      color: #94A3B8;
+      font-size: 1.1rem;
+      color: #64748B;
       font-weight: 400;
-      margin-top: 4px;
+      margin-top: 8px;
+      letter-spacing: 0.4px;
     }
 
     /* ── Search card ───────────────────────────────────────────────────── */
     .search-section {
       position: relative;
       z-index: 10;
-      max-width: 740px;
-      margin: -48px auto 0;
+      max-width: 760px;
+      margin: -52px auto 0;
       padding: 0 16px;
     }
     .search-card {
-      background: var(--white);
-      border-radius: 22px;
-      padding: 28px 28px 22px;
+      background: rgba(255,255,255,0.98);
+      border-radius: 24px;
+      padding: 30px 30px 24px;
       box-shadow:
-        0 24px 64px rgba(0,0,0,.14),
-        0 4px 18px rgba(0,0,0,.07),
-        0 0 0 1px rgba(0,0,0,.04);
+        0 32px 80px rgba(0,0,0,.18),
+        0 8px 24px rgba(0,0,0,.08),
+        0 0 0 1px rgba(0,0,0,.05),
+        inset 0 1px 0 rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
     }
     .search-row {
       display: flex;
@@ -142,24 +152,24 @@
     }
     .input-field {
       width: 100%;
-      padding: 13px 16px;
-      border: 2px solid var(--border);
+      padding: 14px 17px;
+      border: 1.5px solid var(--border);
       border-radius: 12px;
-      font-size: 0.96rem;
+      font-size: 0.95rem;
       font-family: 'Inter', sans-serif;
       color: var(--text);
-      background: var(--bg);
+      background: #F8FAFC;
       outline: none;
-      transition: border-color 0.22s, box-shadow 0.22s, background 0.22s;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
     }
-    .input-field::placeholder { color: #b0bec5; }
+    .input-field::placeholder { color: #CBD5E1; }
     .input-field:focus {
       border-color: var(--green);
-      box-shadow: 0 0 0 4px rgba(0,200,83,.13);
+      box-shadow: 0 0 0 4px rgba(0,200,83,.11), 0 2px 8px rgba(0,200,83,.08);
       background: white;
     }
     .search-btn {
-      padding: 13px 28px;
+      padding: 14px 30px;
       background: linear-gradient(135deg, #00C853 0%, #00897B 100%);
       color: white;
       border: none;
@@ -170,11 +180,12 @@
       cursor: pointer;
       white-space: nowrap;
       letter-spacing: 0.3px;
-      transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 16px rgba(0,200,83,.3);
+      transition: transform 0.18s, box-shadow 0.18s, opacity 0.18s;
     }
-    .search-btn:hover  { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(0,200,83,.38); }
-    .search-btn:active { transform: translateY(0); }
-    .search-btn:disabled { opacity: 0.55; cursor: default; transform: none; box-shadow: none; }
+    .search-btn:hover  { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(0,200,83,.42); }
+    .search-btn:active { transform: translateY(0); box-shadow: 0 4px 12px rgba(0,200,83,.25); }
+    .search-btn:disabled { opacity: 0.5; cursor: default; transform: none; box-shadow: none; }
 
     .chips {
       display: flex;
@@ -192,94 +203,97 @@
       margin-bottom: 2px;
     }
     .chip {
-      padding: 6px 14px;
+      padding: 6px 15px;
       border: 1.5px solid var(--border);
       border-radius: 20px;
       background: white;
-      font-size: 0.79rem;
+      font-size: 0.78rem;
       font-family: 'Inter', sans-serif;
       font-weight: 500;
       color: var(--muted);
       cursor: pointer;
-      transition: border-color 0.18s, color 0.18s, background 0.18s, transform 0.15s;
+      transition: border-color 0.15s, color 0.15s, background 0.15s, transform 0.15s, box-shadow 0.15s;
     }
     .chip:hover {
       border-color: var(--green);
-      color: #00a844;
-      background: rgba(0,200,83,.05);
+      color: #009e3f;
+      background: rgba(0,200,83,.06);
       transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(0,200,83,.12);
     }
     .location-btn {
       width: 100%;
       margin-top: 14px;
-      padding: 10px 16px;
-      background: transparent;
-      border: 1.5px dashed var(--green);
-      border-radius: 10px;
-      color: var(--green);
+      padding: 11px 16px;
+      background: rgba(0,200,83,.04);
+      border: 1.5px dashed rgba(0,200,83,.5);
+      border-radius: 11px;
+      color: #009e3f;
       font-family: 'Inter', sans-serif;
-      font-size: 0.88rem;
+      font-size: 0.87rem;
       font-weight: 600;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
-      transition: background 0.18s, opacity 0.18s;
+      gap: 7px;
+      transition: background 0.18s, border-color 0.18s, opacity 0.18s;
     }
-    .location-btn:hover    { background: rgba(0,200,83,.07); }
-    .location-btn:disabled { opacity: 0.5; cursor: default; }
+    .location-btn:hover    { background: rgba(0,200,83,.09); border-color: var(--green); }
+    .location-btn:disabled { opacity: 0.45; cursor: default; }
 
     /* ── Stats bar ─────────────────────────────────────────────────────── */
     .stats-bar {
-      max-width: 740px;
-      margin: 22px auto 0;
+      max-width: 760px;
+      margin: 20px auto 0;
       padding: 0 16px;
-      animation: fadeUp 0.4s ease both;
+      animation: fadeUp 0.45s cubic-bezier(.22,.68,0,1.15) both;
     }
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(10px); }
+      from { opacity: 0; transform: translateY(12px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .stats-inner {
-      background: var(--navy);
-      border-radius: 14px;
-      padding: 14px 22px;
+      background: linear-gradient(135deg, #0d1629 0%, #0F172A 100%);
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px;
+      padding: 14px 24px;
       display: flex;
       flex-wrap: wrap;
-      gap: 6px 20px;
+      gap: 6px 22px;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,.2);
     }
     .stat-item {
-      font-size: 0.83rem;
-      color: #94A3B8;
+      font-size: 0.82rem;
+      color: #64748B;
       display: flex;
       align-items: center;
       gap: 6px;
     }
-    .stat-item strong { color: white; font-weight: 600; }
+    .stat-item strong { color: #CBD5E1; font-weight: 600; }
     .stat-dot {
-      width: 8px; height: 8px;
+      width: 7px; height: 7px;
       border-radius: 50%;
       background: var(--green);
       flex-shrink: 0;
-      animation: dotBlink 1.6s ease-in-out infinite;
+      animation: dotBlink 1.8s ease-in-out infinite;
     }
     @keyframes dotBlink {
-      0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--green); }
-      50%       { opacity: 0.35; box-shadow: none; }
+      0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--green); }
+      50%       { opacity: 0.3; box-shadow: none; }
     }
-    .stats-div { color: #2d3f55; font-size: 1.1rem; }
+    .stats-div { color: rgba(255,255,255,.08); font-size: 1.2rem; }
 
     /* ── Results ───────────────────────────────────────────────────────── */
     #results {
-      max-width: 740px;
-      margin: 22px auto 64px;
+      max-width: 760px;
+      margin: 24px auto 72px;
       padding: 0 16px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
+      gap: 16px;
     }
 
     /* ── Parking meter loader ──────────────────────────────────────────── */
@@ -372,31 +386,36 @@
     /* ── Result cards ──────────────────────────────────────────────────── */
     .parking-card {
       background: white;
-      border-radius: 16px;
-      padding: 20px 22px;
-      border-left: 5px solid var(--status-color, var(--green));
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      border-radius: 18px;
+      padding: 22px 24px;
+      border-left: 4px solid var(--status-color, var(--green));
+      box-shadow:
+        0 2px 12px rgba(0,0,0,.06),
+        0 1px 3px rgba(0,0,0,.04);
       display: flex;
-      gap: 18px;
+      gap: 20px;
       align-items: flex-start;
-      animation: cardIn 0.5s cubic-bezier(.22,.68,0,1.15) both;
+      animation: cardIn 0.52s cubic-bezier(.22,.68,0,1.2) both;
       animation-delay: var(--delay, 0s);
-      transition: transform 0.22s, box-shadow 0.22s;
+      transition: transform 0.2s, box-shadow 0.2s;
     }
-    .parking-card:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,.1); }
+    .parking-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 44px rgba(0,0,0,.1), 0 2px 8px rgba(0,0,0,.06);
+    }
     @keyframes cardIn {
-      from { opacity: 0; transform: translateY(22px); }
+      from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
     .spot-number {
       font-family: 'Syne', sans-serif;
-      font-size: 2.4rem;
+      font-size: 2.2rem;
       font-weight: 800;
       color: var(--status-color, var(--green));
-      opacity: 0.22;
-      min-width: 54px;
+      opacity: 0.18;
+      min-width: 52px;
       line-height: 1;
-      padding-top: 2px;
+      padding-top: 3px;
       text-align: center;
       flex-shrink: 0;
     }
@@ -414,51 +433,52 @@
       font-size: 1rem;
       font-weight: 700;
       line-height: 1.35;
+      color: #0F172A;
     }
-    .card-side { font-family: 'Inter', sans-serif; font-weight: 400; color: var(--muted); font-size: 0.87rem; }
-    .card-landmark { font-size: 0.82rem; color: var(--muted); margin-top: 3px; font-style: italic; }
+    .card-side { font-family: 'Inter', sans-serif; font-weight: 400; color: var(--muted); font-size: 0.85rem; }
+    .card-landmark { font-size: 0.81rem; color: #94A3B8; margin-top: 3px; font-style: italic; }
     .status-badge {
-      font-size: 0.68rem;
+      font-size: 0.67rem;
       font-weight: 700;
-      padding: 4px 10px;
+      padding: 4px 11px;
       border-radius: 20px;
       white-space: nowrap;
-      letter-spacing: 0.6px;
+      letter-spacing: 0.7px;
       font-family: 'Inter', sans-serif;
       flex-shrink: 0;
     }
     .card-streetview {
-      width: 100%; height: 220px;
+      width: 100%; height: 200px;
       object-fit: cover;
-      border-radius: 10px;
-      margin: 12px 0;
+      border-radius: 12px;
+      margin: 14px 0;
       display: block;
       background: var(--bg);
       border: 1px solid var(--border);
     }
-    .card-details { display: flex; flex-wrap: wrap; gap: 7px; }
+    .card-details { display: flex; flex-wrap: wrap; gap: 6px; }
     .detail-item {
       display: flex;
       align-items: center;
       gap: 5px;
-      font-size: 0.78rem;
-      color: var(--muted);
-      background: var(--bg);
-      padding: 4px 10px;
+      font-size: 0.76rem;
+      color: #64748B;
+      background: #F8FAFC;
+      padding: 4px 11px;
       border-radius: 20px;
-      border: 1px solid var(--border);
+      border: 1px solid #EEF2F7;
       white-space: nowrap;
     }
 
     /* ── Crowdsourced report section ──────────────────────────────────── */
-    .card-report      { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
-    .report-status    { min-height: 22px; margin-bottom: 8px; }
+    .card-report      { margin-top: 16px; border-top: 1px solid #F1F5F9; padding-top: 14px; }
+    .report-status    { min-height: 22px; margin-bottom: 9px; }
     .report-status-badge {
       display: inline-flex;
       align-items: center;
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       font-weight: 600;
-      padding: 3px 10px;
+      padding: 3px 11px;
       border-radius: 20px;
       border: 1.5px solid;
     }
@@ -468,19 +488,19 @@
       padding: 8px 10px;
       border-radius: 10px;
       border: 1.5px solid;
-      font-size: 0.82rem;
+      font-size: 0.81rem;
       font-weight: 600;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       background: transparent;
-      transition: background 0.18s, transform 0.15s;
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
     }
     .report-btn:hover    { transform: translateY(-1px); }
-    .report-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
-    .report-free         { border-color: #00C853; color: #00a844; }
-    .report-free:hover   { background: rgba(0,200,83,.1); }
-    .report-taken        { border-color: #F44336; color: #d32f2f; }
-    .report-taken:hover  { background: rgba(244,67,54,.1); }
+    .report-btn:disabled { opacity: 0.35; cursor: default; transform: none; }
+    .report-free         { border-color: rgba(0,200,83,.45); color: #00954a; }
+    .report-free:hover   { background: rgba(0,200,83,.08); border-color: #00C853; box-shadow: 0 3px 10px rgba(0,200,83,.15); }
+    .report-taken        { border-color: rgba(244,67,54,.4); color: #c62828; }
+    .report-taken:hover  { background: rgba(244,67,54,.07); border-color: #F44336; box-shadow: 0 3px 10px rgba(244,67,54,.12); }
 
     /* ── Message states ────────────────────────────────────────────────── */
     .msg { text-align: center; padding: 52px 16px; color: var(--muted); }
@@ -490,26 +510,28 @@
 
     /* ── Footer ────────────────────────────────────────────────────────── */
     footer {
-      background: var(--navy);
-      color: #475569;
+      background: #080e1c;
+      color: #334155;
       text-align: center;
-      padding: 22px 16px;
-      font-size: 0.82rem;
-      letter-spacing: 0.2px;
+      padding: 24px 16px;
+      font-size: 0.8rem;
+      letter-spacing: 0.3px;
+      border-top: 1px solid rgba(255,255,255,.04);
     }
-    footer strong { color: #94A3B8; }
+    footer strong { color: #64748B; font-weight: 600; }
 
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width: 600px) {
-      .hero         { padding: 52px 16px 82px; }
-      .logo-text    { font-size: 2.6rem; }
-      .hero-tagline { font-size: 0.97rem; }
+      .hero         { padding: 56px 16px 86px; }
+      .logo-text    { font-size: 2.7rem; letter-spacing: -1.5px; }
+      .hero-tagline { font-size: 0.95rem; }
+      .search-card  { padding: 22px 18px 18px; border-radius: 20px; }
       .search-row   { flex-direction: column; }
       .search-btn   { width: 100%; padding: 14px; }
       .stats-inner  { gap: 6px 14px; padding: 12px 16px; }
       .stats-div    { display: none; }
-      .parking-card { gap: 12px; padding: 16px; }
-      .spot-number  { font-size: 1.9rem; min-width: 44px; }
+      .parking-card { gap: 12px; padding: 16px 18px; border-radius: 16px; }
+      .spot-number  { font-size: 1.8rem; min-width: 42px; }
     }
   </style>
 </head>
@@ -529,7 +551,7 @@
                 fill="#00C853" font-family="Syne, sans-serif">P</text>
         </svg>
       </div>
-      <span class="logo-text">ParkMe</span>
+      <span class="logo-text">Park Me</span>
     </div>
     <p class="hero-tagline">Find free street parking anywhere, instantly</p>
   </header>
@@ -583,7 +605,7 @@
 
   <!-- Footer -->
   <footer>
-    <strong>ParkMe</strong> © 2026 &nbsp;|&nbsp; Always verify posted signs before parking
+    <strong>Park Me</strong> © 2026 &nbsp;|&nbsp; Always verify posted signs before parking
   </footer>
 
   <script src="app.js"></script>
