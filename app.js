@@ -78,6 +78,7 @@ function renderResults(parsed, street) {
         <div class="card-body">
           <div class="card-header-row">
             <h3 class="card-address">${escHtml(s.address)} <span class="card-side">(${escHtml(s.side)})</span></h3>
+            ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
             <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
           </div>
           <div class="card-details">
