@@ -69,6 +69,7 @@ function renderResults(parsed, street) {
     'PERMIT REQUIRED': '#F44336',
   };
 
+  resultsDiv.innerHTML = '';
   resultsDiv.innerHTML = spots.map((s, i) => {
     const color = STATUS_COLOR[s.status] || '#00C853';
     const num   = String(i + 1).padStart(2, '0');
@@ -89,9 +90,61 @@ function renderResults(parsed, street) {
             <span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>
             <span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>
           </div>
+          <div class="card-report" data-spot-id="${escHtml(s.address)}">
+            <div class="report-status"></div>
+            <div class="report-actions">
+              <button class="report-btn report-free"  data-status="FREE">✅ Still Free</button>
+              <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
+            </div>
+          </div>
         </div>
       </div>`;
   }).join('');
+
+  // Fetch existing crowdsourced status and wire buttons for each card
+  document.querySelectorAll('.card-report').forEach(el => {
+    const spotId = el.dataset.spotId;
+    fetchSpotStatus(spotId, el.querySelector('.report-status'));
+    el.querySelectorAll('.report-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleReport(spotId, btn.dataset.status, el));
+    });
+  });
+}
+
+// ── Crowdsourced report helpers ───────────────────────────────────────────────
+async function fetchSpotStatus(spotId, statusEl) {
+  try {
+    const r = await fetch(`/api/status?spot_id=${encodeURIComponent(spotId)}`);
+    const data = await r.json();
+    if (data.status) renderStatusBadge(statusEl, data.status, data.minutes_ago);
+  } catch {}
+}
+
+function renderStatusBadge(statusEl, status, minutesAgo) {
+  const isFree  = status === 'FREE';
+  const color   = isFree ? '#00C853' : '#F44336';
+  const icon    = isFree ? '✅' : '❌';
+  const label   = isFree ? 'Reported free' : 'Reported taken';
+  const timeStr = minutesAgo < 1 ? 'just now' : `${minutesAgo} min ago`;
+  statusEl.innerHTML = `
+    <span class="report-status-badge" style="color:${color};background:${color}12;border-color:${color}40">
+      ${icon} ${label} · ${timeStr}
+    </span>`;
+}
+
+async function handleReport(spotId, status, cardReportEl) {
+  const btns = cardReportEl.querySelectorAll('.report-btn');
+  btns.forEach(b => b.disabled = true);
+  try {
+    await fetch('/api/report', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ spot_id: spotId, status })
+    });
+    renderStatusBadge(cardReportEl.querySelector('.report-status'), status, 0);
+  } catch {
+    btns.forEach(b => b.disabled = false);
+  }
 }
 
 function showMessage(text, isError = false) {

@@ -450,6 +450,38 @@
       white-space: nowrap;
     }
 
+    /* ── Crowdsourced report section ──────────────────────────────────── */
+    .card-report      { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+    .report-status    { min-height: 22px; margin-bottom: 8px; }
+    .report-status-badge {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      border: 1.5px solid;
+    }
+    .report-actions   { display: flex; gap: 8px; }
+    .report-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 10px;
+      border: 1.5px solid;
+      font-size: 0.82rem;
+      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      background: transparent;
+      transition: background 0.18s, transform 0.15s;
+    }
+    .report-btn:hover    { transform: translateY(-1px); }
+    .report-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+    .report-free         { border-color: #00C853; color: #00a844; }
+    .report-free:hover   { background: rgba(0,200,83,.1); }
+    .report-taken        { border-color: #F44336; color: #d32f2f; }
+    .report-taken:hover  { background: rgba(244,67,54,.1); }
+
     /* ── Message states ────────────────────────────────────────────────── */
     .msg { text-align: center; padding: 52px 16px; color: var(--muted); }
     .msg.error { color: #b91c1c; }
