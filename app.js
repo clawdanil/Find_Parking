@@ -72,21 +72,32 @@ function renderResults(parsed, street) {
   resultsDiv.innerHTML = spots.map((s, i) => {
     const color = STATUS_COLOR[s.status] || '#00C853';
     const num   = String(i + 1).padStart(2, '0');
+    const fullAddr = encodeURIComponent(`${s.address}, ${parsed.neighborhood || street}, ${cityInput.value}`);
+    const mapImgUrl = (s.lat && s.lng)
+      ? `https://staticmap.openstreetmap.de/staticmap.php?center=${s.lat},${s.lng}&zoom=17&size=600x180&markers=${s.lat},${s.lng},red-pushpin&maptype=mapnik`
+      : null;
+    const mapsUrl      = `https://www.google.com/maps/search/?api=1&query=${fullAddr}`;
+    const streetViewUrl= `https://www.google.com/maps?q=${fullAddr}&layer=c`;
     return `
       <div class="parking-card" style="--status-color:${color};--delay:${i * 0.08}s">
         <div class="spot-number">${num}</div>
         <div class="card-body">
           <div class="card-header-row">
             <h3 class="card-address">${escHtml(s.address)} <span class="card-side">(${escHtml(s.side)})</span></h3>
-            ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
             <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
           </div>
+          ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
           <div class="card-details">
             <span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>
             <span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>
             <span class="detail-item">🔑 ${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
             <span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>
             <span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>
+          </div>
+          ${mapImgUrl ? `<img class="card-map" src="${mapImgUrl}" alt="Map of ${escHtml(s.address)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <div class="card-map-links">
+            <a href="${mapsUrl}" target="_blank" rel="noopener" class="map-link">🗺️ Open in Maps</a>
+            <a href="${streetViewUrl}" target="_blank" rel="noopener" class="map-link">📷 Street View</a>
           </div>
         </div>
       </div>`;
