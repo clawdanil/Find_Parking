@@ -46,7 +46,7 @@
       min-height: 100vh;
       -webkit-font-smoothing: antialiased;
     }
-    .page-wrap { overflow-x: hidden; }
+    .page-wrap { overflow-x: hidden; width: 100%; }
 
     /* ── iOS mesh gradient background ─────────────────────────────────── */
     .bg-scene {
@@ -206,9 +206,11 @@
     .search-section {
       position: relative;
       z-index: 10;
+      width: 100%;
       max-width: 760px;
       margin: 0 auto;
       padding: 0 20px 52px;
+      box-sizing: border-box;
     }
 
     .search-card {
@@ -242,7 +244,7 @@
       width: 100%;
       padding: 13px 16px;
       background: rgba(255,255,255,.72);
-      border: 1px solid rgba(255,255,255,.90);
+      border: 1px solid rgba(28,28,30,.15);
       border-radius: 16px;
       font-size: .93rem;
       font-family: 'Inter', sans-serif;
@@ -331,7 +333,7 @@
     /* ── Stats bar ─────────────────────────────────────────────────────── */
     .stats-bar {
       position: relative; z-index: 10;
-      max-width: 760px; margin: 0 auto 18px; padding: 0 20px;
+      width: 100%; max-width: 760px; margin: 0 auto 18px; padding: 0 20px; box-sizing: border-box;
       animation: fadeUp .4s ease both;
     }
     @keyframes fadeUp {
@@ -361,7 +363,7 @@
     /* ── Results layout ────────────────────────────────────────────────── */
     .results-wrapper {
       position: relative; z-index: 10;
-      max-width: 820px; margin: 0 auto 100px; padding: 0 20px;
+      width: 100%; max-width: 820px; margin: 0 auto 100px; padding: 0 20px; box-sizing: border-box;
       display: grid; grid-template-columns: 1fr; gap: 16px; align-items: start;
     }
     .results-wrapper.has-map { max-width: 1360px; grid-template-columns: 1fr 400px; }
