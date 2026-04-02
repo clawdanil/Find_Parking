@@ -753,11 +753,12 @@
   <script src="app.js"></script>
 
   <!-- PWA Install Banner -->
+  <!-- iOS: instructional banner -->
   <div class="install-banner" id="install-banner" aria-live="polite">
     <div class="install-banner-icon">P</div>
     <div class="install-banner-text">
-      <div class="install-banner-title">Add ParkMe to your home screen</div>
-      <div class="install-banner-sub">Get quick access — works offline too</div>
+      <div class="install-banner-title" id="install-title">Add ParkMe to your home screen</div>
+      <div class="install-banner-sub" id="install-sub">Get quick access — works offline too</div>
     </div>
     <button class="install-banner-btn" id="install-btn">Install</button>
     <button class="install-banner-dismiss" id="install-dismiss" aria-label="Dismiss">✕</button>
@@ -775,10 +776,25 @@
 
     // PWA Install prompt
     let deferredPrompt = null;
-    const banner   = document.getElementById('install-banner');
+    const banner     = document.getElementById('install-banner');
     const installBtn = document.getElementById('install-btn');
     const dismissBtn = document.getElementById('install-dismiss');
+    const titleEl    = document.getElementById('install-title');
+    const subEl      = document.getElementById('install-sub');
 
+    const isIOS        = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isStandalone = window.navigator.standalone === true
+                      || window.matchMedia('(display-mode: standalone)').matches;
+
+    if (isIOS && !isStandalone) {
+      // iOS Safari: show instructional banner — no programmatic install API
+      titleEl.textContent = 'Add ParkMe to Home Screen';
+      subEl.innerHTML     = 'Tap the Share button <span style="font-size:1rem">⬆</span> then <strong>Add to Home Screen</strong>';
+      installBtn.style.display = 'none'; // no install button on iOS
+      setTimeout(() => banner.classList.add('show'), 2500);
+    }
+
+    // Chrome / Android / Edge: use beforeinstallprompt
     window.addEventListener('beforeinstallprompt', e => {
       e.preventDefault();
       deferredPrompt = e;
