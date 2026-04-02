@@ -49,23 +49,23 @@
       z-index: 0;
       pointer-events: none;
       background:
-        radial-gradient(ellipse at 15% 15%, rgba(167,232,255,.85) 0%, transparent 45%),
-        radial-gradient(ellipse at 85% 10%, rgba(255,200,230,.80) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 60%, rgba(195,210,255,.75) 0%, transparent 50%),
-        radial-gradient(ellipse at 10% 80%, rgba(180,255,200,.70) 0%, transparent 45%),
-        radial-gradient(ellipse at 88% 80%, rgba(255,220,160,.70) 0%, transparent 45%);
-      background-color: #e8f0fb;
+        radial-gradient(ellipse at 15% 15%, rgba(120,170,255,.20) 0%, transparent 50%),
+        radial-gradient(ellipse at 85% 10%, rgba(200,150,255,.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 70%, rgba(80,200,200,.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% 80%, rgba(120,210,160,.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 88% 80%, rgba(255,190,100,.12) 0%, transparent 50%);
+      background-color: #f0f4fa;
     }
     .bg-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(60px);
-      opacity: .55;
-      animation: orbDrift 20s ease-in-out infinite alternate;
+      filter: blur(80px);
+      opacity: .22;
+      animation: orbDrift 22s ease-in-out infinite alternate;
     }
-    .bg-orb-1 { width: 55vw; height: 55vw; top: -10%; left: -8%;  background: rgba(120,200,255,.6); animation-duration: 22s; }
-    .bg-orb-2 { width: 50vw; height: 50vw; top: -5%;  right: -8%; background: rgba(255,160,200,.5); animation-duration: 18s; animation-delay: -6s; }
-    .bg-orb-3 { width: 45vw; height: 45vw; bottom: 5%; left: 20%; background: rgba(160,200,255,.5); animation-duration: 25s; animation-delay: -10s; }
+    .bg-orb-1 { width: 55vw; height: 55vw; top: -10%; left: -8%;  background: rgba(100,160,255,.7); animation-duration: 22s; }
+    .bg-orb-2 { width: 50vw; height: 50vw; top: -5%;  right: -8%; background: rgba(190,130,255,.6); animation-duration: 18s; animation-delay: -6s; }
+    .bg-orb-3 { width: 45vw; height: 45vw; bottom: 5%; left: 20%; background: rgba(80,190,210,.6);  animation-duration: 25s; animation-delay: -10s; }
     @keyframes orbDrift {
       from { transform: translate(0,0) scale(1);   }
       to   { transform: translate(5vw,6vh) scale(1.12); }
@@ -84,53 +84,51 @@
       display: inline-flex;
       align-items: center;
       gap: 14px;
-      padding: 14px 22px 14px 14px;
-      background: rgba(255,255,255,.62);
-      backdrop-filter: blur(60px) saturate(180%);
-      -webkit-backdrop-filter: blur(60px) saturate(180%);
-      border: 1px solid rgba(255,255,255,.90);
-      border-radius: 100px;
+      padding: 12px 22px 12px 12px;
+      background: rgba(255,255,255,.68);
+      backdrop-filter: blur(60px) saturate(200%);
+      -webkit-backdrop-filter: blur(60px) saturate(200%);
+      border: 1px solid rgba(255,255,255,.92);
+      border-radius: 20px;
       box-shadow:
-        0 20px 56px rgba(0,0,0,.10),
-        0 4px 16px rgba(0,0,0,.06),
+        0 16px 48px rgba(0,0,0,.10),
+        0 4px 14px rgba(0,0,0,.06),
         inset 0 1.5px 0 rgba(255,255,255,1),
-        inset 0 -1px 0 rgba(0,0,0,.04);
+        inset 0 -1px 0 rgba(0,0,0,.03);
       margin-bottom: 40px;
     }
 
-    /* P icon circle */
+    /* Dark app-icon P mark */
     .logo-icon {
-      width: 54px; height: 54px;
-      border-radius: 50%;
-      background: linear-gradient(145deg, rgba(255,255,255,.95), rgba(255,255,255,.70));
-      border: 1px solid rgba(255,255,255,.95);
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: linear-gradient(145deg, #2a2a2e 0%, #1c1c1e 100%);
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; font-weight: 900; color: var(--green);
+      font-size: 1.55rem; font-weight: 900; color: var(--green);
       box-shadow:
-        0 4px 14px rgba(52,199,89,.18),
-        0 2px 6px rgba(0,0,0,.08),
-        inset 0 1px 0 rgba(255,255,255,1);
+        0 4px 16px rgba(0,0,0,.22),
+        inset 0 1px 0 rgba(255,255,255,.10),
+        inset 0 -1px 0 rgba(0,0,0,.30);
       flex-shrink: 0;
       letter-spacing: -1px;
     }
 
-    /* Text col: "ParkMe" + sub */
+    /* Text col */
     .logo-text-col {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 3px;
+      gap: 4px;
     }
 
-    /* "ParkMe" + fun bubbles on same row */
     .logo-name-row {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .logo-name {
-      font-size: 1.8rem;
+      font-size: 1.75rem;
       font-weight: 900;
       letter-spacing: -1.2px;
       line-height: 1;
@@ -138,60 +136,30 @@
     }
     .logo-name em { font-style: normal; color: var(--green); }
 
-    /* fun letter bubbles */
-    .fun-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: -2px;
-    }
-
-    .fb {
+    /* Subtle "fun" badge — professional but playful */
+    .fun-tag {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      font-size: .88rem;
-      font-weight: 900;
-      border: 1.5px solid;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: 0 2px 8px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.8);
+      padding: 3px 10px 3px 9px;
+      background: rgba(255,159,10,.10);
+      border: 1px solid rgba(255,159,10,.28);
+      border-radius: 100px;
+      font-size: .68rem;
+      font-weight: 800;
+      font-style: italic;
+      color: #B36B00;
+      letter-spacing: .3px;
+      transform: rotate(-4deg) translateY(-1px);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.6);
+      white-space: nowrap;
     }
-    .fb-f {
-      background: rgba(255,159,10,.18);
-      border-color: rgba(255,159,10,.45);
-      color: #c97800;
-      transform: rotate(-10deg) translateY(-2px);
-      animation: fbFloat 2.8s ease-in-out infinite 0s;
-    }
-    .fb-u {
-      background: rgba(52,199,89,.18);
-      border-color: rgba(52,199,89,.45);
-      color: #1a8c3f;
-      transform: rotate(6deg) translateY(2px);
-      animation: fbFloat 2.8s ease-in-out infinite .2s;
-    }
-    .fb-n {
-      background: rgba(10,132,255,.16);
-      border-color: rgba(10,132,255,.40);
-      color: #0060c7;
-      transform: rotate(-6deg) translateY(-1px);
-      animation: fbFloat 2.8s ease-in-out infinite .4s;
-    }
-    @keyframes fbFloat {
-      0%,100% { transform: rotate(var(--r,0deg)) translateY(0); }
-      50%      { transform: rotate(var(--r,0deg)) translateY(-4px); }
-    }
-    .fb-f { --r: -10deg; }
-    .fb-u { --r:   6deg; }
-    .fb-n { --r:  -6deg; }
 
     .logo-sub {
       font-size: .60rem;
       font-weight: 700;
-      letter-spacing: 2px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
       color: var(--t30);
       padding-left: 1px;
@@ -628,11 +596,7 @@
       <div class="logo-text-col">
         <div class="logo-name-row">
           <span class="logo-name">Park<em>Me</em></span>
-          <div class="fun-row">
-            <span class="fb fb-f">f</span>
-            <span class="fb fb-u">u</span>
-            <span class="fb fb-n">n</span>
-          </div>
+          <span class="fun-tag">fun</span>
         </div>
         <span class="logo-sub">Free Street Parking</span>
       </div>
