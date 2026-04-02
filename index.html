@@ -44,9 +44,9 @@
       background: #dde8f5;
       color: var(--text);
       min-height: 100vh;
-      overflow-x: hidden;
       -webkit-font-smoothing: antialiased;
     }
+    .page-wrap { overflow-x: hidden; }
 
     /* ── iOS mesh gradient background ─────────────────────────────────── */
     .bg-scene {
@@ -586,10 +586,10 @@
     /* ── PWA Install Banner ─────────────────────────────────────────────── */
     .install-banner {
       position: fixed;
-      bottom: 24px;
+      bottom: max(24px, env(safe-area-inset-bottom, 24px));
       left: 50%;
-      transform: translateX(-50%) translateY(120px);
-      z-index: 1000;
+      transform: translateX(-50%) translateY(200px);
+      z-index: 99999;
       width: calc(100% - 40px);
       max-width: 480px;
       background: rgba(255,255,255,0.82);
@@ -663,6 +663,7 @@
   </style>
 </head>
 <body>
+<div class="page-wrap">
 
   <!-- iOS mesh bg -->
   <div class="bg-scene" aria-hidden="true">
@@ -752,8 +753,9 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js"></script>
 
-  <!-- PWA Install Banner -->
-  <!-- iOS: instructional banner -->
+</div><!-- /.page-wrap -->
+
+  <!-- PWA Install Banner / iOS instructional banner -->
   <div class="install-banner" id="install-banner" aria-live="polite">
     <div class="install-banner-icon">P</div>
     <div class="install-banner-text">
