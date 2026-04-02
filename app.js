@@ -18,19 +18,27 @@ const acDropdown = document.getElementById('ac-dropdown');
 async function fetchACSuggestions(q) {
   try {
     const res  = await fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&countrycodes=us`,
-      { headers: { 'Accept-Language': 'en' } }
+      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en&countrycodes=us`
     );
     const data = await res.json();
-    return data
-      .filter(r => r.address?.road)
-      .map(r => {
-        const a      = r.address;
-        const street = [a.house_number, a.road].filter(Boolean).join(' ');
-        const city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
-        return { display: [street, city].filter(Boolean).join(', '), main: street, sub: city, city, lat: parseFloat(r.lat), lon: parseFloat(r.lon) };
-      });
+    return (data.features || [])
+      .filter(f => f.properties?.street || f.properties?.name)
+      .map(f => {
+        const p      = f.properties;
+        const [lon, lat] = f.geometry.coordinates;
+        const street = [p.housenumber, p.street || p.name].filter(Boolean).join(' ');
+        const state  = p.state ? stateAbbr(p.state) : '';
+        const city   = [p.city || p.town || p.village || p.county, state].filter(Boolean).join(', ');
+        return { display: [street, city].filter(Boolean).join(', '), main: street || p.name, sub: city, city, lat, lon };
+      })
+      .filter(s => s.city); // only show results with a city
   } catch { return []; }
+}
+
+// Convert full state name to 2-letter abbreviation
+function stateAbbr(name) {
+  const map = { 'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY' };
+  return map[name] || name;
 }
 
 function renderACDropdown(suggestions) {
@@ -60,7 +68,7 @@ streetInput.addEventListener('input', () => {
   clearTimeout(acTimer);
   const q = streetInput.value.trim();
   if (q.length < 3) { acDropdown.hidden = true; return; }
-  acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 350);
+  acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 200);
 });
 
 streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
