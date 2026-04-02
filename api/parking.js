@@ -18,43 +18,22 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 3000,
+        max_tokens: 2000,
         messages: [{
           role: 'user',
-          content: `You are a parking expert for ${city}. The user wants ALL parking options near: "${street}" in ${city}. Today is ${day} at ${time}.
+          content: `Parking expert for ${city}. Find ALL parking within 0.3mi of "${street}", ${city}. ${day}, ${time}.
 
-Return ALL types of parking within 0.3 miles — free street spots, paid street meters, paid lots, AND parking garages. Include at least 2–3 of each type that actually exists in this area.
+Return 2-3 of each type that exists nearby:
+- "FREE_STREET": free on-street (avg_cost:"Free")
+- "PAID_STREET": metered street (avg_cost e.g."$2.50/hr")
+- "PAID_LOT": paid surface lot (avg_cost e.g."$10/day · $3/hr")
+- "GARAGE": parking garage/structure (avg_cost e.g."$18/day · $5 first hr")
 
-SPOT TYPES — use exactly these values for the "type" field:
-- "FREE_STREET"  — free on-street parking (no meter, no fee)
-- "PAID_STREET"  — metered or paid on-street parking
-- "PAID_LOT"     — surface parking lot (paid)
-- "GARAGE"       — multi-level parking garage or structure
-
-INPUT PARSING:
-- If input contains a business name, identify the exact block and prioritize nearby spots.
-- If input is a full address: same-block spots first, then nearby.
-- If input is a street name: spots along that street or cross-streets.
-
-COORDINATE RULES (critical):
-- lat/lng MUST be MID-BLOCK for street spots, NOT at intersections or corners.
-- For garages/lots use the actual entrance coordinate.
-- NEVER place a coordinate at a corner or intersection — offset at least 50m toward block center.
-
-HEADING RULE (for street spots):
-- Face ALONG the street so the camera shows the parking lane.
-- East-west street → heading = 90
-- North-south street → heading = 0
-- For garages/lots: heading toward the entrance.
-
-COST RULES:
-- FREE_STREET: avg_cost = "Free"
-- PAID_STREET: avg_cost = realistic local meter rate e.g. "$2.50/hr"
-- PAID_LOT: avg_cost = realistic daily/hourly rate e.g. "$10/day · $3/hr"
-- GARAGE: avg_cost = realistic local garage rate e.g. "$18/day · $5 first hr"
+COORDS: Street spots → mid-block lat/lng (NOT intersections). Garages/lots → entrance.
+HEADING: Along street direction (E-W street=90, N-S street=0). Garages → toward entrance.
 
 Return ONLY valid JSON, no markdown:
-{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"type":"FREE_STREET","address":"specific block","side":"north/south/east/west side (empty for garages/lots)","landmark":"real nearby business or cross street","lat":40.7178,"lng":-74.0431,"heading":90,"status":"FREE","avg_cost":"Free","time_limit":"2 hrs","permit_zone":"None","permit_required":false,"sweeping_schedule":"Mon 8–10am","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"0.1 mi","notes":"Any helpful detail"}],"general_tips":["tip1","tip2"]}`
+{"street":"${street}","neighborhood":"area name","spots":[{"id":1,"type":"FREE_STREET","address":"block description","side":"north/south/east/west (blank for garages)","landmark":"nearby business","lat":40.7178,"lng":-74.0431,"heading":90,"avg_cost":"Free","time_limit":"2 hrs","permit_required":false,"permit_zone":"None","sweeping_schedule":"Mon 8-10am","overnight_parking":"Allowed","distance_from_search":"0.1 mi","notes":""}],"general_tips":["tip1"]}`
         }]
       })
     });

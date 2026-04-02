@@ -1,4 +1,4 @@
-const TIMEOUT_MS = 8000;
+const TIMEOUT_MS = 28000;
 
 const searchBtn      = document.getElementById('search-btn');
 const cityInput      = document.getElementById('city-input');
