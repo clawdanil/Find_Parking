@@ -14,7 +14,11 @@ export default async function handler(req, res) {
     const meta = await fetch(metaUrl).then(r => r.json());
 
     if (meta.status !== 'OK') {
-      // No Street View imagery near this spot — 404 triggers onerror in browser
+      return res.status(404).end();
+    }
+
+    // Reject user-contributed / business panoramas — only accept Google's own street imagery
+    if (!meta.copyright?.includes('Google')) {
       return res.status(404).end();
     }
 
