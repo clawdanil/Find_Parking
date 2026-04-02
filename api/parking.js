@@ -30,6 +30,13 @@ INPUT PARSING:
 - If input is a full address (has a number): same-block spots first, then immediate cross-streets.
 - If input is a street name only: spots along that street or immediate cross-streets.
 
+COORDINATE RULES (critical — bad coords cause wrong Street View images):
+- lat/lng MUST be MID-BLOCK, NOT at intersections or corners.
+- A mid-block coordinate is roughly halfway between two cross-streets along the parking side.
+- NEVER place a coordinate at a corner, crosswalk, or intersection — move it at least 50–80 meters toward the center of the block.
+- If you are unsure of the exact mid-block location, offset the nearest intersection by ~0.0005 degrees along the street direction.
+- Example: if parking is on the east side of 1st Ave between 2nd St and 3rd St, the lat should be midway between the latitudes of 2nd St and 3rd St, NOT at either intersection.
+
 HEADING RULE (critical for Street View):
 - heading = the compass direction you face when standing IN THE STREET looking TOWARD the curb where cars park (perpendicular to the street).
 - Parking on the NORTH curb of an east-west street → heading = 0

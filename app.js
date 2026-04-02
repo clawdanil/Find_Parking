@@ -170,7 +170,7 @@ function renderResults(parsed, street) {
             <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
           </div>
           ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
-          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view of ${escHtml(s.address)}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view of ${escHtml(s.address)}" loading="lazy" onerror="this.parentElement.querySelector('.sv-disclaimer')?.remove();this.style.display='none'"><p class="sv-disclaimer">📷 Approximate street view — always verify signs on arrival</p>` : ''}
           <div class="card-details">
             <span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>
             <span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>
