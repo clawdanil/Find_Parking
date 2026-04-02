@@ -37,14 +37,12 @@ COORDINATE RULES (critical — bad coords cause wrong Street View images):
 - If you are unsure of the exact mid-block location, offset the nearest intersection by ~0.0005 degrees along the street direction.
 - Example: if parking is on the east side of 1st Ave between 2nd St and 3rd St, the lat should be midway between the latitudes of 2nd St and 3rd St, NOT at either intersection.
 
-HEADING RULE (critical — must show the parking curb, not the road):
-- heading = compass direction facing DIRECTLY AT THE CURB/SIDEWALK where cars park.
-- The camera will tilt down at -25°, so heading must be exactly perpendicular to the street pointing at the parked-car zone.
-- Parking on NORTH curb of east-west street → heading = 0 (face north toward curb)
-- Parking on SOUTH curb → heading = 180
-- Parking on EAST curb of north-south street → heading = 90
-- Parking on WEST curb → heading = 270
-- For diagonal streets, calculate true perpendicular compass bearing toward the curb side.
+HEADING RULE — face ALONG the street so the camera shows the parking lane in context:
+- The Street View camera sits in the middle of the road. Facing perpendicular to the street just shows a building wall. Instead, face ALONG the street so the parking lane runs alongside the frame — exactly what a driver sees when pulling up to park.
+- East-west street (parking on north or south side) → heading = 90 (face east along the street)
+- North-south street (parking on east or west side) → heading = 0 (face north along the street)
+- For diagonal streets, use the compass bearing that runs parallel to the street direction.
+- Always pick the along-street direction, NOT the perpendicular/toward-curb direction.
 
 Return ONLY valid JSON, no markdown:
 {"street":"${street}","neighborhood":"area name","spots":[{"id":1,"address":"specific block","side":"north/south/east/west side","landmark":"real nearby business","lat":40.7178,"lng":-74.0431,"heading":90,"status":"FREE","time_limit":"No limit","permit_zone":"None","permit_required":false,"sweeping_schedule":"None","has_meters":false,"overnight_parking":"Allowed","distance_from_search":"On street"}],"general_tips":["tip1","tip2"]}`
