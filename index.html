@@ -330,6 +330,72 @@
       box-shadow: 0 4px 12px rgba(52,199,89,.12);
     }
 
+    /* ── Weather widget ────────────────────────────────────────────────── */
+    .weather-bar {
+      position: relative; z-index: 10;
+      width: 100%; max-width: 760px;
+      margin: 12px auto 0; padding: 0 20px;
+      box-sizing: border-box;
+    }
+    .weather-card {
+      background: rgba(255,255,255,.52);
+      backdrop-filter: blur(40px) saturate(180%);
+      -webkit-backdrop-filter: blur(40px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.78);
+      border-radius: 18px;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.07), inset 0 1px 0 rgba(255,255,255,.9);
+      transition: opacity .3s;
+    }
+    .weather-card.loading { opacity: .5; }
+    .weather-icon {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .weather-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .weather-temp {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text);
+      line-height: 1;
+    }
+    .weather-desc {
+      font-size: .72rem;
+      font-weight: 600;
+      color: var(--t55);
+      margin-top: 2px;
+      text-transform: capitalize;
+    }
+    .weather-city-name {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--t30);
+      letter-spacing: .5px;
+      margin-top: 1px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .weather-details {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      align-items: flex-end;
+    }
+    .weather-detail {
+      font-size: .70rem;
+      font-weight: 600;
+      color: var(--t55);
+      white-space: nowrap;
+    }
+
     /* ── Stats bar ─────────────────────────────────────────────────────── */
     .stats-bar {
       position: relative; z-index: 10;
@@ -720,6 +786,22 @@
     </div>
   </section>
 
+  <!-- Weather -->
+  <div class="weather-bar" id="weather-bar">
+    <div class="weather-card loading" id="weather-card">
+      <div class="weather-icon" id="w-icon">⏳</div>
+      <div class="weather-main">
+        <div class="weather-temp" id="w-temp">--°F</div>
+        <div class="weather-desc" id="w-desc">Fetching weather…</div>
+        <div class="weather-city-name" id="w-city">Locating…</div>
+      </div>
+      <div class="weather-details">
+        <div class="weather-detail" id="w-wind">💨 -- mph</div>
+        <div class="weather-detail" id="w-humidity">💧 --%</div>
+      </div>
+    </div>
+  </div>
+
   <!-- Stats -->
   <div class="stats-bar" id="stats-bar" hidden>
     <div class="stats-inner glass-panel">
@@ -821,6 +903,95 @@
     window.addEventListener('appinstalled', () => {
       banner.classList.remove('show');
       deferredPrompt = null;
+    });
+
+    // ── Weather ─────────────────────────────────────────────────────────
+    const WMO = {
+      0:'Clear sky',1:'Mainly clear',2:'Partly cloudy',3:'Overcast',
+      45:'Foggy',48:'Icy fog',
+      51:'Light drizzle',53:'Drizzle',55:'Heavy drizzle',
+      61:'Light rain',63:'Rain',65:'Heavy rain',
+      71:'Light snow',73:'Snow',75:'Heavy snow',77:'Snow grains',
+      80:'Rain showers',81:'Heavy showers',82:'Violent showers',
+      85:'Snow showers',86:'Heavy snow showers',
+      95:'Thunderstorm',96:'Thunderstorm w/ hail',99:'Thunderstorm w/ heavy hail'
+    };
+    const WMO_ICON = {
+      0:'☀️',1:'🌤',2:'⛅',3:'☁️',
+      45:'🌫',48:'🌫',
+      51:'🌦',53:'🌦',55:'🌧',
+      61:'🌧',63:'🌧',65:'🌧',
+      71:'🌨',73:'❄️',75:'❄️',77:'🌨',
+      80:'🌦',81:'🌧',82:'⛈',
+      85:'🌨',86:'❄️',
+      95:'⛈',96:'⛈',99:'⛈'
+    };
+
+    function renderWeather(data, cityLabel) {
+      const c = data.current;
+      const code = c.weather_code ?? c.weathercode;
+      document.getElementById('w-icon').textContent    = WMO_ICON[code] ?? '🌡';
+      document.getElementById('w-temp').textContent    = Math.round(c.temperature_2m) + '°F';
+      document.getElementById('w-desc').textContent    = WMO[code] ?? 'Unknown';
+      document.getElementById('w-city').textContent    = cityLabel;
+      document.getElementById('w-wind').textContent    = '💨 ' + Math.round(c.wind_speed_10m) + ' mph';
+      document.getElementById('w-humidity').textContent= '💧 ' + Math.round(c.relative_humidity_2m) + '%';
+      document.getElementById('weather-card').classList.remove('loading');
+    }
+
+    async function fetchWeather(lat, lon, cityLabel) {
+      document.getElementById('weather-card').classList.add('loading');
+      try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}`
+          + `&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m`
+          + `&temperature_unit=fahrenheit&wind_speed_unit=mph&timezone=auto`;
+        const res = await fetch(url);
+        const data = await res.json();
+        renderWeather(data, cityLabel);
+      } catch(e) {
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+        document.getElementById('weather-card').classList.remove('loading');
+      }
+    }
+
+    async function geocodeCity(cityStr) {
+      const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityStr)}&count=1&language=en&format=json`);
+      const data = await res.json();
+      if (!data.results?.length) throw new Error('Not found');
+      const r = data.results[0];
+      return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
+    }
+
+    // Load weather on page start using geolocation
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const { latitude: lat, longitude: lon } = pos.coords;
+        // Reverse-geocode label via Open-Meteo (just show coords-based city)
+        try {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+          const d = await res.json();
+          const label = d.address?.city || d.address?.town || d.address?.village || 'Your Location';
+          fetchWeather(lat, lon, label);
+        } catch {
+          fetchWeather(lat, lon, 'Your Location');
+        }
+      }, () => {
+        // Geolocation denied — default to New York
+        fetchWeather(40.7128, -74.0060, 'New York, NY');
+      });
+    } else {
+      fetchWeather(40.7128, -74.0060, 'New York, NY');
+    }
+
+    // Update weather when a city chip is clicked
+    document.querySelectorAll('.chip[data-city]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const city = btn.dataset.city;
+        try {
+          const { lat, lon, label } = await geocodeCity(city);
+          fetchWeather(lat, lon, label);
+        } catch { /* ignore */ }
+      });
     });
   </script>
 </body>
