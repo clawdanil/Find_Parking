@@ -1,12 +1,70 @@
 const TIMEOUT_MS = 28000;
 
 const searchBtn      = document.getElementById('search-btn');
-const cityInput      = document.getElementById('city-input');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
 const statsBar       = document.getElementById('stats-bar');
 const resultsWrapper = document.getElementById('results-wrapper');
 const mapPanel       = document.getElementById('map-panel');
+
+// ── Autocomplete state ────────────────────────────────────────────────────────
+let selectedCity = '';   // set when user picks an autocomplete suggestion or chip
+let selectedLat  = null;
+let selectedLon  = null;
+let acTimer      = null;
+
+const acDropdown = document.getElementById('ac-dropdown');
+
+async function fetchACSuggestions(q) {
+  try {
+    const res  = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=6&addressdetails=1&countrycodes=us`,
+      { headers: { 'Accept-Language': 'en' } }
+    );
+    const data = await res.json();
+    return data
+      .filter(r => r.address?.road)
+      .map(r => {
+        const a      = r.address;
+        const street = [a.house_number, a.road].filter(Boolean).join(' ');
+        const city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
+        return { display: [street, city].filter(Boolean).join(', '), main: street, sub: city, city, lat: parseFloat(r.lat), lon: parseFloat(r.lon) };
+      });
+  } catch { return []; }
+}
+
+function renderACDropdown(suggestions) {
+  if (!suggestions.length) { acDropdown.hidden = true; return; }
+  acDropdown.innerHTML = suggestions.map((s, i) => `
+    <div class="ac-item" data-idx="${i}">
+      <span class="ac-main">${escHtml(s.main)}</span>
+      <span class="ac-sub">${escHtml(s.sub)}</span>
+    </div>`).join('');
+  acDropdown.querySelectorAll('.ac-item').forEach((el, i) => {
+    el.addEventListener('mousedown', e => { e.preventDefault(); selectAC(suggestions[i]); });
+  });
+  acDropdown.hidden = false;
+}
+
+function selectAC(s) {
+  streetInput.value = s.display;
+  selectedCity      = s.city;
+  selectedLat       = s.lat;
+  selectedLon       = s.lon;
+  acDropdown.hidden = true;
+  // Update weather to the selected location
+  if (typeof fetchWeather === 'function') fetchWeather(s.lat, s.lon, s.city);
+}
+
+streetInput.addEventListener('input', () => {
+  clearTimeout(acTimer);
+  const q = streetInput.value.trim();
+  if (q.length < 3) { acDropdown.hidden = true; return; }
+  acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 350);
+});
+
+streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
+streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
 let allSpots  = [];
@@ -250,7 +308,7 @@ function renderResults(parsed, street) {
 
   document.getElementById('stat-count').textContent  = spots.length;
   document.getElementById('stat-street').textContent = parsed.street || street;
-  document.getElementById('stat-city').textContent   = parsed.neighborhood || cityInput.value;
+  document.getElementById('stat-city').textContent   = parsed.neighborhood || selectedCity;
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   statsBar.hidden = false;
 
@@ -315,10 +373,26 @@ function escHtml(str) {
 
 // ── Search ────────────────────────────────────────────────────────────────────
 async function searchParking() {
-  const city   = cityInput.value.trim();   // id="city-input"
-  const street = streetInput.value.trim(); // id="street-input"
-  if (!street) { streetInput.focus(); return; }
-  if (!city)   { cityInput.focus();   return; }
+  const fullAddress = streetInput.value.trim();
+  if (!fullAddress) { streetInput.focus(); return; }
+
+  // Derive city: prefer autocomplete selection, fall back to parsing the typed address
+  let city   = selectedCity;
+  let street = fullAddress;
+  if (!city) {
+    const parts = fullAddress.split(',').map(s => s.trim()).filter(Boolean);
+    if (parts.length >= 2) {
+      street = parts[0];
+      city   = parts.slice(1).join(', ');
+    } else {
+      showMessage('Please select an address from the suggestions or include a city (e.g. "175 2nd St, Jersey City, NJ").', true);
+      return;
+    }
+  } else {
+    // Strip city from display string for the street portion
+    const comma = fullAddress.indexOf(',');
+    if (comma > 0) street = fullAddress.slice(0, comma).trim();
+  }
 
   showSkeletons();
   searchBtn.disabled = true;
@@ -368,12 +442,13 @@ async function searchParking() {
 
 // ── Event listeners ───────────────────────────────────────────────────────────
 searchBtn.addEventListener('click', searchParking);
-streetInput.addEventListener('keydown', e => { if (e.key === 'Enter') searchParking(); });
-cityInput.addEventListener('keydown',   e => { if (e.key === 'Enter') searchParking(); });
+streetInput.addEventListener('keydown', e => { if (e.key === 'Enter') { acDropdown.hidden = true; searchParking(); } });
 
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
-    cityInput.value = chip.dataset.city;
+    selectedCity = chip.dataset.city;
+    streetInput.value = '';
+    streetInput.placeholder = `Address in ${chip.dataset.city}…`;
     streetInput.focus();
   });
 });
@@ -399,17 +474,16 @@ locationBtn.addEventListener('click', () => {
           { headers: { 'Accept-Language': 'en' } }
         );
         const data = await r.json();
-        const a = data.address;
-
-        const city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
+        const city    = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
         const houseNo = a.house_number ? a.house_number + ' ' : '';
         const street  = houseNo + (a.road || a.pedestrian || a.footway || '');
 
-        cityInput.value   = city;
-        streetInput.value = street;
+        selectedCity      = city;
+        selectedLat       = lat;
+        selectedLon       = lng;
+        streetInput.value = [street, city].filter(Boolean).join(', ');
+        if (typeof fetchWeather === 'function') fetchWeather(lat, lng, city);
       } catch {
-        // Reverse geocode failed — fill coordinates as fallback
-        cityInput.value   = '';
         streetInput.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       }
 

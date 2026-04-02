@@ -618,6 +618,32 @@
     }
     footer strong { color:var(--t55); }
 
+    /* ── Address autocomplete ──────────────────────────────────────────── */
+    .ac-wrap { position: relative; }
+    .ac-dropdown {
+      position: absolute;
+      top: calc(100% + 4px); left: 0; right: 0;
+      z-index: 200;
+      background: rgba(255,255,255,.96);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(28,28,30,.12);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(0,0,0,.14);
+    }
+    .ac-item {
+      display: flex; flex-direction: column; gap: 1px;
+      padding: 11px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(28,28,30,.06);
+      transition: background .12s;
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item:hover, .ac-item.focused { background: rgba(52,199,89,.07); }
+    .ac-main { font-size: .84rem; font-weight: 600; color: var(--text); }
+    .ac-sub  { font-size: .70rem; color: var(--t55); }
+
     /* ── Tabs ──────────────────────────────────────────────────────────── */
     .tabs-outer {
       position: relative; z-index: 10;
@@ -830,13 +856,10 @@
   <section class="search-section">
     <div class="search-card glass-panel">
       <div class="search-row">
-        <div class="input-group">
-          <label for="city-input">City</label>
-          <input id="city-input" class="input-field" type="text" placeholder="" autocomplete="off" />
-        </div>
-        <div class="input-group">
-          <label for="street-input">Street or Address</label>
-          <input id="street-input" class="input-field" type="text" placeholder="" autocomplete="off" />
+        <div class="input-group ac-wrap">
+          <label for="street-input">Address, Street or Landmark</label>
+          <input id="street-input" class="input-field" type="text" placeholder="e.g. 175 2nd St, Jersey City, NJ" autocomplete="off" />
+          <div class="ac-dropdown" id="ac-dropdown" hidden></div>
         </div>
         <button id="search-btn" class="search-btn">Search →</button>
       </div>
