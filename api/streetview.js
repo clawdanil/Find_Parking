@@ -24,8 +24,8 @@ export default async function handler(req, res) {
 
     // Step 2: fetch the image using the exact panorama ID + supplied heading
     const h = heading || 0;
-    // pitch=-25 tilts camera down toward curb; fov=65 zooms in on the parking area
-    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=640x320&pano=${meta.pano_id}&fov=65&pitch=-25&heading=${h}&key=${key}`;
+    // pitch=-5: near eye-level, slight downward tilt to show curb + parking lane naturally
+    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x400&pano=${meta.pano_id}&fov=75&pitch=-5&heading=${h}&key=${key}`;
     const r = await fetch(imgUrl);
     const buffer = await r.arrayBuffer();
     res.setHeader('Content-Type', 'image/jpeg');
