@@ -8,6 +8,24 @@ const statsBar       = document.getElementById('stats-bar');
 const resultsWrapper = document.getElementById('results-wrapper');
 const mapPanel       = document.getElementById('map-panel');
 
+// ── Tab state ─────────────────────────────────────────────────────────────────
+let allSpots  = [];
+let activeTab = 'all';
+
+const TAB_TYPES = {
+  all:    null,
+  free:   ['FREE_STREET'],
+  paid:   ['PAID_STREET', 'PAID_LOT'],
+  garage: ['GARAGE'],
+};
+
+const TYPE_META = {
+  FREE_STREET:  { label: 'Free Street',  color: '#30D158', icon: '🅿️' },
+  PAID_STREET:  { label: 'Paid Street',  color: '#FF9F0A', icon: '🪙' },
+  PAID_LOT:     { label: 'Paid Lot',     color: '#FF6B00', icon: '🅿️' },
+  GARAGE:       { label: 'Garage',       color: '#0A84FF', icon: '🏢' },
+};
+
 // ── Map state ─────────────────────────────────────────────────────────────────
 let parkingMap  = null;
 let mapMarkers  = [];
@@ -39,12 +57,13 @@ function updateMap(spots) {
     'FREE':            '#30D158',
     'LIMITED':         '#FFD60A',
     'PERMIT REQUIRED': '#FF453A',
+    'PAID':            '#0A84FF',
   };
 
   const bounds = [];
 
   spotsWithCoords.forEach((s, i) => {
-    const color = STATUS_MAP_COLOR[s.status] || '#5D9B7C';
+    const color = (TYPE_META[s.type] || {}).color || STATUS_MAP_COLOR[s.status] || '#5D9B7C';
     const num   = i + 1;
 
     const icon = L.divIcon({
@@ -134,6 +153,88 @@ function showSkeletons() {
   }, 1700);
 }
 
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function renderTabs(spots) {
+  const counts = {
+    all:    spots.length,
+    free:   spots.filter(s => TAB_TYPES.free.includes(s.type)).length,
+    paid:   spots.filter(s => TAB_TYPES.paid.includes(s.type)).length,
+    garage: spots.filter(s => TAB_TYPES.garage.includes(s.type)).length,
+  };
+
+  const tabsEl = document.getElementById('results-tabs');
+  tabsEl.innerHTML = ['all','free','paid','garage'].map(t => `
+    <button class="tab-btn ${activeTab === t ? 'active' : ''}" data-tab="${t}">
+      ${{ all:'All', free:'Free', paid:'Paid', garage:'Garages' }[t]}
+      <span class="tab-count">${counts[t]}</span>
+    </button>`).join('');
+
+  tabsEl.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTab = btn.dataset.tab;
+      renderTabs(allSpots);
+      renderCards(allSpots);
+    });
+  });
+}
+
+function renderCards(spots) {
+  const types = TAB_TYPES[activeTab];
+  const visible = types ? spots.filter(s => types.includes(s.type)) : spots;
+
+  if (visible.length === 0) {
+    resultsDiv.innerHTML = `<div class="msg"><div class="msg-icon">ℹ️</div><p>No ${activeTab === 'all' ? '' : activeTab + ' '}parking found in this area.</p></div>`;
+    updateMap(spots); // keep full map
+    return;
+  }
+
+  resultsDiv.innerHTML = visible.map((s, i) => {
+    const meta  = TYPE_META[s.type] || TYPE_META['FREE_STREET'];
+    const color = meta.color;
+    const num   = String(i + 1).padStart(2, '0');
+    const isPaid = s.type !== 'FREE_STREET';
+    return `
+      <div class="parking-card" style="--status-color:${color};--delay:${i * 0.08}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <h3 class="card-address">${escHtml(s.address)}${s.side ? ` <span class="card-side">(${escHtml(s.side)})</span>` : ''}</h3>
+            <span class="status-badge" style="background:${color}22;color:${color}">${meta.icon} ${escHtml(meta.label)}</span>
+          </div>
+          ${isPaid ? `<div class="cost-badge">💰 ${escHtml(s.avg_cost)}</div>` : ''}
+          ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
+          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view" loading="lazy" onerror="this.parentElement.querySelector('.sv-disclaimer')?.remove();this.style.display='none'"><p class="sv-disclaimer">📷 Approximate street view — always verify on arrival</p>` : ''}
+          <div class="card-details">
+            ${s.time_limit   ? `<span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>` : ''}
+            ${s.sweeping_schedule && s.sweeping_schedule !== 'None' ? `<span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>` : ''}
+            ${s.permit_required ? `<span class="detail-item">🔑 ${escHtml(s.permit_zone)} permit</span>` : ''}
+            ${s.overnight_parking ? `<span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>` : ''}
+            ${s.distance_from_search ? `<span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>` : ''}
+            ${s.notes ? `<span class="detail-item">ℹ️ ${escHtml(s.notes)}</span>` : ''}
+          </div>
+          ${!isPaid ? `
+          <div class="card-report" data-spot-id="${escHtml(s.address)}">
+            <div class="report-status"></div>
+            <div class="report-actions">
+              <button class="report-btn report-free"  data-status="FREE">✅ Still Free</button>
+              <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
+            </div>
+          </div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+
+  updateMap(spots);
+
+  document.querySelectorAll('.card-report').forEach(el => {
+    const spotId = el.dataset.spotId;
+    fetchSpotStatus(spotId, el.querySelector('.report-status'));
+    el.querySelectorAll('.report-btn').forEach(btn => {
+      btn.addEventListener('click', () => handleReport(spotId, btn.dataset.status, el));
+    });
+  });
+}
+
 // ── Render parking cards ──────────────────────────────────────────────────────
 function renderResults(parsed, street) {
   clearInterval(loadingTimer);
@@ -144,62 +245,19 @@ function renderResults(parsed, street) {
     return;
   }
 
-  const freeCount = spots.filter(s => s.status === 'FREE').length;
-  document.getElementById('stat-count').textContent = freeCount;
+  allSpots  = spots;
+  activeTab = 'all';
+
+  const freeCount = spots.filter(s => s.type === 'FREE_STREET').length;
+  document.getElementById('stat-count').textContent  = spots.length;
   document.getElementById('stat-street').textContent = parsed.street || street;
   document.getElementById('stat-city').textContent   = parsed.neighborhood || cityInput.value;
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   statsBar.hidden = false;
 
-  const STATUS_COLOR = {
-    'FREE':            '#30D158',
-    'LIMITED':         '#FFD60A',
-    'PERMIT REQUIRED': '#FF453A',
-  };
-
-  resultsDiv.innerHTML = '';
-  resultsDiv.innerHTML = spots.map((s, i) => {
-    const color = STATUS_COLOR[s.status] || '#00C853';
-    const num   = String(i + 1).padStart(2, '0');
-    return `
-      <div class="parking-card" style="--status-color:${color};--delay:${i * 0.08}s">
-        <div class="spot-number">${num}</div>
-        <div class="card-body">
-          <div class="card-header-row">
-            <h3 class="card-address">${escHtml(s.address)} <span class="card-side">(${escHtml(s.side)})</span></h3>
-            <span class="status-badge" style="background:${color}22;color:${color}">${escHtml(s.status)}</span>
-          </div>
-          ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
-          ${s.lat && s.lng ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view of ${escHtml(s.address)}" loading="lazy" onerror="this.parentElement.querySelector('.sv-disclaimer')?.remove();this.style.display='none'"><p class="sv-disclaimer">📷 Approximate street view — always verify signs on arrival</p>` : ''}
-          <div class="card-details">
-            <span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>
-            <span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>
-            <span class="detail-item">🔑 ${s.permit_required ? escHtml(s.permit_zone) + ' permit' : 'No permit'}</span>
-            <span class="detail-item">🌙 ${escHtml(s.overnight_parking)}</span>
-            <span class="detail-item">📍 ${escHtml(s.distance_from_search)}</span>
-          </div>
-          <div class="card-report" data-spot-id="${escHtml(s.address)}">
-            <div class="report-status"></div>
-            <div class="report-actions">
-              <button class="report-btn report-free"  data-status="FREE">✅ Still Free</button>
-              <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
-            </div>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
-
-  // Update map with all spots
-  updateMap(spots);
-
-  // Fetch existing crowdsourced status and wire buttons for each card
-  document.querySelectorAll('.card-report').forEach(el => {
-    const spotId = el.dataset.spotId;
-    fetchSpotStatus(spotId, el.querySelector('.report-status'));
-    el.querySelectorAll('.report-btn').forEach(btn => {
-      btn.addEventListener('click', () => handleReport(spotId, btn.dataset.status, el));
-    });
-  });
+  // Render tabs then cards
+  renderTabs(spots);
+  renderCards(spots);
 }
 
 // ── Crowdsourced report helpers ───────────────────────────────────────────────

@@ -618,6 +618,55 @@
     }
     footer strong { color:var(--t55); }
 
+    /* ── Tabs ──────────────────────────────────────────────────────────── */
+    .tabs-bar {
+      display: flex; gap: 5px;
+      background: rgba(255,255,255,.50);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid rgba(255,255,255,.82);
+      border-radius: 100px;
+      padding: 4px;
+      margin-bottom: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.06);
+    }
+    .tab-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+      padding: 8px 10px;
+      border: none; border-radius: 100px;
+      background: transparent;
+      font-family: 'Inter', sans-serif;
+      font-size: .75rem; font-weight: 700;
+      color: var(--t55);
+      cursor: pointer;
+      transition: all .2s;
+      white-space: nowrap;
+    }
+    .tab-btn.active {
+      background: rgba(255,255,255,.92);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,.10);
+    }
+    .tab-count {
+      font-size: .62rem; font-weight: 800;
+      padding: 1px 6px; border-radius: 100px;
+      background: rgba(28,28,30,.08);
+      min-width: 18px; text-align: center;
+    }
+    .tab-btn.active .tab-count { background: rgba(28,28,30,.13); }
+
+    /* ── Cost badge ─────────────────────────────────────────────────────── */
+    .cost-badge {
+      display: inline-flex; align-items: center;
+      margin: 4px 0 8px;
+      padding: 4px 12px;
+      background: rgba(255,159,10,.10);
+      border: 1px solid rgba(255,159,10,.28);
+      border-radius: 100px;
+      font-size: .75rem; font-weight: 700;
+      color: #B36B00;
+    }
+
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width:640px) {
       .hero              { padding:64px 20px 52px; }
@@ -802,7 +851,7 @@
     <div class="stats-inner glass-panel">
       <span class="stat-item">
         <span class="stat-dot"></span>
-        <strong id="stat-count">0</strong>&nbsp;free spots found
+        <strong id="stat-count">0</strong>&nbsp;spots found
       </span>
       <span class="stats-div">·</span>
       <span class="stat-item">📍 Near <strong id="stat-street">–</strong></span>
@@ -815,7 +864,10 @@
 
   <!-- Results + Map -->
   <div class="results-wrapper" id="results-wrapper">
-    <div id="results"></div>
+    <div>
+      <div class="tabs-bar" id="results-tabs"></div>
+      <div id="results"></div>
+    </div>
     <aside class="map-panel" id="map-panel" hidden>
       <div class="map-header">
         🗺 <span id="map-spot-count">0 spots</span> on map &nbsp;·&nbsp; click a pin for details
