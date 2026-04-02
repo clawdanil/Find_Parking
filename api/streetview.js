@@ -1,37 +1,36 @@
-export default async function handler(req, res) {
-  const { lat, lng, heading } = req.query;
-  if (!lat || !lng) return res.status(400).end();
+export const config = { runtime: 'edge' };
 
-  if (!process.env.GOOGLE_MAPS_API_KEY) {
-    return res.status(503).end();
-  }
+export default async function handler(req) {
+  const { searchParams } = new URL(req.url);
+  const lat     = searchParams.get('lat');
+  const lng     = searchParams.get('lng');
+  const heading = searchParams.get('heading') || '0';
+
+  if (!lat || !lng) return new Response(null, { status: 400 });
+  if (!process.env.GOOGLE_MAPS_API_KEY) return new Response(null, { status: 503 });
 
   const key = process.env.GOOGLE_MAPS_API_KEY;
 
   try {
-    // Step 1: find the nearest real panorama within 100 m
-    const metaUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lng}&radius=50&source=outdoor&key=${key}`;
-    const meta = await fetch(metaUrl).then(r => r.json());
+    const meta = await fetch(
+      `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lng}&radius=50&source=outdoor&key=${key}`
+    ).then(r => r.json());
 
-    if (meta.status !== 'OK') {
-      return res.status(404).end();
-    }
+    if (meta.status !== 'OK') return new Response(null, { status: 404 });
+    if (!meta.copyright?.includes('Google')) return new Response(null, { status: 404 });
 
-    // Reject user-contributed / business panoramas — only accept Google's own street imagery
-    if (!meta.copyright?.includes('Google')) {
-      return res.status(404).end();
-    }
+    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x400&pano=${meta.pano_id}&fov=75&pitch=-5&heading=${heading}&key=${key}`;
+    const img    = await fetch(imgUrl);
+    const buffer = await img.arrayBuffer();
 
-    // Step 2: fetch the image using the exact panorama ID + supplied heading
-    const h = heading || 0;
-    // pitch=-5: near eye-level, slight downward tilt to show curb + parking lane naturally
-    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=800x400&pano=${meta.pano_id}&fov=75&pitch=-5&heading=${h}&key=${key}`;
-    const r = await fetch(imgUrl);
-    const buffer = await r.arrayBuffer();
-    res.setHeader('Content-Type', 'image/jpeg');
-    res.setHeader('Cache-Control', 'public, max-age=86400');
-    res.send(Buffer.from(buffer));
-  } catch (e) {
-    res.status(500).end();
+    return new Response(buffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'image/jpeg',
+        'Cache-Control': 'public, max-age=86400',
+      },
+    });
+  } catch {
+    return new Response(null, { status: 500 });
   }
 }
