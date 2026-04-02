@@ -248,14 +248,14 @@ function renderResults(parsed, street) {
   allSpots  = spots;
   activeTab = 'all';
 
-  const freeCount = spots.filter(s => s.type === 'FREE_STREET').length;
   document.getElementById('stat-count').textContent  = spots.length;
   document.getElementById('stat-street').textContent = parsed.street || street;
   document.getElementById('stat-city').textContent   = parsed.neighborhood || cityInput.value;
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   statsBar.hidden = false;
 
-  // Render tabs then cards
+  // Show tabs and render
+  document.getElementById('results-tabs-outer').hidden = false;
   renderTabs(spots);
   renderCards(spots);
 }
@@ -323,6 +323,7 @@ async function searchParking() {
   showSkeletons();
   searchBtn.disabled = true;
   statsBar.hidden = true;
+  document.getElementById('results-tabs-outer').hidden = true;
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
