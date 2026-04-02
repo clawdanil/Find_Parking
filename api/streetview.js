@@ -10,7 +10,7 @@ export default async function handler(req, res) {
 
   try {
     // Step 1: find the nearest real panorama within 100 m
-    const metaUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lng}&radius=100&source=outdoor&key=${key}`;
+    const metaUrl = `https://maps.googleapis.com/maps/api/streetview/metadata?location=${lat},${lng}&radius=50&source=outdoor&key=${key}`;
     const meta = await fetch(metaUrl).then(r => r.json());
 
     if (meta.status !== 'OK') {
@@ -24,7 +24,8 @@ export default async function handler(req, res) {
 
     // Step 2: fetch the image using the exact panorama ID + supplied heading
     const h = heading || 0;
-    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=640x320&pano=${meta.pano_id}&fov=80&pitch=-10&heading=${h}&key=${key}`;
+    // pitch=-25 tilts camera down toward curb; fov=65 zooms in on the parking area
+    const imgUrl = `https://maps.googleapis.com/maps/api/streetview?size=640x320&pano=${meta.pano_id}&fov=65&pitch=-25&heading=${h}&key=${key}`;
     const r = await fetch(imgUrl);
     const buffer = await r.arrayBuffer();
     res.setHeader('Content-Type', 'image/jpeg');
