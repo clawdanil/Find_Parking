@@ -36,9 +36,9 @@ function updateMap(spots) {
   mapMarkers = [];
 
   const STATUS_MAP_COLOR = {
-    'FREE':            '#5D9B7C',
-    'LIMITED':         '#C8895A',
-    'PERMIT REQUIRED': '#C47272',
+    'FREE':            '#30D158',
+    'LIMITED':         '#FFD60A',
+    'PERMIT REQUIRED': '#FF453A',
   };
 
   const bounds = [];
@@ -70,12 +70,12 @@ function updateMap(spots) {
 
     const popup = `
       <div style="padding:14px 16px;font-family:'Inter',sans-serif;min-width:200px;">
-        <div style="font-size:0.75rem;font-weight:700;color:#9A8878;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
-        <div style="font-size:0.95rem;font-weight:600;color:#1A1512;line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
-        <div style="font-size:0.8rem;color:#7A6E62;margin-bottom:8px;">${escHtml(s.side)}</div>
-        ${s.landmark ? `<div style="font-size:0.77rem;color:#9A8878;font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
-        <span style="display:inline-block;background:${color}22;color:${color};font-size:0.67rem;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:0.6px;">${escHtml(s.status)}</span>
-        ${s.distance_from_search ? `<div style="font-size:0.75rem;color:#9A8878;margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
+        <div style="font-size:0.68rem;font-weight:600;color:rgba(245,245,247,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
+        <div style="font-size:0.93rem;font-weight:600;color:rgba(245,245,247,.95);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
+        <div style="font-size:0.78rem;color:rgba(245,245,247,.45);margin-bottom:8px;">${escHtml(s.side)}</div>
+        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(245,245,247,.3);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
+        <span style="display:inline-block;background:${color}22;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
+        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(245,245,247,.3);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
       </div>`;
 
     const marker = L.marker([s.lat, s.lng], { icon })
@@ -152,9 +152,9 @@ function renderResults(parsed, street) {
   statsBar.hidden = false;
 
   const STATUS_COLOR = {
-    'FREE':            '#5D9B7C',
-    'LIMITED':         '#C8895A',
-    'PERMIT REQUIRED': '#C47272',
+    'FREE':            '#30D158',
+    'LIMITED':         '#FFD60A',
+    'PERMIT REQUIRED': '#FF453A',
   };
 
   resultsDiv.innerHTML = '';
@@ -213,7 +213,7 @@ async function fetchSpotStatus(spotId, statusEl) {
 
 function renderStatusBadge(statusEl, status, minutesAgo) {
   const isFree  = status === 'FREE';
-  const color   = isFree ? '#5D9B7C' : '#C47272';
+  const color   = isFree ? '#30D158' : '#FF453A';
   const icon    = isFree ? '✅' : '❌';
   const label   = isFree ? 'Reported free' : 'Reported taken';
   const timeStr = minutesAgo < 1 ? 'just now' : `${minutesAgo} min ago`;
