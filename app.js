@@ -17,28 +17,9 @@ const acDropdown = document.getElementById('ac-dropdown');
 
 async function fetchACSuggestions(q) {
   try {
-    const res  = await fetch(
-      `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lang=en&countrycodes=us`
-    );
-    const data = await res.json();
-    return (data.features || [])
-      .filter(f => f.properties?.street || f.properties?.name)
-      .map(f => {
-        const p      = f.properties;
-        const [lon, lat] = f.geometry.coordinates;
-        const street = [p.housenumber, p.street || p.name].filter(Boolean).join(' ');
-        const state  = p.state ? stateAbbr(p.state) : '';
-        const city   = [p.city || p.town || p.village || p.county, state].filter(Boolean).join(', ');
-        return { display: [street, city].filter(Boolean).join(', '), main: street || p.name, sub: city, city, lat, lon };
-      })
-      .filter(s => s.city); // only show results with a city
+    const res  = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
+    return await res.json();
   } catch { return []; }
-}
-
-// Convert full state name to 2-letter abbreviation
-function stateAbbr(name) {
-  const map = { 'Alabama':'AL','Alaska':'AK','Arizona':'AZ','Arkansas':'AR','California':'CA','Colorado':'CO','Connecticut':'CT','Delaware':'DE','Florida':'FL','Georgia':'GA','Hawaii':'HI','Idaho':'ID','Illinois':'IL','Indiana':'IN','Iowa':'IA','Kansas':'KS','Kentucky':'KY','Louisiana':'LA','Maine':'ME','Maryland':'MD','Massachusetts':'MA','Michigan':'MI','Minnesota':'MN','Mississippi':'MS','Missouri':'MO','Montana':'MT','Nebraska':'NE','Nevada':'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND','Ohio':'OH','Oklahoma':'OK','Oregon':'OR','Pennsylvania':'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD','Tennessee':'TN','Texas':'TX','Utah':'UT','Vermont':'VT','Virginia':'VA','Washington':'WA','West Virginia':'WV','Wisconsin':'WI','Wyoming':'WY' };
-  return map[name] || name;
 }
 
 function renderACDropdown(suggestions) {
@@ -54,14 +35,22 @@ function renderACDropdown(suggestions) {
   acDropdown.hidden = false;
 }
 
-function selectAC(s) {
+async function selectAC(s) {
   streetInput.value = s.display;
-  selectedCity      = s.city;
-  selectedLat       = s.lat;
-  selectedLon       = s.lon;
+  selectedCity      = s.sub || s.display; // sub = "Jersey City, NJ"
   acDropdown.hidden = true;
-  // Update weather to the selected location
-  if (typeof fetchWeather === 'function') fetchWeather(s.lat, s.lon, s.city);
+
+  // Geocode in background to get lat/lon for weather
+  try {
+    const res  = await fetch(`/api/geocode?place_id=${encodeURIComponent(s.place_id)}`);
+    const geo  = await res.json();
+    if (geo.lat && geo.lon) {
+      selectedCity = geo.city || selectedCity;
+      selectedLat  = geo.lat;
+      selectedLon  = geo.lon;
+      if (typeof fetchWeather === 'function') fetchWeather(geo.lat, geo.lon, selectedCity);
+    }
+  } catch { /* weather update optional */ }
 }
 
 streetInput.addEventListener('input', () => {
