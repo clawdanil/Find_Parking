@@ -15,11 +15,41 @@ let acTimer      = null;
 
 const acDropdown = document.getElementById('ac-dropdown');
 
-async function fetchACSuggestions(q) {
+// ── Google Maps JS API bootstrap ──────────────────────────────────────────────
+window._gmapsReady = false;
+window._initGooglePlaces = function () {
+  window._acService  = new google.maps.places.AutocompleteService();
+  window._geocoder   = new google.maps.Geocoder();
+  window._gmapsReady = true;
+};
+
+(async () => {
   try {
-    const res  = await fetch(`/api/autocomplete?q=${encodeURIComponent(q)}`);
-    return await res.json();
-  } catch { return []; }
+    const res = await fetch('/api/config');
+    const { mapsKey } = await res.json();
+    if (!mapsKey) return;
+    const s = document.createElement('script');
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${mapsKey}&libraries=places&loading=async&callback=_initGooglePlaces`;
+    document.head.appendChild(s);
+  } catch { /* autocomplete unavailable */ }
+})();
+
+async function fetchACSuggestions(q) {
+  if (!window._gmapsReady) return [];
+  return new Promise(resolve => {
+    window._acService.getPlacePredictions(
+      { input: q, componentRestrictions: { country: 'us' }, types: ['address'] },
+      (preds, status) => {
+        if (status !== google.maps.places.PlacesServiceStatus.OK || !preds) { resolve([]); return; }
+        resolve(preds.map(p => ({
+          display:  p.description.replace(', USA', ''),
+          main:     p.structured_formatting.main_text,
+          sub:      (p.structured_formatting.secondary_text || '').replace(', USA', ''),
+          place_id: p.place_id,
+        })));
+      }
+    );
+  });
 }
 
 function renderACDropdown(suggestions) {
@@ -37,27 +67,35 @@ function renderACDropdown(suggestions) {
 
 async function selectAC(s) {
   streetInput.value = s.display;
-  selectedCity      = s.sub || s.display; // sub = "Jersey City, NJ"
+  selectedCity      = s.sub || s.display;
   acDropdown.hidden = true;
 
-  // Geocode in background to get lat/lon for weather
+  // Geocode via Maps JS API (already loaded, no extra network hop)
+  if (!window._gmapsReady) return;
   try {
-    const res  = await fetch(`/api/geocode?place_id=${encodeURIComponent(s.place_id)}`);
-    const geo  = await res.json();
-    if (geo.lat && geo.lon) {
-      selectedCity = geo.city || selectedCity;
-      selectedLat  = geo.lat;
-      selectedLon  = geo.lon;
-      if (typeof fetchWeather === 'function') fetchWeather(geo.lat, geo.lon, selectedCity);
-    }
-  } catch { /* weather update optional */ }
+    window._geocoder.geocode({ placeId: s.place_id }, (results, status) => {
+      if (status !== 'OK' || !results?.[0]) return;
+      const r    = results[0];
+      const lat  = r.geometry.location.lat();
+      const lon  = r.geometry.location.lng();
+      const get  = type => r.address_components.find(c => c.types.includes(type));
+      const city = [
+        get('locality')?.long_name || get('sublocality')?.long_name,
+        get('administrative_area_level_1')?.short_name,
+      ].filter(Boolean).join(', ');
+      selectedCity = city || selectedCity;
+      selectedLat  = lat;
+      selectedLon  = lon;
+      if (typeof fetchWeather === 'function') fetchWeather(lat, lon, selectedCity);
+    });
+  } catch { /* weather optional */ }
 }
 
 streetInput.addEventListener('input', () => {
   clearTimeout(acTimer);
   const q = streetInput.value.trim();
-  if (q.length < 3) { acDropdown.hidden = true; return; }
-  acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 200);
+  if (q.length < 2) { acDropdown.hidden = true; return; }
+  acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 100);
 });
 
 streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
