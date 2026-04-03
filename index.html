@@ -1115,30 +1115,52 @@
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
 
-    // ── Load weather immediately via IP geolocation (no permission prompt) ──
+    // ── Load weather: GPS first (accurate), IP as quick fallback ──────────
     (async () => {
-      try {
-        const res = await fetch('https://ipapi.co/json/');
-        const d   = await res.json();
-        if (d.latitude && d.longitude) {
-          const label = [d.city, d.region_code].filter(Boolean).join(', ');
-          fetchWeather(d.latitude, d.longitude, label || 'Your Location');
-          // Then quietly refine with GPS if user grants it
-          if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(async pos => {
-              try {
-                const r2  = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${pos.coords.latitude}&lon=${pos.coords.longitude}&format=json`);
-                const d2  = await r2.json();
-                const lbl = d2.address?.city || d2.address?.town || d2.address?.village || 'Your Location';
-                fetchWeather(pos.coords.latitude, pos.coords.longitude, lbl);
-              } catch { /* keep IP result */ }
-            }, () => { /* no GPS, keep IP result */ }, { timeout: 8000 });
+      let gpsResolved = false;
+
+      // 1. Try GPS immediately — most accurate, updates weather to real location
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async pos => {
+          gpsResolved = true;
+          const { latitude: lat, longitude: lon } = pos.coords;
+          try {
+            // Use Google Geocoder if loaded, else Nominatim
+            let lbl = 'Your Location';
+            if (window._gmapsReady && window._geocoder) {
+              await new Promise(resolve => {
+                window._geocoder.geocode({ location: { lat, lng: lon } }, (results, status) => {
+                  if (status === 'OK' && results?.[0]) {
+                    const get = type => results[0].address_components.find(c => c.types.includes(type));
+                    lbl = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ') || lbl;
+                  }
+                  resolve();
+                });
+              });
+            } else {
+              const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+              const d = await r.json();
+              lbl = d.address?.city || d.address?.town || d.address?.village || lbl;
+            }
+            fetchWeather(lat, lon, lbl);
+          } catch { fetchWeather(lat, lon, 'Your Location'); }
+        }, () => { /* GPS denied — IP fallback already ran */ }, { timeout: 8000, maximumAge: 60000 });
+      }
+
+      // 2. IP geolocation runs in parallel as fast fallback (may be inaccurate by ~10mi)
+      setTimeout(async () => {
+        if (gpsResolved) return; // GPS already succeeded, skip IP
+        try {
+          const res = await fetch('https://ipapi.co/json/');
+          const d   = await res.json();
+          if (d.latitude && d.longitude && !gpsResolved) {
+            const label = [d.city, d.region_code].filter(Boolean).join(', ');
+            fetchWeather(d.latitude, d.longitude, label || 'Nearby');
           }
-          return;
+        } catch {
+          if (!gpsResolved) fetchWeather(40.7128, -74.0060, 'New York, NY');
         }
-      } catch { /* fall through */ }
-      // Hard fallback: New York
-      fetchWeather(40.7128, -74.0060, 'New York, NY');
+      }, 300); // slight delay so GPS has a chance to win first
     })();
 
     // Update weather when a city chip is clicked
