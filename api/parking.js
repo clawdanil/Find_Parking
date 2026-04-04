@@ -199,23 +199,25 @@ export default async function handler(req) {
       lng = geo.lon;
     }
 
-    // 2. OSM Overpass: try 2 blocks (200m), expand to 4 blocks (400m) if empty
-    let elements = await queryOverpass(lat, lng, 200);
-    let radiusBlocks  = 2;
-    let radiusExpanded = false;
-    let source = 'osm';
-
-    if (elements.length === 0) {
-      elements = await queryOverpass(lat, lng, 400);
-      radiusBlocks   = 4;
-      radiusExpanded = true;
-    }
-
-    // 3. Convert, filter, deduplicate, sort by distance
-    let spots = elements
+    // 2. OSM Overpass: try 2 blocks (200m), process spots, expand if fewer than 3
+    const processElements = (els) => els
       .map((el, i) => osmElementToSpot(el, lat, lng, i))
       .filter(Boolean)
       .sort((a, b) => a._distMi - b._distMi);
+
+    let elements = await queryOverpass(lat, lng, 200);
+    let spots    = processElements(elements);
+    let radiusBlocks   = 2;
+    let radiusExpanded = false;
+    let source = 'osm';
+
+    // Expand to 4 blocks if fewer than 3 spots found — sparse result = expand
+    if (spots.length < 3) {
+      const moreElements = await queryOverpass(lat, lng, 400);
+      spots          = processElements(moreElements);
+      radiusBlocks   = 4;
+      radiusExpanded = true;
+    }
 
     // Deduplicate spots within 15m of each other
     const seen = [];

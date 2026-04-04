@@ -368,7 +368,7 @@ function renderResults(parsed, street) {
       display:flex;align-items:center;gap:10px;padding:10px 18px;
       background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);
       border-radius:14px;font-size:.78rem;font-weight:600;color:#FBBF24;
-    ">⚠️ No spots within 2 blocks — expanded to 4 blocks.${srcBadge}</div>`;
+    ">⚠️ Fewer than 3 spots within 2 blocks — expanded search to 4 blocks.${srcBadge}</div>`;
   } else {
     radiusBanner.innerHTML = `<div style="
       display:flex;align-items:center;gap:10px;padding:10px 18px;
