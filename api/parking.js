@@ -83,10 +83,11 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
     GARAGE:      'Parking Garage',
   };
 
+  const realName = osmToAddress(tags);
   return {
     id:                   idx + 1,
     type,
-    address:              osmToAddress(tags) || typeLabels[type],
+    address:              realName || typeLabels[type],
     side:                 '',
     landmark:             '',
     lat,
@@ -102,7 +103,74 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
     notes:                osmToNotes(tags),
     source:               'osm',
     _distMi:              dist,
+    _needsAddress:        !realName,   // flag: needs reverse geocode
+    _osmType:             el.type,
+    _osmId:               el.id,
   };
+}
+
+// ── Enrich unnamed OSM spots with real street addresses via Nominatim ─────────
+async function enrichAddresses(spots) {
+  const unnamed = spots.filter(s => s._needsAddress && s.lat && s.lng);
+  if (unnamed.length === 0) return;
+
+  // Try Nominatim lookup by OSM ID first (single request, fast)
+  try {
+    const ids = unnamed.map(s => {
+      const prefix = s._osmType === 'node' ? 'N' : s._osmType === 'way' ? 'W' : 'R';
+      return `${prefix}${s._osmId}`;
+    }).join(',');
+
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 5000);
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/lookup?osm_ids=${encodeURIComponent(ids)}&format=json&addressdetails=1`,
+      { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
+    );
+    if (r.ok) {
+      const data = await r.json();
+      const byId = {};
+      data.forEach(item => { byId[String(item.osm_id)] = item; });
+
+      unnamed.forEach(spot => {
+        const item = byId[String(spot._osmId)];
+        if (!item) return;
+        const addr = item.address || {};
+        const name = item.name && !['parking','car park','park'].includes(item.name.toLowerCase())
+          ? item.name : null;
+        const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
+          .filter(Boolean).join(' ');
+        if (name || street) {
+          spot.address = name || street;
+          spot._needsAddress = false;
+        }
+      });
+    }
+  } catch { /* continue to reverse geocode fallback */ }
+
+  // For any still-unnamed spots, reverse geocode lat/lng in parallel
+  const stillUnnamed = unnamed.filter(s => s._needsAddress);
+  if (stillUnnamed.length === 0) return;
+
+  await Promise.allSettled(stillUnnamed.map(async spot => {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 4000);
+      const r = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?lat=${spot.lat}&lon=${spot.lng}&format=json&zoom=17&addressdetails=1`,
+        { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
+      );
+      if (!r.ok) return;
+      const data = await r.json();
+      const addr = data.address || {};
+      // Prefer a specific name if Nominatim found one
+      const name = data.name && !['parking','car park','park'].includes(data.name.toLowerCase())
+        ? data.name : null;
+      const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
+        .filter(Boolean).join(' ');
+      if (name || street) spot.address = name || street;
+    } catch { /* keep generic label */ }
+  }));
 }
 
 // ── Query OpenStreetMap Overpass API (with mirror fallbacks) ──────────────────
@@ -251,8 +319,17 @@ export default async function handler(req) {
       return true;
     });
 
-    // Re-index IDs
-    spots.forEach((s, i) => { s.id = i + 1; delete s._distMi; });
+    // 3b. Enrich OSM spots that are missing real addresses via Nominatim
+    if (spots.length > 0) await enrichAddresses(spots);
+
+    // Re-index IDs and strip temp fields
+    spots.forEach((s, i) => {
+      s.id = i + 1;
+      delete s._distMi;
+      delete s._needsAddress;
+      delete s._osmType;
+      delete s._osmId;
+    });
 
     // 4. If OSM returned nothing (area not well mapped), fall back to Claude
     if (spots.length === 0 && process.env.ANTHROPIC_API_KEY) {
