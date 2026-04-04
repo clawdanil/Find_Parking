@@ -334,7 +334,7 @@ function renderResults(parsed, street) {
 
   const spots = parsed.spots;
   if (!Array.isArray(spots) || spots.length === 0) {
-    showMessage('No parking spots found. Try a different location.');
+    showMessage('No parking spots found within 4 blocks. Try a different address.');
     return;
   }
 
@@ -346,6 +346,31 @@ function renderResults(parsed, street) {
   document.getElementById('stat-city').textContent   = parsed.neighborhood || selectedCity;
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   statsBar.hidden = false;
+
+  // Show radius notice
+  let radiusBanner = document.getElementById('radius-banner');
+  if (!radiusBanner) {
+    radiusBanner = document.createElement('div');
+    radiusBanner.id = 'radius-banner';
+    radiusBanner.style.cssText = `
+      position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;
+      padding:0 20px;box-sizing:border-box;
+    `;
+    document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', radiusBanner);
+  }
+  if (parsed.radiusExpanded) {
+    radiusBanner.innerHTML = `<div style="
+      display:flex;align-items:center;gap:10px;padding:10px 18px;
+      background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);
+      border-radius:14px;font-size:.78rem;font-weight:600;color:#FBBF24;
+    ">⚠️ No spots found within 2 blocks — showing results within 4 blocks instead.</div>`;
+  } else {
+    radiusBanner.innerHTML = `<div style="
+      display:flex;align-items:center;gap:10px;padding:10px 18px;
+      background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18);
+      border-radius:14px;font-size:.78rem;font-weight:600;color:#34D399;
+    ">✅ Showing parking within 2 blocks of your search location.</div>`;
+  }
 
   // Show tabs and render
   document.getElementById('results-tabs-outer').hidden = false;
@@ -433,6 +458,8 @@ async function searchParking() {
   searchBtn.disabled = true;
   statsBar.hidden = true;
   document.getElementById('results-tabs-outer').hidden = true;
+  const rb = document.getElementById('radius-banner');
+  if (rb) rb.innerHTML = '';
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
@@ -446,6 +473,8 @@ async function searchParking() {
         body: JSON.stringify({
           city,
           street,
+          lat:  selectedLat,
+          lng:  selectedLon,
           day:  new Date().toLocaleDateString('en-US', { weekday: 'long' }),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
         })
