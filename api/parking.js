@@ -103,9 +103,15 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
   };
 }
 
-// ── Query OpenStreetMap Overpass API ──────────────────────────────────────────
+// ── Query OpenStreetMap Overpass API (with mirror fallbacks) ──────────────────
+const OVERPASS_MIRRORS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
 async function queryOverpass(lat, lon, radiusMeters) {
-  const query = `[out:json][timeout:20];
+  const query = `[out:json][timeout:18];
 (
   node["amenity"="parking"](around:${radiusMeters},${lat},${lon});
   way["amenity"="parking"](around:${radiusMeters},${lat},${lon});
@@ -113,14 +119,28 @@ async function queryOverpass(lat, lon, radiusMeters) {
 );
 out center tags;`;
 
-  const r = await fetch('https://overpass-api.de/api/interpreter', {
-    method:  'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body:    `data=${encodeURIComponent(query)}`,
-  });
-  if (!r.ok) throw new Error(`Overpass API error: ${r.status}`);
-  const data = await r.json();
-  return data.elements || [];
+  const body = `data=${encodeURIComponent(query)}`;
+
+  for (const mirror of OVERPASS_MIRRORS) {
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 10000); // 10s per mirror
+      const r = await fetch(mirror, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        signal: controller.signal,
+      });
+      clearTimeout(timer);
+      if (!r.ok) continue; // try next mirror
+      const data = await r.json();
+      return data.elements || [];
+    } catch {
+      // mirror failed or timed out — try next
+    }
+  }
+  // All mirrors failed — return empty so Claude fallback kicks in
+  return null;
 }
 
 // ── Geocode an address via Nominatim (fallback when no lat/lng sent) ──────────
@@ -200,7 +220,7 @@ export default async function handler(req) {
     }
 
     // 2. OSM Overpass: try 2 blocks (200m), process spots, expand if fewer than 3
-    const processElements = (els) => els
+    const processElements = (els) => (els || [])
       .map((el, i) => osmElementToSpot(el, lat, lng, i))
       .filter(Boolean)
       .sort((a, b) => a._distMi - b._distMi);
@@ -211,12 +231,12 @@ export default async function handler(req) {
     let radiusExpanded = false;
     let source = 'osm';
 
-    // Expand to 4 blocks if fewer than 3 spots found — sparse result = expand
-    if (spots.length < 3) {
+    // Expand to 4 blocks if fewer than 3 spots found OR overpass returned null (all mirrors failed)
+    if (elements === null || spots.length < 3) {
       const moreElements = await queryOverpass(lat, lng, 400);
       spots          = processElements(moreElements);
       radiusBlocks   = 4;
-      radiusExpanded = true;
+      radiusExpanded = spots.length > 0; // only flag expanded if we actually got more
     }
 
     // Deduplicate spots within 15m of each other
