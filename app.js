@@ -358,18 +358,23 @@ function renderResults(parsed, street) {
     `;
     document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', radiusBanner);
   }
+  const isAI  = parsed.source === 'ai';
+  const srcBadge = isAI
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.25);color:#A78BFA;">AI estimated</span>`
+    : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">Live OSM data</span>`;
+
   if (parsed.radiusExpanded) {
     radiusBanner.innerHTML = `<div style="
       display:flex;align-items:center;gap:10px;padding:10px 18px;
       background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);
       border-radius:14px;font-size:.78rem;font-weight:600;color:#FBBF24;
-    ">⚠️ No spots found within 2 blocks — showing results within 4 blocks instead.</div>`;
+    ">⚠️ No spots within 2 blocks — expanded to 4 blocks.${srcBadge}</div>`;
   } else {
     radiusBanner.innerHTML = `<div style="
       display:flex;align-items:center;gap:10px;padding:10px 18px;
       background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18);
       border-radius:14px;font-size:.78rem;font-weight:600;color:#34D399;
-    ">✅ Showing parking within 2 blocks of your search location.</div>`;
+    ">✅ Showing parking within 2 blocks.${srcBadge}</div>`;
   }
 
   // Show tabs and render
