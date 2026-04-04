@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#1E6AB8">
+  <meta name="theme-color" content="#3D2D6B">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="ParkMe">
@@ -44,7 +44,7 @@
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: linear-gradient(160deg, #1A5FA8 0%, #2B7CC4 40%, #4898D4 72%, #6DB8E8 100%);
+      background: linear-gradient(160deg, #1E1438 0%, #352860 35%, #52429A 65%, #7060B8 100%);
       min-height: 100vh;
       color: var(--text);
       min-height: 100vh;
@@ -52,24 +52,24 @@
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
-    /* ── Raindrop crystal glass background ──────────────────────────────── */
+    /* ── Crystal glass background ───────────────────────────────────────── */
     .bg-scene {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: linear-gradient(160deg, #1A5FA8 0%, #2B7CC4 40%, #4898D4 72%, #6DB8E8 100%);
+      background: linear-gradient(160deg, #1E1438 0%, #352860 35%, #52429A 65%, #7060B8 100%);
     }
     .bg-orb {
       position: absolute;
       border-radius: 50%;
-      filter: blur(120px);
-      opacity: .25;
+      filter: blur(130px);
+      opacity: .28;
       animation: orbDrift 22s ease-in-out infinite alternate;
     }
-    .bg-orb-1 { width: 65vw; height: 65vw; top: -20%; left: -15%; background: radial-gradient(circle, #FFFFFF, #A8D8FF); animation-duration: 22s; }
-    .bg-orb-2 { width: 55vw; height: 55vw; top: -5%;  right: -15%; background: radial-gradient(circle, #C4E0FF, #7EC8F0); animation-duration: 18s; animation-delay: -6s; }
-    .bg-orb-3 { width: 50vw; height: 50vw; bottom: 0; left: 15%;  background: radial-gradient(circle, #FFFFFF, #90C8F0); animation-duration: 25s; animation-delay: -10s; }
+    .bg-orb-1 { width: 65vw; height: 65vw; top: -20%; left: -15%; background: radial-gradient(circle, #C4B0FF, #E8D8FF); animation-duration: 22s; }
+    .bg-orb-2 { width: 55vw; height: 55vw; top: -5%;  right: -15%; background: radial-gradient(circle, #FFFFFF, #D4C0FF); animation-duration: 18s; animation-delay: -6s; }
+    .bg-orb-3 { width: 50vw; height: 50vw; bottom: 0; left: 15%;  background: radial-gradient(circle, #A0D0FF, #C0B0FF); animation-duration: 25s; animation-delay: -10s; }
     @keyframes orbDrift {
       from { transform: translate(0,0) scale(1);   }
       to   { transform: translate(5vw,6vh) scale(1.12); }
