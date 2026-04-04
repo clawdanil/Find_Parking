@@ -182,12 +182,12 @@ function updateMap(spots) {
 
     const popup = `
       <div style="padding:14px 16px;font-family:'Inter',sans-serif;min-width:200px;">
-        <div style="font-size:0.68rem;font-weight:600;color:rgba(255,255,255,.45);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
-        <div style="font-size:0.93rem;font-weight:700;color:rgba(255,255,255,.97);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
-        <div style="font-size:0.78rem;color:rgba(255,255,255,.60);margin-bottom:8px;">${escHtml(s.side)}</div>
-        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(255,255,255,.45);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
-        <span style="display:inline-block;background:${color}33;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
-        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(255,255,255,.45);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
+        <div style="font-size:0.68rem;font-weight:600;color:rgba(10,10,20,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
+        <div style="font-size:0.93rem;font-weight:700;color:rgba(10,10,20,.88);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
+        <div style="font-size:0.78rem;color:rgba(10,10,20,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
+        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(10,10,20,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
+        <span style="display:inline-block;background:${color}18;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
+        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(10,10,20,.35);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
       </div>`;
 
     const marker = L.marker([s.lat, s.lng], { icon })
