@@ -18,21 +18,18 @@ function formatDist(mi) {
   return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
 }
 
+// Street-side/lane tags are road designations, not actual parking facilities — skip them
+const ROAD_PARKING_TYPES = new Set(['street_side','lane','on_street','half_on_kerb','shoulder','street','lay_by']);
+
 // ── Map OSM tags → our 4 parking types ───────────────────────────────────────
 function osmToType(tags) {
-  const p    = (tags.parking || '').toLowerCase();
-  const hasFee  = tags.fee === 'yes';
-  const isFree  = tags.fee === 'no' || tags.fee === 'free';
+  const p      = (tags.parking || '').toLowerCase();
+  const hasFee = tags.fee === 'yes';
 
   if (['multi-storey', 'underground', 'garage', 'rooftop', 'multistorey'].includes(p)) return 'GARAGE';
-  if (['street_side', 'lane', 'on_street', 'half_on_kerb', 'shoulder', 'street'].includes(p)) {
-    return hasFee ? 'PAID_STREET' : 'FREE_STREET';
-  }
   if (p === 'surface') return hasFee ? 'PAID_LOT' : 'FREE_STREET';
-  // no parking subtag — use fee to guess
   if (hasFee) return 'PAID_LOT';
-  if (isFree) return 'FREE_STREET';
-  return 'PAID_LOT'; // unknown, assume paid lot
+  return 'PAID_LOT';
 }
 
 function osmToAvgCost(tags, type) {
@@ -70,6 +67,11 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
   // Skip private / restricted access
   const access = (tags.access || '').toLowerCase();
   if (['private', 'customers', 'permit', 'no', 'delivery'].includes(access)) return null;
+
+  // Skip road-designation entries (street_side, lane, etc.) — these are road tags,
+  // not actual parking facilities. They show up as regular streets in street view.
+  const pTag = (tags.parking || '').toLowerCase();
+  if (ROAD_PARKING_TYPES.has(pTag)) return null;
 
   const type = osmToType(tags);
   const dist = haversineMi(searchLat, searchLon, lat, lon);
@@ -186,8 +188,8 @@ async function claudeFallback(key, street, city, lat, lng, day, time, radiusBloc
   const base     = `Location: "${street}", ${city}.${coords} ${day} ${time}. ${strict} Return ONLY a valid JSON array, no markdown.`;
 
   const [free, paid] = await Promise.all([
-    askClaude(key, `${base} List up to 4 FREE_STREET spots. Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search`).catch(() => []),
-    askClaude(key, `${base} List up to 2 PAID_STREET, 1 PAID_LOT, 2 GARAGE spots. Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search,notes`).catch(() => []),
+    askClaude(key, `${base} List up to 5 FREE_STREET spots (specific block faces where street parking is known to exist — NOT generic road names). Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search`).catch(() => []),
+    askClaude(key, `${base} List up to 3 PAID_STREET metered spots, up to 2 PAID_LOT surface lots, up to 3 GARAGE parking garages. Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search,notes`).catch(() => []),
   ]);
 
   return [...free, ...paid].map((s, i) => ({
@@ -225,18 +227,19 @@ export default async function handler(req) {
       .filter(Boolean)
       .sort((a, b) => a._distMi - b._distMi);
 
-    let elements = await queryOverpass(lat, lng, 200);
+    // 2 blocks ≈ 250m, 4 blocks ≈ 600m (larger radii to get meaningful results)
+    let elements = await queryOverpass(lat, lng, 250);
     let spots    = processElements(elements);
     let radiusBlocks   = 2;
     let radiusExpanded = false;
     let source = 'osm';
 
-    // Expand to 4 blocks if fewer than 3 spots found OR overpass returned null (all mirrors failed)
-    if (elements === null || spots.length < 3) {
-      const moreElements = await queryOverpass(lat, lng, 400);
+    // Expand to 4 blocks if fewer than 5 spots found OR overpass returned null (all mirrors failed)
+    if (elements === null || spots.length < 5) {
+      const moreElements = await queryOverpass(lat, lng, 600);
       spots          = processElements(moreElements);
       radiusBlocks   = 4;
-      radiusExpanded = spots.length > 0; // only flag expanded if we actually got more
+      radiusExpanded = spots.length > 0;
     }
 
     // Deduplicate spots within 15m of each other
