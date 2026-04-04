@@ -128,7 +128,7 @@ function initMap() {
   resultsWrapper.classList.add('has-map');
   if (parkingMap) return;
   parkingMap = L.map('map', { zoomControl: true, attributionControl: true });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 19,
   }).addTo(parkingMap);
@@ -182,12 +182,12 @@ function updateMap(spots) {
 
     const popup = `
       <div style="padding:14px 16px;font-family:'Inter',sans-serif;min-width:200px;">
-        <div style="font-size:0.68rem;font-weight:600;color:rgba(255,255,255,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
-        <div style="font-size:0.93rem;font-weight:600;color:rgba(255,255,255,.95);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
-        <div style="font-size:0.78rem;color:rgba(255,255,255,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
-        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(255,255,255,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
-        <span style="display:inline-block;background:${color}33;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
-        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(255,255,255,.35);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
+        <div style="font-size:0.68rem;font-weight:600;color:rgba(8,18,52,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
+        <div style="font-size:0.93rem;font-weight:600;color:rgba(8,18,52,.90);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
+        <div style="font-size:0.78rem;color:rgba(8,18,52,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
+        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(8,18,52,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
+        <span style="display:inline-block;background:${color}22;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
+        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(8,18,52,.35);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
       </div>`;
 
     const marker = L.marker([s.lat, s.lng], { icon })

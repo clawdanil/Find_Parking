@@ -272,7 +272,7 @@ async function claudeFallback(key, street, city, lat, lng, day, time, radiusBloc
     type:     s.type     || 'FREE_STREET',
     avg_cost: s.avg_cost || (s.type === 'FREE_STREET' ? 'Free' : 'Varies'),
     source:   'ai',
-    _distMi:  parseFloat((s.distance_from_search || '0').replace(/[^\d.]/g, '')) || 0,
+    _distMi:  parseFloat(String(s.distance_from_search || '0').replace(/[^\d.]/g, '')) || 0,
   }));
 }
 
