@@ -184,6 +184,26 @@
       background-clip: text;
     }
 
+    /* ── Headline slide-in animation ───────────────────────────────────── */
+    @keyframes carSlide {
+      0%   { opacity: 0; transform: translateX(-140px); }
+      65%  { opacity: 1; transform: translateX(12px); }   /* overshoot — car braking */
+      78%  { transform: translateX(-5px); }               /* tiny rebound */
+      88%  { transform: translateX(3px); }                /* settles */
+      100% { opacity: 1; transform: translateX(0); }
+    }
+
+    .hero-line-1 {
+      display: block;
+      opacity: 0;
+      animation: carSlide 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.15s forwards;
+    }
+    .hero-line-2 {
+      display: block;
+      opacity: 0;
+      animation: carSlide 0.65s cubic-bezier(0.22, 1, 0.36, 1) 0.42s forwards;
+    }
+
     .hero-sub {
       font-size: 1.05rem;
       font-weight: 500;
@@ -815,7 +835,10 @@
       </div>
     </div>
 
-    <h1 class="hero-headline">Your Local<br><span class="accent-word">Universe.</span></h1>
+    <h1 class="hero-headline">
+      <span class="hero-line-1">Your Local</span>
+      <span class="hero-line-2 accent-word">Universe.</span>
+    </h1>
 
     <!-- Weather pill -->
     <div class="weather-pill" id="weather-card">
