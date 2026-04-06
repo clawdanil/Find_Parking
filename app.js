@@ -648,17 +648,18 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
       const lon = el.lon ?? el.center?.lon;
       if (!lat || !lon) return null;
       const tags = el.tags || {};
-      const name = tags.name || tags.brand || tags['name:en'] || 'Unnamed';
-      if (name === 'Unnamed') return null; // skip unnamed blobs
+      const name = tags.name || tags.brand || tags['name:en'] || '';
+      if (!name) return null;
       const dist = haversineMiFE(searchLat, searchLng, lat, lon);
+      // Address: prefer structured tags, then addr:full (Google Places vicinity), then empty
       const addr = [tags['addr:housenumber'], tags['addr:street']].filter(Boolean).join(' ')
                 || tags['addr:full'] || '';
-      const extra = tags.cuisine || tags.opening_hours || tags.phone || '';
+      // Extra info line: rating first, then open status, then cuisine
+      const extra = tags.rating || tags.opening_hours || tags.cuisine || '';
       return { name, dist, addr, extra, lat, lon };
     })
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist)
-    // dedupe by name+distance
     .filter((item, i, arr) => i === 0 || !(item.name === arr[i-1].name && Math.abs(item.dist - arr[i-1].dist) < 0.01))
     .slice(0, 15);
 
@@ -681,7 +682,16 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
   hideRadiusBanner();
 
   resultsDiv.innerHTML = items.map((item, i) => {
-    const num = String(i + 1).padStart(2, '0');
+    const num        = String(i + 1).padStart(2, '0');
+    const isOpenNow  = item.extra === 'Open now';
+    const isClosedNow = item.extra === 'Closed now';
+    const badgeColor = isOpenNow ? '#34D399' : isClosedNow ? '#F87171' : '#2563EB';
+    const extraHtml  = item.extra && !isOpenNow && !isClosedNow
+      ? `<span class="detail-item">ℹ️ ${escHtml(item.extra.slice(0, 40))}</span>`
+      : '';
+    const openBadge  = (isOpenNow || isClosedNow)
+      ? `<span class="detail-item" style="color:${badgeColor};font-weight:700">${isOpenNow ? '🟢 Open now' : '🔴 Closed'}</span>`
+      : '';
     return `
       <div class="parking-card nearby-card" style="--status-color:#2563EB;--delay:${i * 0.06}s">
         <div class="spot-number">${num}</div>
@@ -689,13 +699,14 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
           <div class="card-header-row">
             <div>
               <h3 class="card-address">${escHtml(item.name)}</h3>
-              ${item.addr ? `<p class="card-landmark">📍 ${escHtml(item.addr)}</p>` : ''}
+              <p class="card-landmark">📍 ${item.addr ? escHtml(item.addr) : formatDistFE(item.dist) + ' away'}</p>
             </div>
             <span class="status-badge" style="background:rgba(37,99,235,.10);color:#2563EB">${cfg.icon} ${cfg.label}</span>
           </div>
           <div class="card-details">
-            <span class="detail-item">📍 ${formatDistFE(item.dist)}</span>
-            ${item.extra ? `<span class="detail-item">ℹ️ ${escHtml(item.extra.slice(0, 40))}</span>` : ''}
+            <span class="detail-item">🗺️ ${formatDistFE(item.dist)}</span>
+            ${openBadge}
+            ${extraHtml}
           </div>
         </div>
       </div>`;
