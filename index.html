@@ -340,6 +340,49 @@
       box-shadow: 0 4px 12px rgba(10,10,20,.08);
     }
 
+    /* ── Feature tiles ─────────────────────────────────────────────────── */
+    .feature-tiles {
+      margin-top: 18px;
+      border-top: 1px solid rgba(10,10,20,.06);
+      padding-top: 16px;
+    }
+    .tiles-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .feature-tile {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 18px;
+      border-radius: 100px;
+      border: 1.5px solid rgba(10,10,20,.10);
+      background: #F8FAFC;
+      font-family: 'Inter', sans-serif;
+      font-size: .80rem;
+      font-weight: 700;
+      color: var(--t55);
+      cursor: pointer;
+      transition: all .18s;
+      white-space: nowrap;
+    }
+    .feature-tile:hover {
+      border-color: #2563EB;
+      color: #2563EB;
+      background: rgba(37,99,235,.05);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(37,99,235,.12);
+    }
+    .feature-tile.active {
+      background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(37,99,235,.30);
+    }
+    .feature-tile.active:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.38); }
+
     /* ── Weather pill ──────────────────────────────────────────────────── */
     .weather-pill {
       display: inline-flex;
@@ -897,6 +940,19 @@
         <button class="chip" data-city="Chicago, IL">Chicago, IL</button>
         <button class="chip" data-city="Boston, MA">Boston, MA</button>
         <button class="chip" data-city="Austin, TX">Austin, TX</button>
+      </div>
+
+      <!-- Feature tiles -->
+      <div class="feature-tiles" id="feature-tiles">
+        <span class="chips-label">Explore nearby</span>
+        <div class="tiles-row">
+          <button class="feature-tile active" data-feature="parking">🅿️ Parking</button>
+          <button class="feature-tile" data-feature="food">🍔 Food</button>
+          <button class="feature-tile" data-feature="bars">🍺 Bars</button>
+          <button class="feature-tile" data-feature="coffee">☕ Coffee</button>
+          <button class="feature-tile" data-feature="gym">💪 Gym</button>
+          <button class="feature-tile" data-feature="shopping">🛒 Shopping</button>
+        </div>
       </div>
     </div>
   </section>

@@ -102,8 +102,9 @@ streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden
 streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
-let allSpots  = [];
-let activeTab = 'all';
+let allSpots     = [];
+let activeTab    = 'all';
+let activeFeature = 'parking';
 
 const TAB_TYPES = {
   all:    null,
@@ -498,6 +499,11 @@ async function searchParking() {
     const data = await response.json();
     console.log('API response:', data);
     if (data.error) throw new Error(data.error);
+    // Reset to parking tile when a fresh search runs
+    activeFeature = 'parking';
+    document.querySelectorAll('.feature-tile').forEach(t => {
+      t.classList.toggle('active', t.dataset.feature === 'parking');
+    });
     renderResults(data, street);
   } catch (err) {
     console.error('Full error:', err);
@@ -580,9 +586,9 @@ locationBtn.addEventListener('click', () => {
         return;
       }
 
-      locationBtn.textContent = '📍 My Location';
+      locationBtn.textContent = '📍 My Location ✓';
       locationBtn.disabled = false;
-      searchParking();
+      // Do NOT auto-search — user must click Search explicitly
     },
     () => {
       locationBtn.textContent = '📍 Use My Current Location';
@@ -591,4 +597,148 @@ locationBtn.addEventListener('click', () => {
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
+});
+
+// ── Feature Tiles ─────────────────────────────────────────────────────────────
+
+const FEATURE_CONFIG = {
+  parking:  { label: 'Parking',   icon: '🅿️',  query: null }, // handled by existing search
+  food:     { label: 'Food',      icon: '🍔',  query: `node["amenity"~"restaurant|fast_food|food_court"](around:250,{lat},{lng});way["amenity"~"restaurant|fast_food|food_court"](around:250,{lat},{lng});` },
+  bars:     { label: 'Bars',      icon: '🍺',  query: `node["amenity"~"bar|pub|biergarten"](around:250,{lat},{lng});way["amenity"~"bar|pub|biergarten"](around:250,{lat},{lng});` },
+  coffee:   { label: 'Coffee',    icon: '☕',  query: `node["amenity"="cafe"](around:250,{lat},{lng});way["amenity"="cafe"](around:250,{lat},{lng});` },
+  gym:      { label: 'Gym',       icon: '💪',  query: `node["leisure"~"fitness_centre|sports_centre"]["sport"~"fitness|multi"](around:400,{lat},{lng});node["amenity"="gym"](around:400,{lat},{lng});way["leisure"="fitness_centre"](around:400,{lat},{lng});` },
+  shopping: { label: 'Shopping',  icon: '🛒',  query: `node["shop"~"supermarket|mall|convenience|clothing|department_store"](around:300,{lat},{lng});way["shop"~"supermarket|mall|convenience|clothing|department_store"](around:300,{lat},{lng});` },
+};
+
+// Overpass mirrors
+const OVERPASS_MIRRORS_FE = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
+async function queryOverpassFE(overpassQuery) {
+  const body = `[out:json][timeout:10];\n(\n${overpassQuery}\n);\nout center 20;`;
+  const tryMirror = async (url) => {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(body), signal: ctrl.signal });
+      clearTimeout(t);
+      if (!r.ok) throw new Error(r.status);
+      const d = await r.json();
+      return d.elements || [];
+    } catch(e) { clearTimeout(t); throw e; }
+  };
+  return Promise.any(OVERPASS_MIRRORS_FE.map(tryMirror)).catch(() => []);
+}
+
+function haversineMiFE(lat1, lon1, lat2, lon2) {
+  const R = 3958.8, toR = d => d * Math.PI / 180;
+  const dLat = toR(lat2 - lat1), dLon = toR(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toR(lat1)) * Math.cos(toR(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function formatDistFE(mi) {
+  return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
+}
+
+function renderNearbyResults(elements, feature, searchLat, searchLng) {
+  const cfg   = FEATURE_CONFIG[feature];
+  const items = elements
+    .map(el => {
+      const lat = el.lat ?? el.center?.lat;
+      const lon = el.lon ?? el.center?.lon;
+      if (!lat || !lon) return null;
+      const tags = el.tags || {};
+      const name = tags.name || tags.brand || tags['name:en'] || 'Unnamed';
+      const dist = haversineMiFE(searchLat, searchLng, lat, lon);
+      const addr = [tags['addr:housenumber'], tags['addr:street']].filter(Boolean).join(' ')
+                || tags['addr:full'] || '';
+      const extra = tags.cuisine || tags.opening_hours || tags.phone || '';
+      return { name, dist, addr, extra, lat, lon };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, 12);
+
+  if (items.length === 0) {
+    showMessage(`No ${cfg.label} found within 0.15 miles. Try zooming out or a different area.`);
+    return;
+  }
+
+  statsBar.hidden = false;
+  document.getElementById('stat-count').textContent  = items.length;
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+
+  resultsDiv.innerHTML = items.map((item, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    return `
+      <div class="parking-card nearby-card" style="--status-color:#2563EB;--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div>
+              <h3 class="card-address">${escHtml(item.name)}</h3>
+              ${item.addr ? `<p class="card-landmark">📍 ${escHtml(item.addr)}</p>` : ''}
+            </div>
+            <span class="status-badge" style="background:rgba(37,99,235,.10);color:#2563EB">${cfg.icon} ${cfg.label}</span>
+          </div>
+          <div class="card-details">
+            <span class="detail-item">📍 ${formatDistFE(item.dist)}</span>
+            ${item.extra ? `<span class="detail-item">ℹ️ ${escHtml(item.extra.slice(0, 40))}</span>` : ''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Show on map
+  if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
+}
+
+async function loadFeature(feature) {
+  if (!selectedLat || !selectedLon) {
+    showMessage('Enter an address and click Search first, then choose a category.', true);
+    return;
+  }
+
+  activeFeature = feature;
+
+  // Update active tile UI
+  document.querySelectorAll('.feature-tile').forEach(t => {
+    t.classList.toggle('active', t.dataset.feature === feature);
+  });
+
+  if (feature === 'parking') {
+    // Restore parking results
+    if (allSpots.length > 0) {
+      renderCards(allSpots);
+      statsBar.hidden = false;
+      document.getElementById('results-tabs-outer').hidden = false;
+    } else {
+      searchParking();
+    }
+    return;
+  }
+
+  const cfg   = FEATURE_CONFIG[feature];
+  const query = cfg.query.replace(/\{lat\}/g, selectedLat).replace(/\{lng\}/g, selectedLon);
+
+  showSkeletons();
+  statsBar.hidden = true;
+
+  try {
+    const elements = await queryOverpassFE(query);
+    renderNearbyResults(elements, feature, selectedLat, selectedLon);
+  } catch {
+    showMessage(`Could not load ${cfg.label} data. Please try again.`, true);
+  }
+}
+
+document.querySelectorAll('.feature-tile').forEach(tile => {
+  tile.addEventListener('click', () => loadFeature(tile.dataset.feature));
 });
