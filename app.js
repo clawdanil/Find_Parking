@@ -214,12 +214,21 @@ const LOADING_MSGS = [
   'Almost there…',
 ];
 
+const NEARBY_LOADING_MSGS = {
+  food:     ['Finding restaurants…', 'Checking menus…', 'Almost there…'],
+  bars:     ['Finding bars & pubs…', 'Checking nearby…', 'Almost there…'],
+  coffee:   ['Finding coffee shops…', 'Checking nearby…', 'Almost there…'],
+  gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
+  shopping: ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
+};
+
 let loadingTimer = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
-function showSkeletons() {
+function showSkeletons(feature) {
   clearInterval(loadingTimer);
   let idx = 0;
+  const msgs = (feature && NEARBY_LOADING_MSGS[feature]) || LOADING_MSGS;
   resultsDiv.innerHTML = `
     <div class="loading-state">
       <div class="meter-light"></div>
@@ -232,17 +241,17 @@ function showSkeletons() {
       </div>
       <div class="meter-neck"></div>
       <div class="meter-pole"></div>
-      <p id="loading-msg" class="loading-msg">${LOADING_MSGS[0]}</p>
+      <p id="loading-msg" class="loading-msg">${msgs[0]}</p>
     </div>`;
 
   loadingTimer = setInterval(() => {
-    idx = (idx + 1) % LOADING_MSGS.length;
+    idx = (idx + 1) % msgs.length;
     const el = document.getElementById('loading-msg');
     if (el) {
       el.style.animation = 'none';
       void el.offsetHeight;
       el.style.animation = '';
-      el.textContent = LOADING_MSGS[idx];
+      el.textContent = msgs[idx];
     }
   }, 1700);
 }
@@ -607,12 +616,46 @@ locationBtn.addEventListener('click', () => {
 // ── Feature Tiles ─────────────────────────────────────────────────────────────
 
 const FEATURE_CONFIG = {
-  parking:  { label: 'Parking',   icon: '🅿️',  query: null },
-  food:     { label: 'Food',      icon: '🍔',  query: `node["amenity"~"^(restaurant|fast_food|food_court|diner|bistro)$"](around:400,{lat},{lng});way["amenity"~"^(restaurant|fast_food|food_court)$"](around:400,{lat},{lng});` },
-  bars:     { label: 'Bars',      icon: '🍺',  query: `node["amenity"~"^(bar|pub|biergarten|nightclub|lounge)$"](around:400,{lat},{lng});way["amenity"~"^(bar|pub|biergarten)$"](around:400,{lat},{lng});` },
-  coffee:   { label: 'Coffee',    icon: '☕',  query: `node["amenity"="cafe"](around:400,{lat},{lng});way["amenity"="cafe"](around:400,{lat},{lng});` },
-  gym:      { label: 'Gym',       icon: '💪',  query: `node["leisure"~"^(fitness_centre|sports_centre)$"](around:600,{lat},{lng});node["amenity"="gym"](around:600,{lat},{lng});way["leisure"~"^(fitness_centre|sports_centre)$"](around:600,{lat},{lng});` },
-  shopping: { label: 'Shopping',  icon: '🛒',  query: `node["shop"~"^(supermarket|mall|convenience|clothing|department_store|grocery)$"](around:500,{lat},{lng});way["shop"~"^(supermarket|mall|convenience|clothing|department_store)$"](around:500,{lat},{lng});` },
+  parking:  { label: 'Parking',  icon: '🅿️', query: null },
+  food: {
+    label: 'Food', icon: '🍔',
+    query: `
+      node["amenity"~"restaurant|fast_food|food_court|diner|bistro|canteen"](around:600,{lat},{lng});
+      way["amenity"~"restaurant|fast_food|food_court|diner|bistro"](around:600,{lat},{lng});
+      relation["amenity"~"restaurant|fast_food"](around:600,{lat},{lng});`
+  },
+  bars: {
+    label: 'Bars', icon: '🍺',
+    query: `
+      node["amenity"~"bar|pub|biergarten|nightclub|lounge|brewery"](around:600,{lat},{lng});
+      way["amenity"~"bar|pub|biergarten|nightclub"](around:600,{lat},{lng});`
+  },
+  coffee: {
+    label: 'Coffee', icon: '☕',
+    query: `
+      node["amenity"="cafe"](around:600,{lat},{lng});
+      way["amenity"="cafe"](around:600,{lat},{lng});
+      node["amenity"="restaurant"]["cuisine"~"coffee|tea|espresso"](around:600,{lat},{lng});
+      node["shop"~"coffee|tea"](around:600,{lat},{lng});
+      node["name"~"Starbucks|Dunkin|Coffee|Cafe|Espresso",i](around:600,{lat},{lng});`
+  },
+  gym: {
+    label: 'Gym', icon: '💪',
+    query: `
+      node["leisure"~"fitness_centre|sports_centre|sports_hall"](around:800,{lat},{lng});
+      way["leisure"~"fitness_centre|sports_centre"](around:800,{lat},{lng});
+      node["amenity"~"gym|dojo"](around:800,{lat},{lng});
+      node["name"~"Gym|Fitness|Planet Fitness|LA Fitness|Equinox|CrossFit|YMCA",i](around:800,{lat},{lng});`
+  },
+  shopping: {
+    label: 'Shopping', icon: '🛒',
+    query: `
+      node["shop"~"mall|supermarket|department_store|convenience|clothing|grocery|general"](around:1000,{lat},{lng});
+      way["shop"~"mall|supermarket|department_store|convenience|clothing"](around:1000,{lat},{lng});
+      way["leisure"="shopping_centre"](around:1000,{lat},{lng});
+      relation["leisure"="shopping_centre"](around:1000,{lat},{lng});
+      node["name"~"Mall|Plaza|Center|Centre|Market|Target|Walmart|Costco|Whole Foods|ShopRite",i](around:1000,{lat},{lng});`
+  },
 };
 
 // Overpass mirrors
@@ -669,7 +712,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
     .slice(0, 12);
 
   if (items.length === 0) {
-    showMessage(`No ${cfg.label} found within 0.15 miles. Try zooming out or a different area.`);
+    showMessage(`No ${cfg.label} found nearby. OSM data may be incomplete for this area — try a different address.`);
     return;
   }
 
@@ -733,7 +776,7 @@ async function loadFeature(feature) {
   const cfg   = FEATURE_CONFIG[feature];
   const query = cfg.query.replace(/\{lat\}/g, selectedLat).replace(/\{lng\}/g, selectedLon);
 
-  showSkeletons();
+  showSkeletons(feature);
   statsBar.hidden = true;
 
   try {
