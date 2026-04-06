@@ -42,10 +42,16 @@ function osmToAvgCost(tags, type) {
 }
 
 function osmToAddress(tags) {
-  if (tags.name)                                        return tags.name;
+  // Only return a real street address — NOT the facility name
   if (tags['addr:housenumber'] && tags['addr:street'])  return `${tags['addr:housenumber']} ${tags['addr:street']}`;
   if (tags['addr:street'])                              return tags['addr:street'];
-  if (tags.operator)                                    return tags.operator;
+  return null;
+}
+
+// Returns the human-readable facility name (e.g. "South Garage")
+function osmFacilityName(tags) {
+  if (tags.name)     return tags.name;
+  if (tags.operator) return tags.operator;
   return null;
 }
 
@@ -83,13 +89,18 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
     GARAGE:      'Parking Garage',
   };
 
-  const realName = osmToAddress(tags);
+  const streetAddr   = osmToAddress(tags);      // e.g. "401 Washington Blvd"
+  const facilityName = osmFacilityName(tags);   // e.g. "South Garage"
+  const hasRealAddr  = !!streetAddr;
+
   return {
     id:                   idx + 1,
     type,
-    address:              realName || typeLabels[type],
+    // Show real street address when available; fall back to facility name or generic label
+    address:              streetAddr || facilityName || typeLabels[type],
+    // Expose facility name as landmark so the card can show both
     side:                 '',
-    landmark:             '',
+    landmark:             facilityName && facilityName !== streetAddr ? facilityName : '',
     lat,
     lng:                  lon,
     heading:              0,
@@ -103,7 +114,8 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
     notes:                osmToNotes(tags),
     source:               'osm',
     _distMi:              dist,
-    _needsAddress:        !realName,   // flag: needs reverse geocode
+    // Always enrich when no proper housenumber+street found — even if we have a name
+    _needsAddress:        !hasRealAddr,
     _osmType:             el.type,
     _osmId:               el.id,
   };
@@ -135,13 +147,19 @@ async function enrichAddresses(spots) {
       unnamed.forEach(spot => {
         const item = byId[String(spot._osmId)];
         if (!item) return;
-        const addr = item.address || {};
-        const name = item.name && !['parking','car park','park'].includes(item.name.toLowerCase())
-          ? item.name : null;
+        const addr   = item.address || {};
         const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
           .filter(Boolean).join(' ');
-        if (name || street) {
-          spot.address = name || street;
+        const facName = item.name && !['parking','car park','park','parking lot']
+          .includes(item.name.toLowerCase()) ? item.name : null;
+
+        if (street) {
+          // Got a real street address — use it as address, save old name as landmark
+          if (spot.address && spot.address !== street) spot.landmark = spot.landmark || spot.address;
+          spot.address = street;
+          spot._needsAddress = false;
+        } else if (facName) {
+          spot.address = facName;
           spot._needsAddress = false;
         }
       });
@@ -161,14 +179,20 @@ async function enrichAddresses(spots) {
         { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
       );
       if (!r.ok) return;
-      const data = await r.json();
-      const addr = data.address || {};
-      // Prefer a specific name if Nominatim found one
-      const name = data.name && !['parking','car park','park'].includes(data.name.toLowerCase())
-        ? data.name : null;
+      const data   = await r.json();
+      const addr   = data.address || {};
       const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
         .filter(Boolean).join(' ');
-      if (name || street) spot.address = name || street;
+      const facName = data.name && !['parking','car park','park','parking lot']
+        .includes((data.name || '').toLowerCase()) ? data.name : null;
+
+      if (street) {
+        // Demote old name to landmark, set real address
+        if (spot.address && spot.address !== street) spot.landmark = spot.landmark || spot.address;
+        spot.address = street;
+      } else if (facName) {
+        spot.address = facName;
+      }
     } catch { /* keep generic label */ }
   }));
 }
