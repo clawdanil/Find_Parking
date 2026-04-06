@@ -633,11 +633,13 @@ const FEATURE_CONFIG = {
   coffee: {
     label: 'Coffee', icon: '☕',
     query: `
-      node["amenity"="cafe"](around:600,{lat},{lng});
-      way["amenity"="cafe"](around:600,{lat},{lng});
-      node["amenity"="restaurant"]["cuisine"~"coffee|tea|espresso"](around:600,{lat},{lng});
-      node["shop"~"coffee|tea"](around:600,{lat},{lng});
-      node["name"~"Starbucks|Dunkin|Coffee|Cafe|Espresso",i](around:600,{lat},{lng});`
+      node["amenity"="cafe"](around:800,{lat},{lng});
+      way["amenity"="cafe"](around:800,{lat},{lng});
+      node["amenity"~"restaurant|fast_food"]["cuisine"~"coffee|tea|espresso|bubble_tea"](around:800,{lat},{lng});
+      node["shop"~"coffee|tea|beverages"](around:800,{lat},{lng});
+      node["brand"~"Starbucks|Dunkin|Tim Hortons|Peet|Blue Bottle",i](around:800,{lat},{lng});
+      node["name"~"Starbucks|Dunkin|Coffee|Cafe|Espresso|Brew|Roast|Latte",i](around:800,{lat},{lng});
+      way["name"~"Starbucks|Dunkin|Coffee|Cafe",i](around:800,{lat},{lng});`
   },
   gym: {
     label: 'Gym', icon: '💪',
@@ -650,11 +652,14 @@ const FEATURE_CONFIG = {
   shopping: {
     label: 'Shopping', icon: '🛒',
     query: `
-      node["shop"~"mall|supermarket|department_store|convenience|clothing|grocery|general"](around:1000,{lat},{lng});
-      way["shop"~"mall|supermarket|department_store|convenience|clothing"](around:1000,{lat},{lng});
-      way["leisure"="shopping_centre"](around:1000,{lat},{lng});
-      relation["leisure"="shopping_centre"](around:1000,{lat},{lng});
-      node["name"~"Mall|Plaza|Center|Centre|Market|Target|Walmart|Costco|Whole Foods|ShopRite",i](around:1000,{lat},{lng});`
+      node["shop"~"mall|supermarket|department_store|convenience|clothing|grocery|general|wholesale"](around:2000,{lat},{lng});
+      way["shop"~"mall|supermarket|department_store|convenience|clothing|grocery"](around:2000,{lat},{lng});
+      relation["shop"~"mall|supermarket|department_store"](around:2000,{lat},{lng});
+      way["leisure"="shopping_centre"](around:2000,{lat},{lng});
+      relation["leisure"="shopping_centre"](around:2000,{lat},{lng});
+      node["leisure"="shopping_centre"](around:2000,{lat},{lng});
+      way["name"~"Mall|Plaza|Center|Centre|Newport|Market",i](around:2000,{lat},{lng});
+      relation["name"~"Mall|Plaza|Center|Centre|Newport",i](around:2000,{lat},{lng});`
   },
 };
 
@@ -666,7 +671,7 @@ const OVERPASS_MIRRORS_FE = [
 ];
 
 async function queryOverpassFE(overpassQuery) {
-  const body = `[out:json][timeout:10];\n(\n${overpassQuery}\n);\nout center 20;`;
+  const body = `[out:json][timeout:20];\n(\n${overpassQuery}\n);\nout center 30;`;
   const tryMirror = async (url) => {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 8000);
