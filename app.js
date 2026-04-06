@@ -499,6 +499,11 @@ async function searchParking() {
     const data = await response.json();
     console.log('API response:', data);
     if (data.error) throw new Error(data.error);
+    // Capture geocoded coordinates so feature tiles can use them
+    if (data.searchLat && data.searchLng) {
+      selectedLat = data.searchLat;
+      selectedLon = data.searchLng;
+    }
     // Reset to parking tile when a fresh search runs
     activeFeature = 'parking';
     document.querySelectorAll('.feature-tile').forEach(t => {
@@ -602,12 +607,12 @@ locationBtn.addEventListener('click', () => {
 // ── Feature Tiles ─────────────────────────────────────────────────────────────
 
 const FEATURE_CONFIG = {
-  parking:  { label: 'Parking',   icon: '🅿️',  query: null }, // handled by existing search
-  food:     { label: 'Food',      icon: '🍔',  query: `node["amenity"~"restaurant|fast_food|food_court"](around:250,{lat},{lng});way["amenity"~"restaurant|fast_food|food_court"](around:250,{lat},{lng});` },
-  bars:     { label: 'Bars',      icon: '🍺',  query: `node["amenity"~"bar|pub|biergarten"](around:250,{lat},{lng});way["amenity"~"bar|pub|biergarten"](around:250,{lat},{lng});` },
-  coffee:   { label: 'Coffee',    icon: '☕',  query: `node["amenity"="cafe"](around:250,{lat},{lng});way["amenity"="cafe"](around:250,{lat},{lng});` },
-  gym:      { label: 'Gym',       icon: '💪',  query: `node["leisure"~"fitness_centre|sports_centre"]["sport"~"fitness|multi"](around:400,{lat},{lng});node["amenity"="gym"](around:400,{lat},{lng});way["leisure"="fitness_centre"](around:400,{lat},{lng});` },
-  shopping: { label: 'Shopping',  icon: '🛒',  query: `node["shop"~"supermarket|mall|convenience|clothing|department_store"](around:300,{lat},{lng});way["shop"~"supermarket|mall|convenience|clothing|department_store"](around:300,{lat},{lng});` },
+  parking:  { label: 'Parking',   icon: '🅿️',  query: null },
+  food:     { label: 'Food',      icon: '🍔',  query: `node["amenity"~"^(restaurant|fast_food|food_court|diner|bistro)$"](around:400,{lat},{lng});way["amenity"~"^(restaurant|fast_food|food_court)$"](around:400,{lat},{lng});` },
+  bars:     { label: 'Bars',      icon: '🍺',  query: `node["amenity"~"^(bar|pub|biergarten|nightclub|lounge)$"](around:400,{lat},{lng});way["amenity"~"^(bar|pub|biergarten)$"](around:400,{lat},{lng});` },
+  coffee:   { label: 'Coffee',    icon: '☕',  query: `node["amenity"="cafe"](around:400,{lat},{lng});way["amenity"="cafe"](around:400,{lat},{lng});` },
+  gym:      { label: 'Gym',       icon: '💪',  query: `node["leisure"~"^(fitness_centre|sports_centre)$"](around:600,{lat},{lng});node["amenity"="gym"](around:600,{lat},{lng});way["leisure"~"^(fitness_centre|sports_centre)$"](around:600,{lat},{lng});` },
+  shopping: { label: 'Shopping',  icon: '🛒',  query: `node["shop"~"^(supermarket|mall|convenience|clothing|department_store|grocery)$"](around:500,{lat},{lng});way["shop"~"^(supermarket|mall|convenience|clothing|department_store)$"](around:500,{lat},{lng});` },
 };
 
 // Overpass mirrors
@@ -733,8 +738,10 @@ async function loadFeature(feature) {
 
   try {
     const elements = await queryOverpassFE(query);
+    clearInterval(loadingTimer);
     renderNearbyResults(elements, feature, selectedLat, selectedLon);
-  } catch {
+  } catch (err) {
+    clearInterval(loadingTimer);
     showMessage(`Could not load ${cfg.label} data. Please try again.`, true);
   }
 }

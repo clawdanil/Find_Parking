@@ -148,15 +148,21 @@ async function enrichAddresses(spots) {
         const item = byId[String(spot._osmId)];
         if (!item) return;
         const addr   = item.address || {};
-        const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
-          .filter(Boolean).join(' ');
-        const facName = item.name && !['parking','car park','park','parking lot']
+        const houseNo = addr.house_number || '';
+        const road    = addr.road || addr.pedestrian || addr.footway || addr.path || '';
+        const nbhd    = addr.neighbourhood || addr.suburb || addr.quarter || '';
+        const city2   = addr.city || addr.town || addr.village || addr.county || '';
+        const facName = item.name && !['parking','car park','park','parking lot','parking area']
           .includes(item.name.toLowerCase()) ? item.name : null;
 
-        if (street) {
-          // Got a real street address — use it as address, save old name as landmark
-          if (spot.address && spot.address !== street) spot.landmark = spot.landmark || spot.address;
-          spot.address = street;
+        let streetAddr = '';
+        if (houseNo && road)       streetAddr = `${houseNo} ${road}`;
+        else if (road && city2)    streetAddr = `${road}, ${city2}`;
+        else if (road)             streetAddr = road;
+
+        if (streetAddr) {
+          if (spot.address && spot.address !== streetAddr) spot.landmark = spot.landmark || spot.address;
+          spot.address = streetAddr;
           spot._needsAddress = false;
         } else if (facName) {
           spot.address = facName;
@@ -181,15 +187,21 @@ async function enrichAddresses(spots) {
       if (!r.ok) return;
       const data   = await r.json();
       const addr   = data.address || {};
-      const street = [addr.house_number, addr.road || addr.pedestrian || addr.footway]
-        .filter(Boolean).join(' ');
-      const facName = data.name && !['parking','car park','park','parking lot']
+      const houseNo = addr.house_number || '';
+      const road    = addr.road || addr.pedestrian || addr.footway || addr.path || '';
+      const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || '';
+      const city    = addr.city || addr.town || addr.village || addr.county || '';
+      const facName = data.name && !['parking','car park','park','parking lot','parking area']
         .includes((data.name || '').toLowerCase()) ? data.name : null;
 
-      if (street) {
-        // Demote old name to landmark, set real address
-        if (spot.address && spot.address !== street) spot.landmark = spot.landmark || spot.address;
-        spot.address = street;
+      let streetAddr = '';
+      if (houseNo && road)       streetAddr = `${houseNo} ${road}`;
+      else if (road && city)     streetAddr = `${road}, ${city}`;
+      else if (road)             streetAddr = road;
+
+      if (streetAddr) {
+        if (spot.address && spot.address !== streetAddr) spot.landmark = spot.landmark || spot.address;
+        spot.address = streetAddr;
       } else if (facName) {
         spot.address = facName;
       }
@@ -372,7 +384,7 @@ export default async function handler(req) {
       spots.forEach((s, i) => { s.id = i + 1; delete s._distMi; });
     }
 
-    return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source });
+    return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source, searchLat: lat, searchLng: lng });
 
   } catch (e) {
     return json({ error: e.message }, 500);
