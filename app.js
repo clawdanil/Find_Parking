@@ -616,75 +616,13 @@ locationBtn.addEventListener('click', () => {
 // ── Feature Tiles ─────────────────────────────────────────────────────────────
 
 const FEATURE_CONFIG = {
-  parking:  { label: 'Parking',  icon: '🅿️', query: null },
-  food: {
-    label: 'Food', icon: '🍔',
-    query: `
-      node["amenity"~"restaurant|fast_food|food_court|diner|bistro|canteen"](around:600,{lat},{lng});
-      way["amenity"~"restaurant|fast_food|food_court|diner|bistro"](around:600,{lat},{lng});
-      relation["amenity"~"restaurant|fast_food"](around:600,{lat},{lng});`
-  },
-  bars: {
-    label: 'Bars', icon: '🍺',
-    query: `
-      node["amenity"~"bar|pub|biergarten|nightclub|lounge|brewery"](around:600,{lat},{lng});
-      way["amenity"~"bar|pub|biergarten|nightclub"](around:600,{lat},{lng});`
-  },
-  coffee: {
-    label: 'Coffee', icon: '☕',
-    query: `
-      node["amenity"="cafe"](around:800,{lat},{lng});
-      way["amenity"="cafe"](around:800,{lat},{lng});
-      node["amenity"~"restaurant|fast_food"]["cuisine"~"coffee|tea|espresso|bubble_tea"](around:800,{lat},{lng});
-      node["shop"~"coffee|tea|beverages"](around:800,{lat},{lng});
-      node["brand"~"Starbucks|Dunkin|Tim Hortons|Peet|Blue Bottle",i](around:800,{lat},{lng});
-      node["name"~"Starbucks|Dunkin|Coffee|Cafe|Espresso|Brew|Roast|Latte",i](around:800,{lat},{lng});
-      way["name"~"Starbucks|Dunkin|Coffee|Cafe",i](around:800,{lat},{lng});`
-  },
-  gym: {
-    label: 'Gym', icon: '💪',
-    query: `
-      node["leisure"~"fitness_centre|sports_centre|sports_hall"](around:800,{lat},{lng});
-      way["leisure"~"fitness_centre|sports_centre"](around:800,{lat},{lng});
-      node["amenity"~"gym|dojo"](around:800,{lat},{lng});
-      node["name"~"Gym|Fitness|Planet Fitness|LA Fitness|Equinox|CrossFit|YMCA",i](around:800,{lat},{lng});`
-  },
-  shopping: {
-    label: 'Shopping', icon: '🛒',
-    query: `
-      node["shop"~"mall|supermarket|department_store|convenience|clothing|grocery|general|wholesale"](around:2000,{lat},{lng});
-      way["shop"~"mall|supermarket|department_store|convenience|clothing|grocery"](around:2000,{lat},{lng});
-      relation["shop"~"mall|supermarket|department_store"](around:2000,{lat},{lng});
-      way["leisure"="shopping_centre"](around:2000,{lat},{lng});
-      relation["leisure"="shopping_centre"](around:2000,{lat},{lng});
-      node["leisure"="shopping_centre"](around:2000,{lat},{lng});
-      way["name"~"Mall|Plaza|Center|Centre|Newport|Market",i](around:2000,{lat},{lng});
-      relation["name"~"Mall|Plaza|Center|Centre|Newport",i](around:2000,{lat},{lng});`
-  },
+  parking:  { label: 'Parking',  icon: '🅿️' },
+  food:     { label: 'Food',     icon: '🍔' },
+  bars:     { label: 'Bars',     icon: '🍺' },
+  coffee:   { label: 'Coffee',   icon: '☕' },
+  gym:      { label: 'Gym',      icon: '💪' },
+  shopping: { label: 'Shopping', icon: '🛒' },
 };
-
-// Overpass mirrors
-const OVERPASS_MIRRORS_FE = [
-  'https://overpass-api.de/api/interpreter',
-  'https://overpass.kumi.systems/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
-];
-
-async function queryOverpassFE(overpassQuery) {
-  const body = `[out:json][timeout:20];\n(\n${overpassQuery}\n);\nout center 30;`;
-  const tryMirror = async (url) => {
-    const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 8000);
-    try {
-      const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: 'data=' + encodeURIComponent(body), signal: ctrl.signal });
-      clearTimeout(t);
-      if (!r.ok) throw new Error(r.status);
-      const d = await r.json();
-      return d.elements || [];
-    } catch(e) { clearTimeout(t); throw e; }
-  };
-  return Promise.any(OVERPASS_MIRRORS_FE.map(tryMirror)).catch(() => []);
-}
 
 function haversineMiFE(lat1, lon1, lat2, lon2) {
   const R = 3958.8, toR = d => d * Math.PI / 180;
@@ -697,6 +635,11 @@ function formatDistFE(mi) {
   return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
 }
 
+function hideRadiusBanner() {
+  const rb = document.getElementById('radius-banner');
+  if (rb) rb.innerHTML = '';
+}
+
 function renderNearbyResults(elements, feature, searchLat, searchLng) {
   const cfg   = FEATURE_CONFIG[feature];
   const items = elements
@@ -706,6 +649,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
       if (!lat || !lon) return null;
       const tags = el.tags || {};
       const name = tags.name || tags.brand || tags['name:en'] || 'Unnamed';
+      if (name === 'Unnamed') return null; // skip unnamed blobs
       const dist = haversineMiFE(searchLat, searchLng, lat, lon);
       const addr = [tags['addr:housenumber'], tags['addr:street']].filter(Boolean).join(' ')
                 || tags['addr:full'] || '';
@@ -714,19 +658,27 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
     })
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist)
-    .slice(0, 12);
+    // dedupe by name+distance
+    .filter((item, i, arr) => i === 0 || !(item.name === arr[i-1].name && Math.abs(item.dist - arr[i-1].dist) < 0.01))
+    .slice(0, 15);
 
   if (items.length === 0) {
     showMessage(`No ${cfg.label} found nearby. OSM data may be incomplete for this area — try a different address.`);
     return;
   }
 
+  // Update stats bar with nearby-friendly text
   statsBar.hidden = false;
-  document.getElementById('stat-count').textContent  = items.length;
+  const countEl = document.getElementById('stat-count');
+  countEl.textContent = items.length;
+  // Temporarily patch the " spots found" label text
+  const statCountParent = countEl.parentElement;
+  if (statCountParent) statCountParent.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${items.length}</strong>&nbsp;${cfg.label.toLowerCase()} found`;
   document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
   document.getElementById('stat-city').textContent   = selectedCity || '–';
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
 
   resultsDiv.innerHTML = items.map((item, i) => {
     const num = String(i + 1).padStart(2, '0');
@@ -749,7 +701,6 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
       </div>`;
   }).join('');
 
-  // Show on map
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
@@ -761,36 +712,44 @@ async function loadFeature(feature) {
 
   activeFeature = feature;
 
-  // Update active tile UI
   document.querySelectorAll('.feature-tile').forEach(t => {
     t.classList.toggle('active', t.dataset.feature === feature);
   });
 
   if (feature === 'parking') {
-    // Restore parking results
+    hideRadiusBanner();
     if (allSpots.length > 0) {
       renderCards(allSpots);
       statsBar.hidden = false;
       document.getElementById('results-tabs-outer').hidden = false;
+      // restore parking stat label
+      const countEl = document.getElementById('stat-count');
+      if (countEl?.parentElement) {
+        countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${allSpots.length}</strong>&nbsp;spots found`;
+      }
     } else {
       searchParking();
     }
     return;
   }
 
-  const cfg   = FEATURE_CONFIG[feature];
-  const query = cfg.query.replace(/\{lat\}/g, selectedLat).replace(/\{lng\}/g, selectedLon);
-
   showSkeletons(feature);
   statsBar.hidden = true;
+  hideRadiusBanner();
 
   try {
-    const elements = await queryOverpassFE(query);
+    const res = await fetch('/api/nearby', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lat: selectedLat, lng: selectedLon, feature }),
+    });
     clearInterval(loadingTimer);
-    renderNearbyResults(elements, feature, selectedLat, selectedLon);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+    renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon);
   } catch (err) {
     clearInterval(loadingTimer);
-    showMessage(`Could not load ${cfg.label} data. Please try again.`, true);
+    showMessage(`Could not load ${FEATURE_CONFIG[feature].label} data. Please try again.`, true);
   }
 }
 
