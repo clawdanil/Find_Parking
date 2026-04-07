@@ -121,18 +121,80 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
   };
 }
 
-// ── Enrich unnamed OSM spots with real street addresses via Nominatim ─────────
-async function enrichAddresses(spots) {
+// ── Reverse geocode one spot via Google → clean address with house number ─────
+async function googleReverseGeocode(lat, lng, key) {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 4000);
+    const res = await fetch(
+      `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`,
+      { signal: ctrl.signal }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.status !== 'OK' || !data.results?.length) return null;
+
+    const get = (result, type) =>
+      result.address_components?.find(c => c.types.includes(type));
+
+    // Prefer a result that has a street_number (house number)
+    const withNum = data.results.find(r =>
+      r.types.includes('street_address') || r.types.includes('premise')
+    );
+    const best = withNum || data.results[0];
+
+    const houseNo = get(best, 'street_number')?.long_name  || '';
+    const road    = get(best, 'route')?.long_name           || '';
+    const city    = get(best, 'locality')?.long_name
+                 || get(best, 'sublocality')?.long_name     || '';
+    const state   = get(best, 'administrative_area_level_1')?.short_name || '';
+
+    if (houseNo && road) return `${houseNo} ${road}, ${city}`;
+    if (road && city)    return `${road} & ${crossStreet(data.results, road) || city}`;
+    return null;
+  } catch { return null; }
+}
+
+// Find a cross-street from geocoding results to enrich "Road, City" → "Road & CrossSt"
+function crossStreet(results, mainRoad) {
+  for (const r of results) {
+    if (!r.types.includes('intersection')) continue;
+    const roads = r.address_components
+      .filter(c => c.types.includes('route'))
+      .map(c => c.long_name)
+      .filter(name => name !== mainRoad);
+    if (roads.length) return roads[0];
+  }
+  return null;
+}
+
+// ── Enrich spots missing real addresses ──────────────────────────────────────
+async function enrichAddresses(spots, googleKey) {
   const unnamed = spots.filter(s => s._needsAddress && s.lat && s.lng);
   if (unnamed.length === 0) return;
 
-  // Try Nominatim lookup by OSM ID first (single request, fast)
+  if (googleKey) {
+    // Google Geocoding: parallel reverse geocode, much better address quality
+    await Promise.allSettled(unnamed.map(async spot => {
+      const addr = await googleReverseGeocode(spot.lat, spot.lng, googleKey);
+      if (addr) {
+        if (spot.address && spot.address !== addr) spot.landmark = spot.landmark || spot.address;
+        spot.address = addr;
+        spot._needsAddress = false;
+      }
+    }));
+  }
+
+  // Nominatim fallback for any still-unnamed spots (no Google key or Google failed)
+  const stillUnnamed = unnamed.filter(s => s._needsAddress);
+  if (stillUnnamed.length === 0) return;
+
+  // Try Nominatim batch lookup by OSM ID first
   try {
-    const ids = unnamed.map(s => {
+    const ids = stillUnnamed.map(s => {
       const prefix = s._osmType === 'node' ? 'N' : s._osmType === 'way' ? 'W' : 'R';
       return `${prefix}${s._osmId}`;
     }).join(',');
-
     const ctrl = new AbortController();
     setTimeout(() => ctrl.abort(), 3000);
     const r = await fetch(
@@ -143,40 +205,22 @@ async function enrichAddresses(spots) {
       const data = await r.json();
       const byId = {};
       data.forEach(item => { byId[String(item.osm_id)] = item; });
-
-      unnamed.forEach(spot => {
+      stillUnnamed.forEach(spot => {
         const item = byId[String(spot._osmId)];
         if (!item) return;
-        const addr   = item.address || {};
+        const addr    = item.address || {};
         const houseNo = addr.house_number || '';
-        const road    = addr.road || addr.pedestrian || addr.footway || addr.path || '';
-        const nbhd    = addr.neighbourhood || addr.suburb || addr.quarter || '';
-        const city2   = addr.city || addr.town || addr.village || addr.county || '';
-        const facName = item.name && !['parking','car park','park','parking lot','parking area']
-          .includes(item.name.toLowerCase()) ? item.name : null;
-
-        let streetAddr = '';
-        if (houseNo && road)       streetAddr = `${houseNo} ${road}`;
-        else if (road && city2)    streetAddr = `${road}, ${city2}`;
-        else if (road)             streetAddr = road;
-
-        if (streetAddr) {
-          if (spot.address && spot.address !== streetAddr) spot.landmark = spot.landmark || spot.address;
-          spot.address = streetAddr;
-          spot._needsAddress = false;
-        } else if (facName) {
-          spot.address = facName;
-          spot._needsAddress = false;
-        }
+        const road    = addr.road || addr.pedestrian || addr.footway || '';
+        const city2   = addr.city || addr.town || addr.village || '';
+        const streetAddr = houseNo && road ? `${houseNo} ${road}, ${city2}`
+                         : road && city2   ? `${road}, ${city2}` : '';
+        if (streetAddr) { spot.address = streetAddr; spot._needsAddress = false; }
       });
     }
-  } catch { /* continue to reverse geocode fallback */ }
+  } catch { /* fall through */ }
 
-  // For any still-unnamed spots, reverse geocode lat/lng in parallel
-  const stillUnnamed = unnamed.filter(s => s._needsAddress);
-  if (stillUnnamed.length === 0) return;
-
-  await Promise.allSettled(stillUnnamed.map(async spot => {
+  // Final fallback: individual reverse geocode via Nominatim
+  await Promise.allSettled(stillUnnamed.filter(s => s._needsAddress).map(async spot => {
     try {
       const ctrl = new AbortController();
       setTimeout(() => ctrl.abort(), 2500);
@@ -185,27 +229,15 @@ async function enrichAddresses(spots) {
         { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
       );
       if (!r.ok) return;
-      const data   = await r.json();
-      const addr   = data.address || {};
-      const houseNo = addr.house_number || '';
-      const road    = addr.road || addr.pedestrian || addr.footway || addr.path || '';
-      const neighbourhood = addr.neighbourhood || addr.suburb || addr.quarter || '';
-      const city    = addr.city || addr.town || addr.village || addr.county || '';
-      const facName = data.name && !['parking','car park','park','parking lot','parking area']
-        .includes((data.name || '').toLowerCase()) ? data.name : null;
-
-      let streetAddr = '';
-      if (houseNo && road)       streetAddr = `${houseNo} ${road}`;
-      else if (road && city)     streetAddr = `${road}, ${city}`;
-      else if (road)             streetAddr = road;
-
-      if (streetAddr) {
-        if (spot.address && spot.address !== streetAddr) spot.landmark = spot.landmark || spot.address;
-        spot.address = streetAddr;
-      } else if (facName) {
-        spot.address = facName;
-      }
-    } catch { /* keep generic label */ }
+      const data    = await r.json();
+      const a       = data.address || {};
+      const houseNo = a.house_number || '';
+      const road    = a.road || a.pedestrian || a.footway || '';
+      const city    = a.city || a.town || a.village || '';
+      const streetAddr = houseNo && road ? `${houseNo} ${road}, ${city}`
+                       : road && city    ? `${road}, ${city}` : '';
+      if (streetAddr) spot.address = streetAddr;
+    } catch { /* keep as-is */ }
   }));
 }
 
@@ -363,8 +395,10 @@ export default async function handler(req) {
       return true;
     });
 
-    // 3b. Enrich OSM spots that are missing real addresses via Nominatim
-    if (spots.length > 0) await enrichAddresses(spots);
+    // 3b. Enrich OSM spots that are missing real addresses
+    //     Google Geocoding (primary) → Nominatim (fallback)
+    const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
+    if (spots.length > 0) await enrichAddresses(spots, googleKey);
 
     // Re-index IDs and strip temp fields
     spots.forEach((s, i) => {
