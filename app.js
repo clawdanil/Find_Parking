@@ -1,5 +1,28 @@
 const TIMEOUT_MS = 28000;
 
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+(function initDarkMode() {
+  const saved = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  if (saved === 'dark' || (!saved && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+  }
+})();
+
+document.getElementById('dark-toggle').addEventListener('click', () => {
+  const html   = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+});
+
+// Set correct icon on load
+(function syncToggleIcon() {
+  const btn = document.getElementById('dark-toggle');
+  if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+})();
+
 const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');

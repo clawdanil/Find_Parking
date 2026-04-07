@@ -832,6 +832,83 @@
 
 
 
+    /* ── Dark mode toggle button ───────────────────────────────────────── */
+    .dark-toggle {
+      position: fixed; top: 18px; right: 18px; z-index: 9999;
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1.5px solid rgba(10,10,20,.10);
+      background: rgba(255,255,255,.85);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      box-shadow: 0 4px 16px rgba(10,10,20,.10);
+      cursor: pointer; font-size: 1.1rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s, border-color .2s, transform .2s, box-shadow .2s;
+    }
+    .dark-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(10,10,20,.15); }
+    .dark-toggle:active { transform: scale(.95); }
+
+    /* ── Dark mode theme ───────────────────────────────────────────────── */
+    [data-theme="dark"] {
+      --text:   rgba(225,225,245,.92);
+      --t80:    rgba(225,225,245,.72);
+      --t55:    rgba(225,225,245,.52);
+      --t30:    rgba(225,225,245,.32);
+      --t12:    rgba(225,225,245,.10);
+      --t06:    rgba(225,225,245,.06);
+      --glass:  rgba(255,255,255,.055);
+      --glassH: rgba(255,255,255,.09);
+      --border: rgba(255,255,255,.09);
+      --accent: #A5B4FC;
+      --accentH: #818CF8;
+    }
+    [data-theme="dark"] body         { background: #0C0C14; }
+    [data-theme="dark"] .bg-scene    { background: #0C0C14; }
+    [data-theme="dark"] .bg-orb-1    { background: radial-gradient(circle, #1a1a40, #0c0c20); opacity: .30; }
+    [data-theme="dark"] .bg-orb-2    { background: radial-gradient(circle, #1a1030, #0c0c1c); opacity: .25; }
+    [data-theme="dark"] .bg-orb-3    { background: radial-gradient(circle, #101030, #0c0c18); opacity: .20; }
+
+    /* Surfaces */
+    [data-theme="dark"] .logo-pill          { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); box-shadow: 0 4px 24px rgba(0,0,0,.30); }
+    [data-theme="dark"] .glass-panel        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 20px 48px rgba(0,0,0,.30); }
+    [data-theme="dark"] .search-card        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .input-field        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); color: var(--text); }
+    [data-theme="dark"] .input-field:focus  { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.20); box-shadow: 0 0 0 4px rgba(255,255,255,.05); }
+    [data-theme="dark"] .input-field::placeholder { color: rgba(225,225,245,.28); }
+    [data-theme="dark"] .location-btn       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .location-btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.15); }
+    [data-theme="dark"] .chip               { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .chip:hover         { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.16); box-shadow: none; }
+    [data-theme="dark"] .feature-tile       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .feature-tile:hover { background: rgba(37,99,235,.20); }
+    [data-theme="dark"] .weather-pill       { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); box-shadow: 0 4px 20px rgba(0,0,0,.25); }
+    [data-theme="dark"] .stats-inner        { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .parking-card       { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 2px 12px rgba(0,0,0,.25); }
+    [data-theme="dark"] .parking-card:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 10px 32px rgba(0,0,0,.30); }
+    [data-theme="dark"] .parking-card       { box-shadow: 0 2px 12px rgba(0,0,0,.25); }
+    [data-theme="dark"] .detail-item        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .tabs-bar           { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .map-header         { background: rgba(20,20,32,.90); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .map-panel          { border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .ac-dropdown        { background: rgba(18,18,28,.97); border-color: rgba(255,255,255,.10); }
+    [data-theme="dark"] .ac-item:hover,
+    [data-theme="dark"] .ac-item.focused    { background: rgba(255,255,255,.07); }
+    [data-theme="dark"] .ac-item            { border-color: rgba(255,255,255,.07); }
+    [data-theme="dark"] .report-btn         { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .card-report        { border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] footer              { border-color: rgba(255,255,255,.08); }
+    [data-theme="dark"] .dark-toggle        { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+    [data-theme="dark"] .feature-tiles      { border-color: rgba(255,255,255,.08); }
+    [data-theme="dark"] .w-extras           { border-color: rgba(255,255,255,.10); }
+    [data-theme="dark"] .card-type-banner   { opacity: .92; }
+    [data-theme="dark"] .leaflet-popup-content-wrapper { background: rgba(18,18,28,.97) !important; border-color: rgba(255,255,255,.12) !important; }
+    [data-theme="dark"] .leaflet-popup-tip  { background: rgba(18,18,28,.97) !important; }
+    [data-theme="dark"] .hero-headline .accent-word {
+      background: linear-gradient(135deg, rgba(200,200,255,.90) 0%, rgba(180,180,255,.65) 55%, rgba(200,200,255,.80) 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    [data-theme="dark"] .sp { background: radial-gradient(circle, rgba(180,180,200,.55) 0%, rgba(180,180,200,0) 70%); }
+
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width:640px) {
       .hero              { padding:64px 20px 52px; }
@@ -980,13 +1057,16 @@
     </aside>
   </div>
 
+  <!-- Dark mode toggle -->
+  <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+
   <!-- Footer -->
   <footer>
     <strong>ParkMe</strong> &ensp;·&ensp; © 2026 &ensp;·&ensp; Always verify posted signs before parking
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=21"></script>
+  <script src="app.js?v=22"></script>
 
 </div><!-- /.page-wrap -->
 
