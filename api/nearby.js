@@ -265,8 +265,17 @@ async function queryTicketmaster(lat, lng, apiKey) {
         }
       }
 
+      // Normalize name: strip ticket-type suffixes, city suffixes, leading "The"
+      const normName = (e.name || '').toLowerCase()
+        .replace(/\s*[-–:]\s*(flexiticket|tickets?|general admission|admission|entry|experience).*$/i, '')
+        .replace(/^the\s+/i, '')
+        .replace(/\s+(new york|nyc|nj|manhattan|brooklyn|jersey city|chicago|la|los angeles)[!,.]?$/i, '')
+        .replace(/[!.,?'"]/g, '')
+        .replace(/\s+/g, ' ').trim();
+      const normVenue = (venue.name || '').toLowerCase().replace(/[!.,?'"]/g, '').replace(/\s+/g, ' ').trim();
+
       return {
-        _key:    `${(e.name || '').toLowerCase().trim()}|||${(venue.name || '').toLowerCase().trim()}`,
+        _key:    `${normName}|||${normVenue}`,
         _sortKey: sortKey,
         _distMi: distMi,
         type: 'event',
@@ -312,6 +321,129 @@ async function queryTicketmaster(lat, lng, apiKey) {
   }
 }
 
+// ── PATH Train real-time departures (PANYNJ public API) ──────────────────────
+const PATH_CODE_MAP = {
+  'exchange place':     'EXP', 'grove street': 'GRV', 'grove st': 'GRV',
+  'journal square':     'JSQ', 'newport':      'NEW', 'hoboken':  'HOB',
+  'harrison':           'HAR', 'newark':       'NWK',
+  'world trade center': 'WTC', 'wtc':          'WTC',
+  'christopher':        'CHR', '9th street':   '09S', '9th st':   '09S',
+  '14th street':        '14S', '14th st':      '14S',
+  '23rd street':        '23S', '23rd st':      '23S',
+  '33rd street':        '33S', '33rd st':      '33S',
+};
+
+async function fetchPathRealtime() {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 6000);
+    const res = await fetch('https://www.panynj.gov/bin/portauthority/ridepath.json', { signal: ctrl.signal });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const table = {};
+    for (const r of (data.results || [])) {
+      table[r.consideredStation] = r.destinations || [];
+    }
+    return table;
+  } catch { return null; }
+}
+
+function pathDeparturesForStation(code, table) {
+  if (!table || !table[code]) return [];
+  const departures = [];
+  for (const dest of table[code]) {
+    for (const msg of (dest.messages || []).slice(0, 2)) {
+      const secs = parseInt(msg.secondsToArrival || '0');
+      const mins = Math.round(secs / 60);
+      departures.push({
+        headsign: msg.target || dest.label,
+        arrival:  mins <= 1 ? 'Due' : `${mins} min`,
+        color:    msg.lineColor || '#004B87',
+      });
+    }
+  }
+  return departures.sort((a, b) => {
+    const av = a.arrival === 'Due' ? 0 : parseInt(a.arrival);
+    const bv = b.arrival === 'Due' ? 0 : parseInt(b.arrival);
+    return av - bv;
+  }).slice(0, 4);
+}
+
+// ── Transit: Google Places stations + PATH real-time ─────────────────────────
+async function queryTransit(lat, lng, googleKey) {
+  if (!googleKey) return [];
+
+  // Fetch PATH real-time and transit stations in parallel
+  const [pathTable, ...placeArrays] = await Promise.all([
+    fetchPathRealtime(),
+    ...[
+      'transit_station',
+      'subway_station',
+      'bus_station',
+    ].map(async type => {
+      try {
+        const ctrl = new AbortController();
+        setTimeout(() => ctrl.abort(), 8000);
+        const res = await fetch(
+          `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1000&type=${type}&key=${googleKey}`,
+          { signal: ctrl.signal }
+        );
+        if (!res.ok) return [];
+        const data = await res.json();
+        return data.results || [];
+      } catch { return []; }
+    }),
+  ]);
+
+  // Deduplicate stations by place_id, sort by distance
+  const seen = new Set();
+  const stations = placeArrays.flat()
+    .filter(p => {
+      if (seen.has(p.place_id)) return false;
+      seen.add(p.place_id);
+      return true;
+    })
+    .map(p => ({
+      name:     p.name || 'Station',
+      lat:      p.geometry.location.lat,
+      lon:      p.geometry.location.lng,
+      vicinity: p.vicinity || '',
+      types:    p.types || [],
+    }))
+    .sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon))
+    .slice(0, 10);
+
+  return stations.map(s => {
+    const distMi  = haversineMi(lat, lng, s.lat, s.lon);
+    const nameL   = s.name.toLowerCase();
+    const distLabel = distMi < 0.1 ? `${Math.round(distMi * 5280)} ft` : `${distMi.toFixed(2)} mi`;
+
+    // Match to PATH station code
+    let pathCode = null;
+    for (const [keyword, code] of Object.entries(PATH_CODE_MAP)) {
+      if (nameL.includes(keyword)) { pathCode = code; break; }
+    }
+    const departures = pathCode ? pathDeparturesForStation(pathCode, pathTable) : [];
+
+    // Determine transit type label
+    const transitType = pathCode                          ? 'PATH Train'
+      : s.types.includes('subway_station')               ? 'Subway'
+      : s.types.includes('bus_station')                  ? 'Bus Station'
+      : nameL.includes('bus')                            ? 'Bus Stop'
+      : nameL.includes('ferry') || nameL.includes('light rail') ? 'Light Rail / Ferry'
+      : 'Transit';
+
+    return {
+      lat: s.lat, lon: s.lon,
+      name: s.name,
+      address: s.vicinity,
+      transitType,
+      distLabel,
+      departures,  // [{headsign, arrival, color}]
+    };
+  });
+}
+
 // ── Handler: try each radius tier until results found ────────────────────────
 export default async function handler(req) {
   if (req.method !== 'POST' && req.method !== 'GET') {
@@ -327,6 +459,13 @@ export default async function handler(req) {
   }
 
   if (!lat || !lng || !feature) return json({ error: 'Missing params' }, 400);
+
+  // ── Transit: Google Places + PATH real-time ──────────────────────────────
+  if (feature === 'transit') {
+    const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
+    const stations  = await queryTransit(lat, lng, googleKey);
+    return json({ elements: stations, feature, count: stations.length, isTransit: true });
+  }
 
   // ── Events: Ticketmaster API, not Places/Overpass ─────────────────────────
   if (feature === 'events') {

@@ -243,6 +243,7 @@ const NEARBY_LOADING_MSGS = {
   coffee:   ['Finding coffee shops…', 'Checking nearby…', 'Almost there…'],
   gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
   shopping:      ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
+  transit:       ['Finding transit stops…', 'Checking live departures…', 'Almost there…'],
   entertainment: ['Finding entertainment…', 'Checking theatres & venues…', 'Almost there…'],
   events:        ['Searching upcoming events…', 'Checking Ticketmaster…', 'Almost there…'],
 };
@@ -664,6 +665,7 @@ locationBtn.addEventListener('click', () => {
 
 const FEATURE_CONFIG = {
   parking:       { label: 'Parking',       icon: '🅿️' },
+  transit:       { label: 'Transit',       icon: '🚇' },
   food:          { label: 'Food',          icon: '🍔' },
   bars:          { label: 'Bars',          icon: '🍺' },
   coffee:        { label: 'Coffee',        icon: '☕' },
@@ -798,6 +800,71 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
+function renderTransitResults(elements) {
+  clearInterval(loadingTimer);
+  if (!elements || elements.length === 0) {
+    showMessage('No transit stops found within 1 km. Try a different address.');
+    return;
+  }
+
+  statsBar.hidden = false;
+  const countEl = document.getElementById('stat-count');
+  if (countEl?.parentElement) {
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;transit stops nearby`;
+  }
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
+
+  resultsDiv.innerHTML = elements.map((el, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const isPath = el.transitType === 'PATH Train';
+    const typeColor = isPath ? '#004B87'
+      : el.transitType === 'Subway'  ? '#0039A6'
+      : el.transitType.includes('Bus') ? '#006847'
+      : '#374151';
+
+    const typeBadge = `<span class="transit-type-badge" style="background:${typeColor}18;color:${typeColor};border-color:${typeColor}30">${el.transitType}</span>`;
+
+    const departureHtml = el.departures && el.departures.length > 0
+      ? `<div class="transit-departures">
+          ${el.departures.map(d => `
+            <div class="transit-dep-row">
+              <span class="transit-dep-line" style="background:${d.color}"></span>
+              <span class="transit-dep-dest">→ ${escHtml(d.headsign)}</span>
+              <span class="transit-dep-time ${d.arrival === 'Due' ? 'dep-due' : ''}">${escHtml(d.arrival)}</span>
+            </div>`).join('')}
+         </div>`
+      : el.transitType.includes('Bus')
+        ? `<p class="transit-no-rt">🚌 Check schedules via Google Maps</p>`
+        : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+
+    return `
+      <div class="parking-card nearby-card" style="--status-color:${typeColor};--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div style="flex:1;min-width:0">
+              <h3 class="card-address">${escHtml(el.name)}</h3>
+              ${el.address ? `<p class="card-landmark">📍 ${escHtml(el.address)}</p>` : ''}
+            </div>
+            ${typeBadge}
+          </div>
+          <div class="card-details" style="margin-bottom:10px">
+            <span class="detail-item">🗺️ ${escHtml(el.distLabel)}</span>
+          </div>
+          ${departureHtml}
+          <a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, el.address || el.name)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Directions
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 function renderEventsResults(elements) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
@@ -930,7 +997,9 @@ async function loadFeature(feature) {
       showMessage('Events require a Ticketmaster API key. Add TICKETMASTER_API_KEY in Vercel settings.', true);
       return;
     }
-    if (data.isEvents) {
+    if (data.isTransit) {
+      renderTransitResults(data.elements || []);
+    } else if (data.isEvents) {
       renderEventsResults(data.elements || []);
     } else {
       renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);

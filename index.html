@@ -833,6 +833,43 @@
 
 
 
+    /* ── Transit tile ──────────────────────────────────────────────────── */
+    .transit-type-badge {
+      font-size: .68rem; font-weight: 800; padding: 3px 10px;
+      border-radius: 100px; white-space: nowrap; border: 1px solid;
+    }
+    .transit-departures {
+      display: flex; flex-direction: column; gap: 6px;
+      margin: 8px 0 10px;
+      padding: 10px 14px;
+      background: rgba(10,10,20,.03);
+      border: 1px solid rgba(10,10,20,.07);
+      border-radius: 12px;
+    }
+    [data-theme="dark"] .transit-departures {
+      background: rgba(255,255,255,.04);
+      border-color: rgba(255,255,255,.08);
+    }
+    .transit-dep-row {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .80rem; font-weight: 600;
+    }
+    .transit-dep-line {
+      width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+    }
+    .transit-dep-dest { flex: 1; color: var(--text); }
+    .transit-dep-time {
+      font-size: .75rem; font-weight: 800;
+      padding: 2px 9px; border-radius: 100px;
+      background: rgba(10,10,20,.06); color: var(--t55);
+    }
+    [data-theme="dark"] .transit-dep-time { background: rgba(255,255,255,.08); }
+    .dep-due { background: rgba(220,38,38,.12) !important; color: #DC2626 !important; }
+    .transit-no-rt {
+      font-size: .75rem; color: var(--t30); margin: 4px 0 8px;
+      font-style: italic;
+    }
+
     /* ── Dark mode toggle button ───────────────────────────────────────── */
     .dark-toggle {
       position: fixed; top: 18px; right: 18px; z-index: 9999;
@@ -1013,7 +1050,8 @@
       <div class="feature-tiles" id="feature-tiles">
         <span class="chips-label">Explore nearby</span>
         <div class="tiles-row">
-          <button class="feature-tile active" data-feature="parking">🅿️ Parking</button>
+          <button class="feature-tile" data-feature="parking">🅿️ Parking</button>
+          <button class="feature-tile" data-feature="transit">🚇 Transit</button>
           <button class="feature-tile" data-feature="food">🍔 Food</button>
           <button class="feature-tile" data-feature="bars">🍺 Bars</button>
           <button class="feature-tile" data-feature="coffee">☕ Coffee</button>
@@ -1067,7 +1105,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=23"></script>
+  <script src="app.js?v=24"></script>
 
 </div><!-- /.page-wrap -->
 
