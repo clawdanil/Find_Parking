@@ -308,8 +308,11 @@ function renderCards(spots) {
             </div>
             <span class="status-badge" style="background:${color}22;color:${color}">${meta.icon} ${escHtml(meta.label)}</span>
           </div>
-          ${isPaid ? `<div class="cost-badge">💰 ${escHtml(s.avg_cost)}</div>` : ''}
-          ${s.lat && s.lng && ['FREE_STREET','PAID_STREET'].includes(s.type) ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view" loading="lazy" onerror="this.parentElement.querySelector('.sv-disclaimer')?.remove();this.style.display='none'"><p class="sv-disclaimer">📷 Approximate street view — always verify on arrival</p>` : (s.type === 'GARAGE' || s.type === 'PAID_LOT') ? `<div class="card-garage-thumb"><span>${s.type === 'GARAGE' ? '🏢' : '🅿️'}</span><span>${s.type === 'GARAGE' ? 'Parking Garage' : 'Parking Lot'}</span></div>` : ''}
+          <div class="card-type-banner" style="background:${color}0d;border-color:${color}22">
+            <span class="ctb-icon">${meta.icon}</span>
+            <span class="ctb-label">${escHtml(meta.label)}</span>
+            ${s.avg_cost && isPaid ? `<span class="ctb-cost">💰 ${escHtml(s.avg_cost)}</span>` : ''}
+          </div>
           <div class="card-details">
             ${s.time_limit   ? `<span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>` : ''}
             ${s.sweeping_schedule && s.sweeping_schedule !== 'None' ? `<span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>` : ''}
