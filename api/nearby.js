@@ -1,5 +1,12 @@
 export const config = { runtime: 'edge' };
 
+function haversineMi(lat1, lon1, lat2, lon2) {
+  const R = 3958.8, toR = d => d * Math.PI / 180;
+  const dLat = toR(lat2 - lat1), dLon = toR(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toR(lat1)) * Math.cos(toR(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
 // ── Expansion radius tiers per feature (metres) ───────────────────────────────
 const RADIUS_TIERS = {
   food:     [800,  1600, 4000, 8000, 15000],
@@ -197,13 +204,14 @@ async function queryTicketmaster(lat, lng, apiKey) {
     const end   = new Date(now); end.setDate(end.getDate() + 7);
     const fmt   = d => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
 
+    // 10 miles — tight enough to exclude across-river cities (e.g. NYC from Jersey City)
     const url = `https://app.ticketmaster.com/discovery/v2/events.json` +
       `?apikey=${apiKey}` +
       `&latlong=${lat},${lng}` +
-      `&radius=25&unit=miles` +
+      `&radius=10&unit=miles` +
       `&startDateTime=${fmt(now)}` +
       `&endDateTime=${fmt(end)}` +
-      `&size=30` +
+      `&size=50` +
       `&sort=date,asc`;
 
     const res  = await fetch(url, { signal: ctrl.signal });
@@ -211,7 +219,7 @@ async function queryTicketmaster(lat, lng, apiKey) {
     const data = await res.json();
     const evts = data?._embedded?.events || [];
 
-    return evts.map(e => {
+    const mapped = evts.map(e => {
       const venue    = e._embedded?.venues?.[0] || {};
       const vAddr    = venue.address?.line1 || '';
       const vCity    = venue.city?.name || '';
@@ -219,6 +227,8 @@ async function queryTicketmaster(lat, lng, apiKey) {
       const address  = [vAddr, vCity, vState].filter(Boolean).join(', ');
       const vLat     = parseFloat(venue.location?.latitude)  || lat;
       const vLng     = parseFloat(venue.location?.longitude) || lng;
+
+      const distMi   = haversineMi(lat, lng, vLat, vLng);
 
       const cls      = e.classifications?.[0] || {};
       const segment  = cls.segment?.name || '';
@@ -239,8 +249,9 @@ async function queryTicketmaster(lat, lng, apiKey) {
       const startTime  = e.dates?.start?.localTime  || '';
       const tbd        = e.dates?.start?.timeTBA || e.dates?.start?.dateTBD;
 
-      // Format date nicely: "Sat Apr 12 · 7:30 PM"
+      // Format date: "Sat Apr 12 · 7:30 PM"
       let dateLabel = '';
+      let sortKey   = startLocal + (startTime || '');
       if (startLocal) {
         const d = new Date(`${startLocal}T${startTime || '00:00:00'}`);
         dateLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
@@ -250,20 +261,42 @@ async function queryTicketmaster(lat, lng, apiKey) {
       }
 
       return {
+        _key:    `${(e.name || '').toLowerCase().trim()}|||${(venue.name || '').toLowerCase().trim()}`,
+        _sortKey: sortKey,
+        _distMi: distMi,
         type: 'event',
         lat: vLat, lon: vLng,
         tags: {
-          name:       e.name || 'Event',
+          name:        e.name || 'Event',
           'addr:full': address,
-          venue_name: venue.name || '',
+          venue_name:  venue.name || '',
           category,
-          date_label: dateLabel,
-          is_free:    isFree,
+          date_label:  dateLabel,
+          is_free:     isFree,
           price_label: priceLabel,
           ticket_url:  e.url || '',
-          image:       e.images?.find(img => img.ratio === '16_9' && img.width > 300)?.url || '',
+          dist_label:  distMi < 0.1 ? `${Math.round(distMi * 5280)} ft` : `${distMi.toFixed(1)} mi`,
         },
       };
+    });
+
+    // Deduplicate: group by name+venue — keep earliest showtime, note extra slots
+    const grouped = new Map();
+    for (const ev of mapped) {
+      if (!grouped.has(ev._key)) {
+        grouped.set(ev._key, { ev, count: 1 });
+      } else {
+        const g = grouped.get(ev._key);
+        // Keep earliest showtime
+        if (ev._sortKey < g.ev._sortKey) g.ev = ev;
+        g.count++;
+      }
+    }
+
+    return Array.from(grouped.values()).map(({ ev, count }) => {
+      if (count > 1) ev.tags.showtimes = `${count} showtimes`;
+      delete ev._key; delete ev._sortKey; delete ev._distMi;
+      return ev;
     });
   } catch (e) {
     console.error('Ticketmaster error:', e.message);

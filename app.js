@@ -805,10 +805,14 @@ function renderEventsResults(elements) {
         ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
         : `<span class="event-badge event-paid">🎫 Paid</span>`;
 
-    const categoryHtml = t.category
+    const categoryHtml  = t.category
       ? `<span class="detail-item">🎭 ${escHtml(t.category)}</span>` : '';
     const dateHtml = t.date_label
       ? `<span class="detail-item">📅 ${escHtml(t.date_label)}</span>` : '';
+    const showtimesHtml = t.showtimes
+      ? `<span class="detail-item" style="color:#7C3AED;font-weight:600">🔁 ${escHtml(t.showtimes)}</span>` : '';
+    const distHtml = t.dist_label
+      ? `<span class="detail-item">🗺️ ${escHtml(t.dist_label)} away</span>` : '';
     const venueHtml = t.venue_name
       ? `<span class="detail-item">📍 ${escHtml(t.venue_name)}${t['addr:full'] ? ' — ' + escHtml(t['addr:full']) : ''}</span>` : '';
 
@@ -835,7 +839,9 @@ function renderEventsResults(elements) {
           </div>
           <div class="card-details">
             ${dateHtml}
+            ${showtimesHtml}
             ${categoryHtml}
+            ${distHtml}
             ${venueHtml}
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap">
