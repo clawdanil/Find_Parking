@@ -778,9 +778,15 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
 function renderEventsResults(elements) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
-    showMessage('No public events found within 25 miles in the next 7 days.');
+    showMessage('No public events found within 2 miles in the next 7 days.');
     return;
   }
+
+  // Sort by distance to venue — nearest first
+  elements.sort((a, b) =>
+    haversineMiFE(selectedLat, selectedLon, a.lat, a.lon) -
+    haversineMiFE(selectedLat, selectedLon, b.lat, b.lon)
+  );
 
   statsBar.hidden = false;
   const countEl = document.getElementById('stat-count');

@@ -146,7 +146,8 @@ async function queryGooglePlaces(lat, lng, feature, key, radius) {
 
   if (rawPlaces.length === 0) return null;
 
-  // Deduplicate by name, take top 15
+  // Sort by distance, deduplicate by name, take top 15
+  rawPlaces.sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon));
   const seen = new Set();
   const top  = rawPlaces
     .filter(p => { if (!p.name || seen.has(p.name)) return false; seen.add(p.name); return true; })
@@ -293,11 +294,13 @@ async function queryTicketmaster(lat, lng, apiKey) {
       }
     }
 
-    return Array.from(grouped.values()).map(({ ev, count }) => {
-      if (count > 1) ev.tags.showtimes = `${count} showtimes`;
-      delete ev._key; delete ev._sortKey; delete ev._distMi;
-      return ev;
-    });
+    return Array.from(grouped.values())
+      .sort((a, b) => a.ev._distMi - b.ev._distMi)   // nearest venue first
+      .map(({ ev, count }) => {
+        if (count > 1) ev.tags.showtimes = `${count} showtimes`;
+        delete ev._key; delete ev._sortKey; delete ev._distMi;
+        return ev;
+      });
   } catch (e) {
     console.error('Ticketmaster error:', e.message);
     return [];
