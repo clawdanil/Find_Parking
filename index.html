@@ -701,6 +701,21 @@
       white-space:nowrap;
     }
 
+    /* ── Google Maps button ─────────────────────────────────────────────── */
+    .gmaps-btn {
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      margin-top: 12px; padding: 10px 14px;
+      background: rgba(37,99,235,.06);
+      border: 1.5px solid rgba(37,99,235,.18);
+      border-radius: 12px;
+      font-size: .82rem; font-weight: 700;
+      color: #2563EB;
+      text-decoration: none;
+      transition: background .15s, transform .15s;
+    }
+    .gmaps-btn:hover  { background: rgba(37,99,235,.12); transform: translateY(-1px); }
+    .gmaps-btn:active { transform: translateY(0); }
+
     /* ── Report ────────────────────────────────────────────────────────── */
     .card-report   { margin-top:14px; border-top:1px solid rgba(10,10,20,.07); padding-top:13px; }
     .report-status { min-height:22px; margin-bottom:8px; }
@@ -963,7 +978,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=13"></script>
+  <script src="app.js?v=14"></script>
 
 </div><!-- /.page-wrap -->
 

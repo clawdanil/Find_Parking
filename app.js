@@ -329,6 +329,10 @@ function renderCards(spots) {
               <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
             </div>
           </div>` : ''}
+          <a class="gmaps-btn" href="${googleMapsUrl(s.lat, s.lng, s.address)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Google Maps
+          </a>
         </div>
       </div>`;
   }).join('');
@@ -444,6 +448,17 @@ function showMessage(text, isError = false) {
       <div class="msg-icon">${isError ? '⚠️' : 'ℹ️'}</div>
       <p>${escHtml(text)}</p>
     </div>`;
+}
+
+// Build a Google Maps directions URL — origin = searched address, dest = spot
+function googleMapsUrl(lat, lng, address) {
+  const origin = (selectedLat && selectedLon)
+    ? `${selectedLat},${selectedLon}`
+    : encodeURIComponent(streetInput.value.trim());
+  const dest = (lat && lng)
+    ? `${lat},${lng}`
+    : encodeURIComponent(address || '');
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
 }
 
 function escHtml(str) {
@@ -745,6 +760,10 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
             ${ratingHtml}
             ${cuisineHtml}
           </div>
+          <a class="gmaps-btn" href="${googleMapsUrl(item.lat, item.lon, item.addr || item.name)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Google Maps
+          </a>
         </div>
       </div>`;
   }).join('');
