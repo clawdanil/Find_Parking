@@ -381,6 +381,8 @@ function renderResults(parsed, street) {
   const src = parsed.source;
   const srcBadge = src === 'here'
     ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:#2563EB;">🔴 Live HERE data</span>`
+    : src === 'google'
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(234,67,53,.10);border:1px solid rgba(234,67,53,.22);color:#EA4335;">📍 Google Places</span>`
     : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">🗺️ Live OSM data</span>`;
 
   if (parsed.radiusExpanded) {

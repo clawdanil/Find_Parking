@@ -299,6 +299,74 @@ async function geocodeAddress(street, city) {
   return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
 }
 
+// ── Google Places Parking — Layer 2 (accurate addresses, open status, ratings) ─
+async function queryGoogleParking(lat, lng, radiusM, apiKey) {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+
+    const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json` +
+      `?location=${lat},${lng}&radius=${radiusM}&type=parking&key=${apiKey}`;
+
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!['OK', 'ZERO_RESULTS'].includes(data.status)) return [];
+    if (!data.results?.length) return [];
+
+    return data.results.map(place => {
+      const plat = place.geometry?.location?.lat;
+      const plng = place.geometry?.location?.lng;
+      if (!plat || !plng) return null;
+
+      const distMi = haversineMi(lat, lng, plat, plng);
+      const name   = place.name || 'Parking';
+      const nameL  = name.toLowerCase();
+
+      // Determine type from name keywords
+      const isGarage = nameL.includes('garage') || nameL.includes('deck') ||
+                       nameL.includes('structure') || nameL.includes('ramp') ||
+                       nameL.includes('level') || nameL.includes('multi');
+      const isFree   = nameL.includes('free') || nameL.includes('municipal');
+      const type     = isGarage ? 'GARAGE' : 'PAID_LOT';
+
+      // Google's vicinity is the best short address (e.g. "101 Hudson St, Jersey City")
+      const address  = place.vicinity || name;
+
+      // open_now from Nearby Search (no extra API call needed)
+      const openNow  = place.opening_hours?.open_now;
+      const openNote = openNow === true ? 'Open now' : openNow === false ? 'Closed now' : null;
+
+      const rating   = place.rating
+        ? `${place.rating}⭐ (${place.user_ratings_total || 0})`
+        : null;
+
+      return {
+        id:                   0,
+        type,
+        address,
+        landmark:             name !== address ? name : null,
+        lat:                  plat,
+        lng:                  plng,
+        distance_from_search: formatDist(distMi),
+        avg_cost:             isFree ? 'Free' : type === 'GARAGE' ? '~$15–30/day' : '~$10–20/day',
+        time_limit:           openNote,
+        permit_required:      false,
+        permit_zone:          '',
+        sweeping_schedule:    '',
+        overnight_parking:    '',
+        notes:                rating,
+        source:               'google',
+        _distMi:              distMi,
+        _needsAddress:        false, // Google addresses are accurate
+      };
+    }).filter(Boolean).sort((a, b) => a._distMi - b._distMi);
+  } catch (e) {
+    console.error('Google Places parking error:', e.message);
+    return [];
+  }
+}
+
 // ── HERE Parking API — Layer 1 (real data, exact addresses) ──────────────────
 async function queryHereParking(lat, lng, radiusM, apiKey) {
   try {
@@ -404,30 +472,28 @@ export default async function handler(req) {
       lng = geo.lon;
     }
 
-    const hereKey = process.env.HERE_API_KEY || '';
+    const hereKey   = process.env.HERE_API_KEY      || '';
+    const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
 
-    // 1. HERE Parking API — real data, exact addresses, real-time availability
-    let hereSpots = [];
-    if (hereKey) {
-      hereSpots = await queryHereParking(lat, lng, 600, hereKey);
-      hereSpots.sort((a, b) => a._distMi - b._distMi);
-    }
+    // Fire all three data sources in parallel to stay within Vercel's 30s limit
+    const [hereSpots, googleSpots, els250, els600] = await Promise.all([
+      // Layer 1: HERE — real-time availability for lots/garages
+      hereKey   ? queryHereParking(lat, lng, 600, hereKey).then(r => r.sort((a,b) => a._distMi - b._distMi))   : Promise.resolve([]),
+      // Layer 2: Google Places — accurate addresses, open/closed, ratings
+      googleKey ? queryGoogleParking(lat, lng, 800, googleKey).then(r => r.sort((a,b) => a._distMi - b._distMi)) : Promise.resolve([]),
+      // Layer 3: OSM — fills in street parking not covered above
+      queryOverpass(lat, lng, 250),
+      queryOverpass(lat, lng, 600),
+    ]);
 
-    // 2. OSM Overpass — run BOTH radii in parallel (saves ~7s vs sequential)
+    // Process OSM elements
     const processElements = (els) => (els || [])
       .map((el, i) => osmElementToSpot(el, lat, lng, i))
       .filter(Boolean)
       .sort((a, b) => a._distMi - b._distMi);
 
-    // 2 blocks ≈ 250m, 4 blocks ≈ 600m — fire both at once
-    const [els250, els600] = await Promise.all([
-      queryOverpass(lat, lng, 250),
-      queryOverpass(lat, lng, 600),
-    ]);
-
     const spots250 = processElements(els250);
     const spots600 = processElements(els600);
-
     let osmSpots, radiusBlocks, radiusExpanded;
     if (spots250.length >= 5) {
       osmSpots = spots250; radiusBlocks = 2; radiusExpanded = false;
@@ -435,15 +501,21 @@ export default async function handler(req) {
       osmSpots = spots600; radiusBlocks = 4; radiusExpanded = spots600.length > 0;
     }
 
-    // Merge: HERE first (real data), then OSM spots not already covered by HERE
+    // Merge layers: HERE → Google → OSM (each layer deduped against higher-priority layers)
+    // 40m threshold = same physical location
+    const deduped = (candidates, existing) =>
+      candidates.filter(c => !existing.some(e => haversineMi(e.lat, e.lng, c.lat, c.lng) < 0.025));
+
     let spots, source;
     if (hereSpots.length > 0) {
-      // Dedupe OSM spots that are within 40m of a HERE spot (same physical location)
-      const osmUnique = osmSpots.filter(osm =>
-        !hereSpots.some(h => haversineMi(h.lat, h.lng, osm.lat, osm.lng) < 0.025)
-      );
-      spots  = [...hereSpots, ...osmUnique];
+      const googleUnique = deduped(googleSpots, hereSpots);
+      const osmUnique    = deduped(osmSpots, [...hereSpots, ...googleUnique]);
+      spots  = [...hereSpots, ...googleUnique, ...osmUnique];
       source = 'here';
+    } else if (googleSpots.length > 0) {
+      const osmUnique = deduped(osmSpots, googleSpots);
+      spots  = [...googleSpots, ...osmUnique];
+      source = 'google';
     } else {
       spots  = osmSpots;
       source = 'osm';
@@ -458,9 +530,8 @@ export default async function handler(req) {
       return true;
     });
 
-    // 3b. Enrich OSM spots that are missing real addresses
-    //     Google Geocoding (primary) → Nominatim (fallback)
-    const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
+    // Enrich OSM spots that are missing real addresses
+    // Google Geocoding (primary) → Nominatim (fallback)
     if (spots.length > 0) await enrichAddresses(spots, googleKey);
 
     // Re-index IDs and strip temp fields
