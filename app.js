@@ -215,11 +215,12 @@ const LOADING_MSGS = [
 ];
 
 const NEARBY_LOADING_MSGS = {
-  food:     ['Finding restaurants…', 'Checking menus…', 'Almost there…'],
-  bars:     ['Finding bars & pubs…', 'Checking nearby…', 'Almost there…'],
+  food:          ['Finding restaurants…', 'Checking menus…', 'Almost there…'],
+  bars:          ['Finding bars & pubs…', 'Checking nearby…', 'Almost there…'],
   coffee:   ['Finding coffee shops…', 'Checking nearby…', 'Almost there…'],
   gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
-  shopping: ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
+  shopping:      ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
+  entertainment: ['Finding entertainment…', 'Checking theatres & venues…', 'Almost there…'],
 };
 
 let loadingTimer = null;
@@ -621,7 +622,8 @@ const FEATURE_CONFIG = {
   bars:     { label: 'Bars',     icon: '🍺' },
   coffee:   { label: 'Coffee',   icon: '☕' },
   gym:      { label: 'Gym',      icon: '💪' },
-  shopping: { label: 'Shopping', icon: '🛒' },
+  shopping:      { label: 'Shopping',      icon: '🛒' },
+  entertainment: { label: 'Entertainment', icon: '🎬' },
 };
 
 function haversineMiFE(lat1, lon1, lat2, lon2) {

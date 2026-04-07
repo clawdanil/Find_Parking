@@ -6,7 +6,8 @@ const RADIUS_TIERS = {
   bars:     [800,  1600, 4000, 8000, 15000],
   coffee:   [1000, 2000, 4000, 8000, 15000],
   gym:      [1200, 2500, 5000, 10000, 20000],
-  shopping: [2000, 4000, 8000, 16000, 25000],
+  shopping:      [2000, 4000, 8000, 16000, 25000],
+  entertainment: [2000, 4000, 8000, 16000, 25000],
 };
 
 // ── Google Places type mappings ───────────────────────────────────────────────
@@ -15,7 +16,8 @@ const GOOGLE_TYPES = {
   bars:     ['bar'],
   coffee:   ['cafe'],
   gym:      ['gym'],
-  shopping: ['shopping_mall', 'department_store'],
+  shopping:      ['shopping_mall', 'department_store'],
+  entertainment: ['movie_theater', 'bowling_alley', 'amusement_park'],
 };
 
 // ── Overpass fallback queries (radius is passed in) ───────────────────────────
@@ -47,6 +49,21 @@ const OVERPASS_QUERY = {
     way["shop"~"mall|department_store|supermarket"](around:${r},${lat},${lng});
     way["name"~"Mall|Plaza|Centre|Center|Newport|Galleria|Outlet",i](around:${r},${lat},${lng});
     relation["name"~"Mall|Plaza|Centre|Center|Newport|Galleria",i](around:${r},${lat},${lng});`,
+
+  entertainment: (lat, lng, r) => `
+    node["amenity"="cinema"](around:${r},${lat},${lng});
+    way["amenity"="cinema"](around:${r},${lat},${lng});
+    node["leisure"="bowling_alley"](around:${r},${lat},${lng});
+    way["leisure"="bowling_alley"](around:${r},${lat},${lng});
+    node["leisure"~"amusement_arcade|escape_game|miniature_golf|indoor_play"](around:${r},${lat},${lng});
+    way["leisure"~"amusement_arcade|escape_game|miniature_golf|indoor_play"](around:${r},${lat},${lng});
+    node["leisure"="playground"]["indoor"="yes"](around:${r},${lat},${lng});
+    node["amenity"="theatre"](around:${r},${lat},${lng});
+    way["amenity"="theatre"](around:${r},${lat},${lng});
+    node["sport"~"golf|bowling|billiards|laser_tag|climbing"](around:${r},${lat},${lng});
+    way["sport"~"golf|bowling|billiards|laser_tag|climbing"](around:${r},${lat},${lng});
+    node["name"~"Cinema|Theater|Theatre|Bowling|Golf|Arcade|Laser|Escape|Trampoline|Topgolf|Dave|Buster|Chuck|Regal|AMC|IMAX|Cineplex|Odeon|Cineworld",i](around:${r},${lat},${lng});
+    way["name"~"Cinema|Theater|Theatre|Bowling|Golf|Arcade|Laser|Escape|Trampoline|Topgolf",i](around:${r},${lat},${lng});`,
 };
 
 const OVERPASS_MIRRORS = [
