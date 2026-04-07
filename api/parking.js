@@ -314,14 +314,23 @@ async function queryGoogleParking(lat, lng, radiusM, apiKey) {
     if (!['OK', 'ZERO_RESULTS'].includes(data.status)) return [];
     if (!data.results?.length) return [];
 
+    const GAS_BRANDS = ['shell', 'lukoil', 'bp ', 'exxon', 'mobil', 'chevron', 'sunoco',
+      'gulf ', 'citgo', 'wawa', 'speedway', 'marathon', 'valero'];
+
     return data.results.map(place => {
       const plat = place.geometry?.location?.lat;
       const plng = place.geometry?.location?.lng;
       if (!plat || !plng) return null;
 
+      const name  = place.name || 'Parking';
+      const nameL = name.toLowerCase();
+
+      // Skip gas stations and car washes — Google's type=parking can include them
+      const isGas = (place.types || []).includes('gas_station') ||
+        GAS_BRANDS.some(b => nameL.startsWith(b));
+      if (isGas) return null;
+
       const distMi = haversineMi(lat, lng, plat, plng);
-      const name   = place.name || 'Parking';
-      const nameL  = name.toLowerCase();
 
       // Determine type from name keywords
       const isGarage = nameL.includes('garage') || nameL.includes('deck') ||
@@ -391,6 +400,9 @@ async function queryHereParking(lat, lng, radiusM, apiKey) {
     const items = data?.items;
     if (!Array.isArray(items) || items.length === 0) return [];
 
+    // Gas station category IDs to exclude — HERE sometimes returns fuel stations
+    const FUEL_CATEGORIES = new Set(['700-7600-0116', '700-7300-0000', '700-7300-0444']);
+
     return items.map(p => {
       const pos   = p.position || {};
       const addr  = p.address  || {};
@@ -398,12 +410,21 @@ async function queryHereParking(lat, lng, radiusM, apiKey) {
       const plng  = pos.lng;
       if (!plat || !plng) return null;
 
+      const cats  = p.categories || [];
+      const name  = p.title || 'Parking';
+      const nameL = name.toLowerCase();
+
+      // Skip gas stations, car washes, auto services — not parking facilities
+      const isGasFuel = cats.some(c => c.id?.startsWith('700-73')) ||
+        ['shell', 'lukoil', 'bp ', 'exxon', 'mobil', 'chevron', 'sunoco', 'gulf ',
+         'citgo', 'wawa', 'speedway', 'marathon'].some(brand => nameL.startsWith(brand));
+      if (isGasFuel) return null;
+
       const distMi    = haversineMi(lat, lng, plat, plng);
-      const name      = p.title || 'Parking';
-      const nameL     = name.toLowerCase();
       const isGarage  = nameL.includes('garage') || nameL.includes('deck') ||
                         nameL.includes('structure') || nameL.includes('level') ||
-                        (p.categories || []).some(c => c.id === '700-7600-0116');
+                        nameL.includes('multi') ||
+                        cats.some(c => c.id === '700-7600-0116');
       const type      = isGarage ? 'GARAGE' : 'PAID_LOT';
 
       // HERE Browse returns a formatted address string in addr.label
@@ -509,6 +530,9 @@ export default async function handler(req) {
       spots  = osmSpots;
       source = 'osm';
     }
+
+    // Sort merged results by distance — closest first regardless of source
+    spots.sort((a, b) => (a._distMi ?? 99) - (b._distMi ?? 99));
 
     // Deduplicate spots within 15m of each other
     const seen = [];
