@@ -187,6 +187,90 @@ async function queryOverpass(overpassQuery) {
   catch { return []; }
 }
 
+// ── Ticketmaster Discovery API — public events in next 7 days ────────────────
+async function queryTicketmaster(lat, lng, apiKey) {
+  try {
+    const ctrl  = new AbortController();
+    setTimeout(() => ctrl.abort(), 10000);
+
+    const now   = new Date();
+    const end   = new Date(now); end.setDate(end.getDate() + 7);
+    const fmt   = d => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
+
+    const url = `https://app.ticketmaster.com/discovery/v2/events.json` +
+      `?apikey=${apiKey}` +
+      `&latlong=${lat},${lng}` +
+      `&radius=25&unit=miles` +
+      `&startDateTime=${fmt(now)}` +
+      `&endDateTime=${fmt(end)}` +
+      `&size=30` +
+      `&sort=date,asc`;
+
+    const res  = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+    const evts = data?._embedded?.events || [];
+
+    return evts.map(e => {
+      const venue    = e._embedded?.venues?.[0] || {};
+      const vAddr    = venue.address?.line1 || '';
+      const vCity    = venue.city?.name || '';
+      const vState   = venue.state?.stateCode || '';
+      const address  = [vAddr, vCity, vState].filter(Boolean).join(', ');
+      const vLat     = parseFloat(venue.location?.latitude)  || lat;
+      const vLng     = parseFloat(venue.location?.longitude) || lng;
+
+      const cls      = e.classifications?.[0] || {};
+      const segment  = cls.segment?.name || '';
+      const genre    = cls.genre?.name    || '';
+      const category = [segment, genre].filter(Boolean).filter(s => s !== 'Undefined').join(' · ');
+
+      const prices   = e.priceRanges || [];
+      const isFree   = prices.length === 0 || prices.some(p => p.min === 0);
+      const minPrice = prices.length ? Math.min(...prices.map(p => p.min ?? 0)) : null;
+      const maxPrice = prices.length ? Math.max(...prices.map(p => p.max ?? 0)) : null;
+      const currency = prices[0]?.currency || 'USD';
+      const priceLabel = isFree && minPrice === 0 ? 'Free'
+        : minPrice !== null && maxPrice !== null && minPrice !== maxPrice
+          ? `$${minPrice}–$${maxPrice} ${currency}`
+          : minPrice !== null ? `$${minPrice} ${currency}` : null;
+
+      const startLocal = e.dates?.start?.localDate || '';
+      const startTime  = e.dates?.start?.localTime  || '';
+      const tbd        = e.dates?.start?.timeTBA || e.dates?.start?.dateTBD;
+
+      // Format date nicely: "Sat Apr 12 · 7:30 PM"
+      let dateLabel = '';
+      if (startLocal) {
+        const d = new Date(`${startLocal}T${startTime || '00:00:00'}`);
+        dateLabel = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        if (startTime && !tbd) {
+          dateLabel += ' · ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+        }
+      }
+
+      return {
+        type: 'event',
+        lat: vLat, lon: vLng,
+        tags: {
+          name:       e.name || 'Event',
+          'addr:full': address,
+          venue_name: venue.name || '',
+          category,
+          date_label: dateLabel,
+          is_free:    isFree,
+          price_label: priceLabel,
+          ticket_url:  e.url || '',
+          image:       e.images?.find(img => img.ratio === '16_9' && img.width > 300)?.url || '',
+        },
+      };
+    });
+  } catch (e) {
+    console.error('Ticketmaster error:', e.message);
+    return [];
+  }
+}
+
 // ── Handler: try each radius tier until results found ────────────────────────
 export default async function handler(req) {
   if (req.method !== 'POST' && req.method !== 'GET') {
@@ -201,9 +285,17 @@ export default async function handler(req) {
     lat = parseFloat(p.get('lat')); lng = parseFloat(p.get('lng')); feature = p.get('feature');
   }
 
-  if (!lat || !lng || !feature || !OVERPASS_QUERY[feature]) {
-    return json({ error: 'Missing or invalid params' }, 400);
+  if (!lat || !lng || !feature) return json({ error: 'Missing params' }, 400);
+
+  // ── Events: Ticketmaster API, not Places/Overpass ─────────────────────────
+  if (feature === 'events') {
+    const tmKey = process.env.TICKETMASTER_API_KEY || '';
+    if (!tmKey) return json({ error: 'TICKETMASTER_API_KEY not configured', noKey: true }, 200);
+    const events = await queryTicketmaster(lat, lng, tmKey);
+    return json({ elements: events, feature, count: events.length, isEvents: true, expanded: false, radiusLabel: '25 mi' });
   }
+
+  if (!OVERPASS_QUERY[feature]) return json({ error: 'Invalid feature' }, 400);
 
   const key   = process.env.GOOGLE_MAPS_API_KEY || '';
   const tiers = RADIUS_TIERS[feature];

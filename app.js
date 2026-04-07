@@ -221,6 +221,7 @@ const NEARBY_LOADING_MSGS = {
   gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
   shopping:      ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
   entertainment: ['Finding entertainment…', 'Checking theatres & venues…', 'Almost there…'],
+  events:        ['Searching upcoming events…', 'Checking Ticketmaster…', 'Almost there…'],
 };
 
 let loadingTimer = null;
@@ -639,13 +640,14 @@ locationBtn.addEventListener('click', () => {
 // ── Feature Tiles ─────────────────────────────────────────────────────────────
 
 const FEATURE_CONFIG = {
-  parking:  { label: 'Parking',  icon: '🅿️' },
-  food:     { label: 'Food',     icon: '🍔' },
-  bars:     { label: 'Bars',     icon: '🍺' },
-  coffee:   { label: 'Coffee',   icon: '☕' },
-  gym:      { label: 'Gym',      icon: '💪' },
+  parking:       { label: 'Parking',       icon: '🅿️' },
+  food:          { label: 'Food',          icon: '🍔' },
+  bars:          { label: 'Bars',          icon: '🍺' },
+  coffee:        { label: 'Coffee',        icon: '☕' },
+  gym:           { label: 'Gym',           icon: '💪' },
   shopping:      { label: 'Shopping',      icon: '🛒' },
   entertainment: { label: 'Entertainment', icon: '🎬' },
+  events:        { label: 'Events',        icon: '🎟️' },
 };
 
 function haversineMiFE(lat1, lon1, lat2, lon2) {
@@ -773,6 +775,78 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
+function renderEventsResults(elements) {
+  clearInterval(loadingTimer);
+  if (!elements || elements.length === 0) {
+    showMessage('No public events found within 25 miles in the next 7 days.');
+    return;
+  }
+
+  statsBar.hidden = false;
+  const countEl = document.getElementById('stat-count');
+  if (countEl?.parentElement) {
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;events this week`;
+  }
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
+
+  resultsDiv.innerHTML = elements.map((el, i) => {
+    const t   = el.tags || {};
+    const num = String(i + 1).padStart(2, '0');
+    const isFree  = t.is_free;
+    const hasTicket = !!t.ticket_url;
+
+    const priceBadge = isFree
+      ? `<span class="event-badge event-free">🎟️ Free</span>`
+      : t.price_label
+        ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
+        : `<span class="event-badge event-paid">🎫 Paid</span>`;
+
+    const categoryHtml = t.category
+      ? `<span class="detail-item">🎭 ${escHtml(t.category)}</span>` : '';
+    const dateHtml = t.date_label
+      ? `<span class="detail-item">📅 ${escHtml(t.date_label)}</span>` : '';
+    const venueHtml = t.venue_name
+      ? `<span class="detail-item">📍 ${escHtml(t.venue_name)}${t['addr:full'] ? ' — ' + escHtml(t['addr:full']) : ''}</span>` : '';
+
+    const ticketBtn = hasTicket
+      ? `<a class="gmaps-btn event-ticket-btn" href="${escHtml(t.ticket_url)}" target="_blank" rel="noopener">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a2 2 0 0 1 0 4v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+           ${isFree ? 'Register / RSVP' : 'Get Tickets'}
+         </a>` : '';
+
+    const mapsBtn = `<a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, t['addr:full'] || t.venue_name)}" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      Open in Google Maps
+    </a>`;
+
+    return `
+      <div class="parking-card nearby-card" style="--status-color:#7C3AED;--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div style="flex:1;min-width:0">
+              <h3 class="card-address">${escHtml(t.name)}</h3>
+            </div>
+            ${priceBadge}
+          </div>
+          <div class="card-details">
+            ${dateHtml}
+            ${categoryHtml}
+            ${venueHtml}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${ticketBtn}
+            ${mapsBtn}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
 async function loadFeature(feature) {
   if (!selectedLat || !selectedLon) {
     showMessage('Enter an address and click Search first, then choose a category.', true);
@@ -815,7 +889,15 @@ async function loadFeature(feature) {
     clearInterval(loadingTimer);
     if (!res.ok) throw new Error('API error ' + res.status);
     const data = await res.json();
-    renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);
+    if (data.noKey) {
+      showMessage('Events require a Ticketmaster API key. Add TICKETMASTER_API_KEY in Vercel settings.', true);
+      return;
+    }
+    if (data.isEvents) {
+      renderEventsResults(data.elements || []);
+    } else {
+      renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);
+    }
   } catch (err) {
     clearInterval(loadingTimer);
     showMessage(`Could not load ${FEATURE_CONFIG[feature].label} data. Please try again.`, true);
