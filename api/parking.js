@@ -367,88 +367,77 @@ async function queryGoogleParking(lat, lng, radiusM, apiKey) {
   }
 }
 
-// ── HERE Parking API — Layer 1 (real data, exact addresses) ──────────────────
+// ── HERE Places Browse API — Layer 1 (free tier, parking category) ───────────
+// Uses the HERE Places v1 Browse endpoint (not the deprecated Parking 4.0 API)
+// Category 700-7600-0000 = Parking Lot, 700-7600-0116 = Parking Garage
 async function queryHereParking(lat, lng, radiusM, apiKey) {
   try {
     const ctrl = new AbortController();
     setTimeout(() => ctrl.abort(), 8000);
 
-    const url = `https://parking.ls.hereapi.com/parking/4.0/search.json` +
-      `?prox=${lat},${lng},${radiusM}` +
-      `&apiKey=${apiKey}` +
-      `&attributes=openinghours,payment,parking,access,vehicle,space,realtime` +
-      `&layer_ids=POPA`;
+    const url = `https://browse.search.hereapi.com/v1/browse` +
+      `?at=${lat},${lng}` +
+      `&categories=700-7600-0000,700-7600-0116` +
+      `&limit=20` +
+      `&circle:center=${lat},${lng}&circle:radius=${radiusM}` +
+      `&apiKey=${apiKey}`;
 
     const res = await fetch(url, { signal: ctrl.signal });
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error('HERE browse status:', res.status, await res.text().catch(() => ''));
+      return [];
+    }
     const data = await res.json();
+    const items = data?.items;
+    if (!Array.isArray(items) || items.length === 0) return [];
 
-    const parkings = data?.Parkings?.Parking;
-    if (!Array.isArray(parkings) || parkings.length === 0) return [];
+    return items.map(p => {
+      const pos   = p.position || {};
+      const addr  = p.address  || {};
+      const plat  = pos.lat;
+      const plng  = pos.lng;
+      if (!plat || !plng) return null;
 
-    return parkings.map(p => {
-      const addr    = p.Address || {};
-      const pos     = p.Position || {};
-      const spaces  = p.Spaces  || {};
-      const rt      = p.Realtime || {};
-      const oh      = p.OpeningHours?.text || '';
-      const payment = p.Payment;
+      const distMi    = haversineMi(lat, lng, plat, plng);
+      const name      = p.title || 'Parking';
+      const nameL     = name.toLowerCase();
+      const isGarage  = nameL.includes('garage') || nameL.includes('deck') ||
+                        nameL.includes('structure') || nameL.includes('level') ||
+                        (p.categories || []).some(c => c.id === '700-7600-0116');
+      const type      = isGarage ? 'GARAGE' : 'PAID_LOT';
 
-      // Build a full street address
-      const houseNo   = addr.HouseNumber || '';
-      const road      = addr.Street      || '';
-      const city2     = addr.City        || '';
-      const state     = addr.State       || '';
-      const fullAddr  = [houseNo && road ? `${houseNo} ${road}` : road, city2, state]
-                          .filter(Boolean).join(', ');
+      // HERE Browse returns a formatted address string in addr.label
+      const fullAddr  = addr.label
+        ? addr.label.replace(/, [A-Z]{2} \d{5}.*$/, '') // strip ZIP+country suffix
+        : [addr.houseNumber, addr.street, addr.city].filter(Boolean).join(' ');
 
-      // Determine type
-      const isFree    = payment?.FreeParkingAvailable === true;
-      const isGarage  = (p.Facility?.type || '').toLowerCase().includes('multi') ||
-                        (p.Name?.text || '').toLowerCase().includes('garage');
-      const type      = isGarage ? 'GARAGE' : isFree ? 'FREE_STREET' : 'PAID_LOT';
+      const avg_cost  = type === 'GARAGE' ? '~$15–30/day' : '~$10–20/day';
 
-      // Real-time availability
-      const totalSpaces  = spaces.totalCount     ?? null;
-      const availSpaces  = spaces.availableCount ?? null;
-      const hasRealtime  = rt.availability === 'REALTIME' && availSpaces !== null;
-      const availLabel   = hasRealtime
-        ? (availSpaces > 10 ? `${availSpaces} spots open`
-          : availSpaces > 0 ? `Only ${availSpaces} left!`
-          : 'Full right now')
-        : null;
-
-      // Pricing
-      let avg_cost = 'Varies';
-      if (isFree)           avg_cost = 'Free';
-      else if (payment?.PriceRange) avg_cost = payment.PriceRange;
-      else if (type === 'GARAGE')   avg_cost = '~$15–30/day';
-      else if (type === 'PAID_LOT') avg_cost = '~$10–20/day';
-
-      const distMi = haversineMi(lat, lng, pos.lat || lat, pos.lng || lng);
+      // HERE Browse includes opening hours when available
+      const oh        = p.openingHours?.[0]?.text?.join(', ') || null;
 
       return {
-        id:               0, // re-indexed later
+        id:                   0,
         type,
-        address:          fullAddr || (p.Name?.text || 'Parking'),
-        landmark:         p.Name?.text || null,
-        lat:              pos.lat,
-        lng:              pos.lng,
+        address:              fullAddr || name,
+        landmark:             name !== fullAddr ? name : null,
+        lat:                  plat,
+        lng:                  plng,
         distance_from_search: formatDist(distMi),
         avg_cost,
-        time_limit:       oh || null,
-        permit_required:  false,
-        permit_zone:      '',
-        sweeping_schedule: '',
-        overnight_parking: '',
-        here_avail:       availLabel,          // real-time availability string
-        here_total:       totalSpaces,
-        here_avail_count: availSpaces,
-        here_realtime:    hasRealtime,
-        source:           'here',
-        _distMi:          distMi,
+        time_limit:           oh,
+        permit_required:      false,
+        permit_zone:          '',
+        sweeping_schedule:    '',
+        overnight_parking:    '',
+        here_avail:           null,
+        here_total:           null,
+        here_avail_count:     null,
+        here_realtime:        false,
+        source:               'here',
+        _distMi:              distMi,
       };
-    }).filter(s => s.lat && s.lng);
+    }).filter(Boolean);
   } catch (e) {
     console.error('HERE API error:', e.message);
     return [];
@@ -543,10 +532,15 @@ export default async function handler(req) {
       delete s._osmId;
     });
 
-    // No AI fallback — fabricated spots cause real-world confusion.
-    // If HERE + OSM found nothing, return empty and let the UI surface a clear message.
+    // Debug counts — visible in browser Network tab to diagnose source failures
+    const _debug = {
+      here:   hereSpots.length,
+      google: googleSpots.length,
+      osm:    osmSpots.length,
+      merged: spots.length,
+    };
 
-    return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source, searchLat: lat, searchLng: lng });
+    return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source, searchLat: lat, searchLng: lng, _debug });
 
   } catch (e) {
     return json({ error: e.message }, 500);
