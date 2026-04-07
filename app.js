@@ -640,7 +640,7 @@ function hideRadiusBanner() {
   if (rb) rb.innerHTML = '';
 }
 
-function renderNearbyResults(elements, feature, searchLat, searchLng) {
+function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {}) {
   const cfg   = FEATURE_CONFIG[feature];
   const items = elements
     .map(el => {
@@ -681,6 +681,20 @@ function renderNearbyResults(elements, feature, searchLat, searchLng) {
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('results-tabs-outer').hidden = true;
   hideRadiusBanner();
+
+  // Show expansion notice if radius was widened to find results
+  if (meta.expanded && meta.radiusLabel) {
+    let rb = document.getElementById('radius-banner');
+    if (!rb) {
+      rb = document.createElement('div');
+      rb.id = 'radius-banner';
+      rb.style.cssText = 'position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;padding:0 20px;box-sizing:border-box;';
+      document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
+    }
+    rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
+      🔍 No results nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+    </div>`;
+  }
 
   resultsDiv.innerHTML = items.map((item, i) => {
     const num         = String(i + 1).padStart(2, '0');
@@ -773,7 +787,7 @@ async function loadFeature(feature) {
     clearInterval(loadingTimer);
     if (!res.ok) throw new Error('API error ' + res.status);
     const data = await res.json();
-    renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon);
+    renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);
   } catch (err) {
     clearInterval(loadingTimer);
     showMessage(`Could not load ${FEATURE_CONFIG[feature].label} data. Please try again.`, true);
