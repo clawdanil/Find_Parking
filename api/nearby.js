@@ -204,11 +204,11 @@ async function queryTicketmaster(lat, lng, apiKey) {
     const end   = new Date(now); end.setDate(end.getDate() + 7);
     const fmt   = d => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-    // 10 miles — tight enough to exclude across-river cities (e.g. NYC from Jersey City)
+    // 2 miles — hyper-local, excludes across-river cities entirely
     const url = `https://app.ticketmaster.com/discovery/v2/events.json` +
       `?apikey=${apiKey}` +
       `&latlong=${lat},${lng}` +
-      `&radius=10&unit=miles` +
+      `&radius=2&unit=miles` +
       `&startDateTime=${fmt(now)}` +
       `&endDateTime=${fmt(end)}` +
       `&size=50` +
