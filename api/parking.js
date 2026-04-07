@@ -344,7 +344,93 @@ async function claudeFallback(key, street, city, lat, lng, day, time, radiusBloc
   }));
 }
 
-// ── Main handler ──────────────────────────────────────────────────────────────
+// ── HERE Parking API — Layer 1 (real data, exact addresses) ──────────────────
+async function queryHereParking(lat, lng, radiusM, apiKey) {
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+
+    const url = `https://parking.ls.hereapi.com/parking/4.0/search.json` +
+      `?prox=${lat},${lng},${radiusM}` +
+      `&apiKey=${apiKey}` +
+      `&attributes=openinghours,payment,parking,access,vehicle,space,realtime` +
+      `&layer_ids=POPA`;
+
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) return [];
+    const data = await res.json();
+
+    const parkings = data?.Parkings?.Parking;
+    if (!Array.isArray(parkings) || parkings.length === 0) return [];
+
+    return parkings.map(p => {
+      const addr    = p.Address || {};
+      const pos     = p.Position || {};
+      const spaces  = p.Spaces  || {};
+      const rt      = p.Realtime || {};
+      const oh      = p.OpeningHours?.text || '';
+      const payment = p.Payment;
+
+      // Build a full street address
+      const houseNo   = addr.HouseNumber || '';
+      const road      = addr.Street      || '';
+      const city2     = addr.City        || '';
+      const state     = addr.State       || '';
+      const fullAddr  = [houseNo && road ? `${houseNo} ${road}` : road, city2, state]
+                          .filter(Boolean).join(', ');
+
+      // Determine type
+      const isFree    = payment?.FreeParkingAvailable === true;
+      const isGarage  = (p.Facility?.type || '').toLowerCase().includes('multi') ||
+                        (p.Name?.text || '').toLowerCase().includes('garage');
+      const type      = isGarage ? 'GARAGE' : isFree ? 'FREE_STREET' : 'PAID_LOT';
+
+      // Real-time availability
+      const totalSpaces  = spaces.totalCount     ?? null;
+      const availSpaces  = spaces.availableCount ?? null;
+      const hasRealtime  = rt.availability === 'REALTIME' && availSpaces !== null;
+      const availLabel   = hasRealtime
+        ? (availSpaces > 10 ? `${availSpaces} spots open`
+          : availSpaces > 0 ? `Only ${availSpaces} left!`
+          : 'Full right now')
+        : null;
+
+      // Pricing
+      let avg_cost = 'Varies';
+      if (isFree)           avg_cost = 'Free';
+      else if (payment?.PriceRange) avg_cost = payment.PriceRange;
+      else if (type === 'GARAGE')   avg_cost = '~$15–30/day';
+      else if (type === 'PAID_LOT') avg_cost = '~$10–20/day';
+
+      const distMi = haversineMi(lat, lng, pos.lat || lat, pos.lng || lng);
+
+      return {
+        id:               0, // re-indexed later
+        type,
+        address:          fullAddr || (p.Name?.text || 'Parking'),
+        landmark:         p.Name?.text || null,
+        lat:              pos.lat,
+        lng:              pos.lng,
+        distance_from_search: formatDist(distMi),
+        avg_cost,
+        time_limit:       oh || null,
+        permit_required:  false,
+        permit_zone:      '',
+        sweeping_schedule: '',
+        overnight_parking: '',
+        here_avail:       availLabel,          // real-time availability string
+        here_total:       totalSpaces,
+        here_avail_count: availSpaces,
+        here_realtime:    hasRealtime,
+        source:           'here',
+        _distMi:          distMi,
+      };
+    }).filter(s => s.lat && s.lng);
+  } catch (e) {
+    console.error('HERE API error:', e.message);
+    return [];
+  }
+}
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
 
@@ -363,6 +449,15 @@ export default async function handler(req) {
       lng = geo.lon;
     }
 
+    const hereKey = process.env.HERE_API_KEY || '';
+
+    // 1. HERE Parking API — real data, exact addresses, real-time availability
+    let hereSpots = [];
+    if (hereKey) {
+      hereSpots = await queryHereParking(lat, lng, 600, hereKey);
+      hereSpots.sort((a, b) => a._distMi - b._distMi);
+    }
+
     // 2. OSM Overpass — run BOTH radii in parallel (saves ~7s vs sequential)
     const processElements = (els) => (els || [])
       .map((el, i) => osmElementToSpot(el, lat, lng, i))
@@ -378,13 +473,26 @@ export default async function handler(req) {
     const spots250 = processElements(els250);
     const spots600 = processElements(els600);
 
-    let spots, radiusBlocks, radiusExpanded;
+    let osmSpots, radiusBlocks, radiusExpanded;
     if (spots250.length >= 5) {
-      spots = spots250; radiusBlocks = 2; radiusExpanded = false;
+      osmSpots = spots250; radiusBlocks = 2; radiusExpanded = false;
     } else {
-      spots = spots600; radiusBlocks = 4; radiusExpanded = spots600.length > 0;
+      osmSpots = spots600; radiusBlocks = 4; radiusExpanded = spots600.length > 0;
     }
-    let source = 'osm';
+
+    // Merge: HERE first (real data), then OSM spots not already covered by HERE
+    let spots, source;
+    if (hereSpots.length > 0) {
+      // Dedupe OSM spots that are within 40m of a HERE spot (same physical location)
+      const osmUnique = osmSpots.filter(osm =>
+        !hereSpots.some(h => haversineMi(h.lat, h.lng, osm.lat, osm.lng) < 0.025)
+      );
+      spots  = [...hereSpots, ...osmUnique];
+      source = 'here';
+    } else {
+      spots  = osmSpots;
+      source = 'osm';
+    }
 
     // Deduplicate spots within 15m of each other
     const seen = [];

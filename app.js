@@ -311,7 +311,7 @@ function renderCards(spots) {
           <div class="card-type-banner" style="background:${color}0d;border-color:${color}22">
             <span class="ctb-icon">${meta.icon}</span>
             <span class="ctb-label">${escHtml(meta.label)}</span>
-            ${s.avg_cost && isPaid ? `<span class="ctb-cost">💰 ${escHtml(s.avg_cost)}</span>` : ''}
+            ${s.here_avail ? `<span class="ctb-realtime ${s.here_avail_count === 0 ? 'ctb-full' : s.here_avail_count <= 10 ? 'ctb-low' : 'ctb-open'}">${s.here_avail_count === 0 ? '🔴' : s.here_avail_count <= 10 ? '🟡' : '🟢'} ${escHtml(s.here_avail)}</span>` : s.avg_cost && isPaid ? `<span class="ctb-cost">💰 ${escHtml(s.avg_cost)}</span>` : ''}
           </div>
           <div class="card-details">
             ${s.time_limit   ? `<span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>` : ''}
@@ -374,10 +374,12 @@ function renderResults(parsed, street) {
     `;
     document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', radiusBanner);
   }
-  const isAI  = parsed.source === 'ai';
-  const srcBadge = isAI
-    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.25);color:#A78BFA;">AI estimated</span>`
-    : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">Live OSM data</span>`;
+  const src = parsed.source;
+  const srcBadge = src === 'ai'
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.25);color:#A78BFA;">🤖 AI estimated</span>`
+    : src === 'here'
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:#2563EB;">🔴 Live HERE data</span>`
+    : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">🗺️ Live OSM data</span>`;
 
   if (parsed.radiusExpanded) {
     radiusBanner.innerHTML = `<div style="
