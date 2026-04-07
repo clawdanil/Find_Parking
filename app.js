@@ -801,7 +801,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
 function renderEventsResults(elements) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
-    showMessage('No public events found within 2 miles in the next 7 days.');
+    showMessage('No public events found within 3 miles in the next 7 days.');
     return;
   }
 
@@ -830,9 +830,11 @@ function renderEventsResults(elements) {
 
     const priceBadge = isFree
       ? `<span class="event-badge event-free">🎟️ Free</span>`
-      : t.price_label
-        ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
-        : `<span class="event-badge event-paid">🎫 Paid</span>`;
+      : t.is_unknown
+        ? `<span class="event-badge event-unknown">🎫 Check Price</span>`
+        : t.price_label
+          ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
+          : `<span class="event-badge event-paid">🎫 Paid</span>`;
 
     const categoryHtml  = t.category
       ? `<span class="detail-item">🎭 ${escHtml(t.category)}</span>` : '';
@@ -848,7 +850,7 @@ function renderEventsResults(elements) {
     const ticketBtn = hasTicket
       ? `<a class="gmaps-btn event-ticket-btn" href="${escHtml(t.ticket_url)}" target="_blank" rel="noopener">
            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a2 2 0 0 1 0 4v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-           ${isFree ? 'Register / RSVP' : 'Get Tickets'}
+           ${isFree ? 'Register / RSVP' : t.is_unknown ? 'View Event & Pricing' : 'Get Tickets'}
          </a>` : '';
 
     const mapsBtn = `<a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, t['addr:full'] || t.venue_name)}" target="_blank" rel="noopener">

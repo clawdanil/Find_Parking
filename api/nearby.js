@@ -205,11 +205,11 @@ async function queryTicketmaster(lat, lng, apiKey) {
     const end   = new Date(now); end.setDate(end.getDate() + 7);
     const fmt   = d => d.toISOString().replace(/\.\d{3}Z$/, 'Z');
 
-    // 2 miles — hyper-local, excludes across-river cities entirely
+    // 3 miles — local but enough for suburban areas
     const url = `https://app.ticketmaster.com/discovery/v2/events.json` +
       `?apikey=${apiKey}` +
       `&latlong=${lat},${lng}` +
-      `&radius=2&unit=miles` +
+      `&radius=3&unit=miles` +
       `&startDateTime=${fmt(now)}` +
       `&endDateTime=${fmt(end)}` +
       `&size=50` +
@@ -236,15 +236,19 @@ async function queryTicketmaster(lat, lng, apiKey) {
       const genre    = cls.genre?.name    || '';
       const category = [segment, genre].filter(Boolean).filter(s => s !== 'Undefined').join(' · ');
 
-      const prices   = e.priceRanges || [];
-      const isFree   = prices.length === 0 || prices.some(p => p.min === 0);
-      const minPrice = prices.length ? Math.min(...prices.map(p => p.min ?? 0)) : null;
-      const maxPrice = prices.length ? Math.max(...prices.map(p => p.max ?? 0)) : null;
-      const currency = prices[0]?.currency || 'USD';
-      const priceLabel = isFree && minPrice === 0 ? 'Free'
+      const prices    = e.priceRanges || [];
+      const hasPrice  = prices.length > 0;
+      const minPrice  = hasPrice ? Math.min(...prices.map(p => p.min ?? 0)) : null;
+      const maxPrice  = hasPrice ? Math.max(...prices.map(p => p.max ?? 0)) : null;
+      const currency  = prices[0]?.currency || 'USD';
+      // Only "Free" when Ticketmaster explicitly returns $0 max — missing price data ≠ free
+      const isFree    = hasPrice && maxPrice === 0;
+      const isUnknown = !hasPrice; // no price data returned at all → show "Check Price"
+      const priceLabel = isFree   ? 'Free'
+        : !hasPrice               ? null   // unknown — handled separately in UI
         : minPrice !== null && maxPrice !== null && minPrice !== maxPrice
           ? `$${minPrice}–$${maxPrice} ${currency}`
-          : minPrice !== null ? `$${minPrice} ${currency}` : null;
+          : minPrice !== null     ? `From $${minPrice} ${currency}` : null;
 
       const startLocal = e.dates?.start?.localDate || '';
       const startTime  = e.dates?.start?.localTime  || '';
@@ -273,8 +277,9 @@ async function queryTicketmaster(lat, lng, apiKey) {
           venue_name:  venue.name || '',
           category,
           date_label:  dateLabel,
-          is_free:     isFree,
-          price_label: priceLabel,
+          is_free:      isFree,
+          is_unknown:   isUnknown,
+          price_label:  priceLabel,
           ticket_url:  e.url || '',
           dist_label:  distMi < 0.1 ? `${Math.round(distMi * 5280)} ft` : `${distMi.toFixed(1)} mi`,
         },
