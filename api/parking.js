@@ -299,51 +299,6 @@ async function geocodeAddress(street, city) {
   return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
 }
 
-// ── Claude fallback for areas with sparse OSM data ────────────────────────────
-async function askClaude(apiKey, prompt) {
-  const r = await fetch('https://api.anthropic.com/v1/messages', {
-    method:  'POST',
-    headers: {
-      'Content-Type':      'application/json',
-      'x-api-key':         apiKey,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model:      'claude-haiku-4-5-20251001',
-      max_tokens: 1200,
-      messages:   [{ role: 'user', content: prompt }],
-    }),
-  });
-  const data = await r.json();
-  if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
-  let text = data.content[0].text.trim().replace(/```json|```/g, '');
-  const start = text.indexOf('[');
-  const end   = text.lastIndexOf(']');
-  if (start === -1 || end === -1) return [];
-  return JSON.parse(text.slice(start, end + 1));
-}
-
-async function claudeFallback(key, street, city, lat, lng, day, time, radiusBlocks) {
-  const radiusMi = (radiusBlocks * 0.05).toFixed(2);
-  const coords   = lat && lng ? ` Exact coordinates: ${lat}, ${lng}.` : '';
-  const strict   = `STRICT RADIUS RULE: only within ${radiusBlocks} city blocks (≈${radiusMi} miles). Return empty array if nothing fits.`;
-  const base     = `Location: "${street}", ${city}.${coords} ${day} ${time}. ${strict} Return ONLY a valid JSON array, no markdown.`;
-
-  const [free, paid] = await Promise.all([
-    askClaude(key, `${base} List up to 5 FREE_STREET spots (specific block faces where street parking is known to exist — NOT generic road names). Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search`).catch(() => []),
-    askClaude(key, `${base} List up to 3 PAID_STREET metered spots, up to 2 PAID_LOT surface lots, up to 3 GARAGE parking garages. Fields: type,address,side,landmark,lat,lng,heading,avg_cost,time_limit,permit_required,permit_zone,sweeping_schedule,overnight_parking,distance_from_search,notes`).catch(() => []),
-  ]);
-
-  return [...free, ...paid].map((s, i) => ({
-    ...s,
-    id:       i + 1,
-    type:     s.type     || 'FREE_STREET',
-    avg_cost: s.avg_cost || (s.type === 'FREE_STREET' ? 'Free' : 'Varies'),
-    source:   'ai',
-    _distMi:  parseFloat(String(s.distance_from_search || '0').replace(/[^\d.]/g, '')) || 0,
-  }));
-}
-
 // ── HERE Parking API — Layer 1 (real data, exact addresses) ──────────────────
 async function queryHereParking(lat, lng, radiusM, apiKey) {
   try {
@@ -517,14 +472,8 @@ export default async function handler(req) {
       delete s._osmId;
     });
 
-    // 4. If OSM returned nothing (area not well mapped), fall back to Claude
-    if (spots.length === 0 && process.env.ANTHROPIC_API_KEY) {
-      source = 'ai';
-      spots  = await claudeFallback(
-        process.env.ANTHROPIC_API_KEY, street, city, lat, lng, day, time, radiusBlocks
-      );
-      spots.forEach((s, i) => { s.id = i + 1; delete s._distMi; });
-    }
+    // No AI fallback — fabricated spots cause real-world confusion.
+    // If HERE + OSM found nothing, return empty and let the UI surface a clear message.
 
     return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source, searchLat: lat, searchLng: lng });
 

@@ -379,9 +379,7 @@ function renderResults(parsed, street) {
     document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', radiusBanner);
   }
   const src = parsed.source;
-  const srcBadge = src === 'ai'
-    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(167,139,250,.15);border:1px solid rgba(167,139,250,.25);color:#A78BFA;">🤖 AI estimated</span>`
-    : src === 'here'
+  const srcBadge = src === 'here'
     ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:#2563EB;">🔴 Live HERE data</span>`
     : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">🗺️ Live OSM data</span>`;
 
@@ -451,13 +449,15 @@ function showMessage(text, isError = false) {
 }
 
 // Build a Google Maps directions URL — origin = searched address, dest = spot
+// Always prefer address strings over raw coordinates so Maps shows names, not "Dropped Pin"
 function googleMapsUrl(lat, lng, address) {
-  const origin = (selectedLat && selectedLon)
-    ? `${selectedLat},${selectedLon}`
-    : encodeURIComponent(streetInput.value.trim());
-  const dest = (lat && lng)
-    ? `${lat},${lng}`
-    : encodeURIComponent(address || '');
+  const typedAddress = streetInput.value.trim();
+  const origin = typedAddress
+    ? encodeURIComponent(typedAddress)
+    : (selectedLat && selectedLon ? `${selectedLat},${selectedLon}` : '');
+  const dest = address
+    ? encodeURIComponent(address)
+    : (lat && lng ? `${lat},${lng}` : '');
   return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
 }
 
