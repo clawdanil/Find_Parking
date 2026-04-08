@@ -1,5 +1,25 @@
 const TIMEOUT_MS = 28000;
 
+// ── Dark mode — always start light, honour explicit user choice only ──────────
+(function initDarkMode() {
+  const saved = localStorage.getItem('theme');
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+})();
+
+document.getElementById('dark-toggle').addEventListener('click', () => {
+  const html   = document.documentElement;
+  const isDark = html.getAttribute('data-theme') === 'dark';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('theme', isDark ? 'light' : 'dark');
+  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
+});
+
+// Set correct icon on load
+(function syncToggleIcon() {
+  const btn = document.getElementById('dark-toggle');
+  if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
+})();
+
 const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
@@ -102,8 +122,9 @@ streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden
 streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
-let allSpots  = [];
-let activeTab = 'all';
+let allSpots     = [];
+let activeTab    = 'all';
+let activeFeature = 'parking';
 
 const TAB_TYPES = {
   all:    null,
@@ -128,7 +149,7 @@ function initMap() {
   resultsWrapper.classList.add('has-map');
   if (parkingMap) return;
   parkingMap = L.map('map', { zoomControl: true, attributionControl: true });
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/voyager/{z}/{x}/{y}{r}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/attributions">CARTO</a>',
     maxZoom: 19,
   }).addTo(parkingMap);
@@ -182,12 +203,12 @@ function updateMap(spots) {
 
     const popup = `
       <div style="padding:14px 16px;font-family:'Inter',sans-serif;min-width:200px;">
-        <div style="font-size:0.68rem;font-weight:600;color:rgba(241,245,249,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
-        <div style="font-size:0.93rem;font-weight:600;color:#F1F5F9;line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
-        <div style="font-size:0.78rem;color:rgba(241,245,249,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
-        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(241,245,249,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
-        <span style="display:inline-block;background:${color}33;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
-        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(241,245,249,.35);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
+        <div style="font-size:0.68rem;font-weight:600;color:rgba(10,10,20,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
+        <div style="font-size:0.93rem;font-weight:700;color:rgba(10,10,20,.88);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
+        <div style="font-size:0.78rem;color:rgba(10,10,20,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
+        ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(10,10,20,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
+        <span style="display:inline-block;background:${color}18;color:${color};font-size:0.65rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.4px;">${escHtml(s.status)}</span>
+        ${s.distance_from_search ? `<div style="font-size:0.73rem;color:rgba(10,10,20,.35);margin-top:8px;">📍 ${escHtml(s.distance_from_search)}</div>` : ''}
       </div>`;
 
     const marker = L.marker([s.lat, s.lng], { icon })
@@ -213,13 +234,25 @@ const LOADING_MSGS = [
   'Almost there…',
 ];
 
+const NEARBY_LOADING_MSGS = {
+  food:          ['Finding restaurants…', 'Checking menus…', 'Almost there…'],
+  bars:          ['Finding bars & pubs…', 'Checking nearby…', 'Almost there…'],
+  coffee:   ['Finding coffee shops…', 'Checking nearby…', 'Almost there…'],
+  gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
+  shopping:      ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
+  transit:       ['Finding transit stops…', 'Checking live departures…', 'Almost there…'],
+  entertainment: ['Finding entertainment…', 'Checking theatres & venues…', 'Almost there…'],
+  events:        ['Searching upcoming events…', 'Checking Ticketmaster…', 'Almost there…'],
+};
+
 let loadingTimer = null;
 let statusPollInterval = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
-function showSkeletons() {
+function showSkeletons(feature) {
   clearInterval(loadingTimer);
   let idx = 0;
+  const msgs = (feature && NEARBY_LOADING_MSGS[feature]) || LOADING_MSGS;
   resultsDiv.innerHTML = `
     <div class="loading-state">
       <div class="meter-light"></div>
@@ -232,17 +265,17 @@ function showSkeletons() {
       </div>
       <div class="meter-neck"></div>
       <div class="meter-pole"></div>
-      <p id="loading-msg" class="loading-msg">${LOADING_MSGS[0]}</p>
+      <p id="loading-msg" class="loading-msg">${msgs[0]}</p>
     </div>`;
 
   loadingTimer = setInterval(() => {
-    idx = (idx + 1) % LOADING_MSGS.length;
+    idx = (idx + 1) % msgs.length;
     const el = document.getElementById('loading-msg');
     if (el) {
       el.style.animation = 'none';
       void el.offsetHeight;
       el.style.animation = '';
-      el.textContent = LOADING_MSGS[idx];
+      el.textContent = msgs[idx];
     }
   }, 1700);
 }
@@ -292,12 +325,17 @@ function renderCards(spots) {
         <div class="spot-number">${num}</div>
         <div class="card-body">
           <div class="card-header-row">
-            <h3 class="card-address">${escHtml(s.address)}${s.side ? ` <span class="card-side">(${escHtml(s.side)})</span>` : ''}</h3>
+            <div>
+              <h3 class="card-address">${escHtml(s.address)}${s.side ? ` <span class="card-side">(${escHtml(s.side)})</span>` : ''}</h3>
+              ${s.landmark ? `<p class="card-landmark">🏢 ${escHtml(s.landmark)}</p>` : ''}
+            </div>
             <span class="status-badge" style="background:${color}22;color:${color}">${meta.icon} ${escHtml(meta.label)}</span>
           </div>
-          ${isPaid ? `<div class="cost-badge">💰 ${escHtml(s.avg_cost)}</div>` : ''}
-          ${s.landmark ? `<p class="card-landmark">📌 ${escHtml(s.landmark)}</p>` : ''}
-          ${s.lat && s.lng && ['FREE_STREET','PAID_STREET'].includes(s.type) ? `<img class="card-streetview" src="/api/streetview?lat=${s.lat}&lng=${s.lng}&heading=${s.heading ?? 0}" alt="Street view" loading="lazy" onerror="this.parentElement.querySelector('.sv-disclaimer')?.remove();this.style.display='none'"><p class="sv-disclaimer">📷 Approximate street view — always verify on arrival</p>` : (s.type === 'GARAGE' || s.type === 'PAID_LOT') ? `<div class="card-garage-thumb"><span>${s.type === 'GARAGE' ? '🏢' : '🅿️'}</span><span>${s.type === 'GARAGE' ? 'Parking Garage' : 'Parking Lot'}</span></div>` : ''}
+          <div class="card-type-banner" style="background:${color}0d;border-color:${color}22">
+            <span class="ctb-icon">${meta.icon}</span>
+            <span class="ctb-label">${escHtml(meta.label)}</span>
+            ${s.here_avail ? `<span class="ctb-realtime ${s.here_avail_count === 0 ? 'ctb-full' : s.here_avail_count <= 10 ? 'ctb-low' : 'ctb-open'}">${s.here_avail_count === 0 ? '🔴' : s.here_avail_count <= 10 ? '🟡' : '🟢'} ${escHtml(s.here_avail)}</span>` : s.avg_cost && isPaid ? `<span class="ctb-cost">💰 ${escHtml(s.avg_cost)}</span>` : ''}
+          </div>
           <div class="card-details">
             ${s.time_limit   ? `<span class="detail-item">🕐 ${escHtml(s.time_limit)}</span>` : ''}
             ${s.sweeping_schedule && s.sweeping_schedule !== 'None' ? `<span class="detail-item">🧹 ${escHtml(s.sweeping_schedule)}</span>` : ''}
@@ -314,6 +352,10 @@ function renderCards(spots) {
               <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
             </div>
           </div>` : ''}
+          <a class="gmaps-btn" href="${googleMapsUrl(s.lat, s.lng, s.address)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Google Maps
+          </a>
         </div>
       </div>`;
   }).join('');
@@ -346,7 +388,7 @@ function renderResults(parsed, street) {
 
   const spots = parsed.spots;
   if (!Array.isArray(spots) || spots.length === 0) {
-    showMessage('No parking spots found. Try a different location.');
+    showMessage('No parking spots found within 4 blocks. Try a different address.');
     return;
   }
 
@@ -358,6 +400,38 @@ function renderResults(parsed, street) {
   document.getElementById('stat-city').textContent   = parsed.neighborhood || selectedCity;
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   statsBar.hidden = false;
+
+  // Show radius notice
+  let radiusBanner = document.getElementById('radius-banner');
+  if (!radiusBanner) {
+    radiusBanner = document.createElement('div');
+    radiusBanner.id = 'radius-banner';
+    radiusBanner.style.cssText = `
+      position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;
+      padding:0 20px;box-sizing:border-box;
+    `;
+    document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', radiusBanner);
+  }
+  const src = parsed.source;
+  const srcBadge = src === 'here'
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(37,99,235,.12);border:1px solid rgba(37,99,235,.25);color:#2563EB;">🔴 Live HERE data</span>`
+    : src === 'google'
+    ? `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(234,67,53,.10);border:1px solid rgba(234,67,53,.22);color:#EA4335;">📍 Google Places</span>`
+    : `<span style="margin-left:auto;font-size:.68rem;padding:2px 8px;border-radius:100px;background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.25);color:#34D399;">🗺️ Live OSM data</span>`;
+
+  if (parsed.radiusExpanded) {
+    radiusBanner.innerHTML = `<div style="
+      display:flex;align-items:center;gap:10px;padding:10px 18px;
+      background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);
+      border-radius:14px;font-size:.78rem;font-weight:600;color:#FBBF24;
+    ">⚠️ Fewer than 3 spots within 2 blocks — expanded search to 4 blocks.${srcBadge}</div>`;
+  } else {
+    radiusBanner.innerHTML = `<div style="
+      display:flex;align-items:center;gap:10px;padding:10px 18px;
+      background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18);
+      border-radius:14px;font-size:.78rem;font-weight:600;color:#34D399;
+    ">✅ Showing parking within 2 blocks.${srcBadge}</div>`;
+  }
 
   // Show tabs and render
   document.getElementById('results-tabs-outer').hidden = false;
@@ -414,6 +488,19 @@ function showMessage(text, isError = false) {
     </div>`;
 }
 
+// Build a Google Maps directions URL — origin = searched address, dest = spot
+// Always prefer address strings over raw coordinates so Maps shows names, not "Dropped Pin"
+function googleMapsUrl(lat, lng, address) {
+  const typedAddress = streetInput.value.trim();
+  const origin = typedAddress
+    ? encodeURIComponent(typedAddress)
+    : (selectedLat && selectedLon ? `${selectedLat},${selectedLon}` : '');
+  const dest = address
+    ? encodeURIComponent(address)
+    : (lat && lng ? `${lat},${lng}` : '');
+  return `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=driving`;
+}
+
 function escHtml(str) {
   return String(str ?? '')
     .replace(/&/g, '&amp;')
@@ -449,6 +536,8 @@ async function searchParking() {
   searchBtn.disabled = true;
   statsBar.hidden = true;
   document.getElementById('results-tabs-outer').hidden = true;
+  const rb = document.getElementById('radius-banner');
+  if (rb) rb.innerHTML = '';
 
   const timeoutPromise = new Promise((_, reject) =>
     setTimeout(() => reject(new Error('TIMEOUT')), TIMEOUT_MS)
@@ -462,6 +551,8 @@ async function searchParking() {
         body: JSON.stringify({
           city,
           street,
+          lat:  selectedLat,
+          lng:  selectedLon,
           day:  new Date().toLocaleDateString('en-US', { weekday: 'long' }),
           time: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
         })
@@ -478,6 +569,16 @@ async function searchParking() {
     const data = await response.json();
     console.log('API response:', data);
     if (data.error) throw new Error(data.error);
+    // Capture geocoded coordinates so feature tiles can use them
+    if (data.searchLat && data.searchLng) {
+      selectedLat = data.searchLat;
+      selectedLon = data.searchLng;
+    }
+    // Reset to parking tile when a fresh search runs
+    activeFeature = 'parking';
+    document.querySelectorAll('.feature-tile').forEach(t => {
+      t.classList.toggle('active', t.dataset.feature === 'parking');
+    });
     renderResults(data, street);
   } catch (err) {
     console.error('Full error:', err);
@@ -560,9 +661,9 @@ locationBtn.addEventListener('click', () => {
         return;
       }
 
-      locationBtn.textContent = '📍 My Location';
+      locationBtn.textContent = '📍 My Location ✓';
       locationBtn.disabled = false;
-      searchParking();
+      // Do NOT auto-search — user must click Search explicitly
     },
     () => {
       locationBtn.textContent = '📍 Use My Current Location';
@@ -572,3 +673,394 @@ locationBtn.addEventListener('click', () => {
     { enableHighAccuracy: true, timeout: 10000 }
   );
 });
+
+// ── Unit detection: US/UK/Myanmar → imperial; everywhere else → metric ────────
+const IMPERIAL_STATES = /,\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i;
+function getUnits() {
+  const text = (streetInput.value || '') + ' ' + (selectedCity || '');
+  if (IMPERIAL_STATES.test(text)) return 'imperial';
+  if (/\b(USA|United States|United Kingdom|England|Scotland|Wales|Myanmar|Burma|Liberia)\b/i.test(text)) return 'imperial';
+  return 'metric';
+}
+
+// ── Feature Tiles ─────────────────────────────────────────────────────────────
+
+const FEATURE_CONFIG = {
+  parking:       { label: 'Parking',       icon: '🅿️' },
+  transit:       { label: 'Transit',       icon: '🚇' },
+  food:          { label: 'Food',          icon: '🍔' },
+  bars:          { label: 'Bars',          icon: '🍺' },
+  coffee:        { label: 'Coffee',        icon: '☕' },
+  gym:           { label: 'Gym',           icon: '💪' },
+  shopping:      { label: 'Shopping',      icon: '🛒' },
+  entertainment: { label: 'Entertainment', icon: '🎬' },
+  events:        { label: 'Events',        icon: '🎟️' },
+};
+
+function haversineMiFE(lat1, lon1, lat2, lon2) {
+  const R = 3958.8, toR = d => d * Math.PI / 180;
+  const dLat = toR(lat2 - lat1), dLon = toR(lon2 - lon1);
+  const a = Math.sin(dLat/2)**2 + Math.cos(toR(lat1)) * Math.cos(toR(lat2)) * Math.sin(dLon/2)**2;
+  return R * 2 * Math.asin(Math.sqrt(a));
+}
+
+function formatDistFE(mi) {
+  if (getUnits() === 'imperial') {
+    return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
+  }
+  const km = mi * 1.60934;
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+function hideRadiusBanner() {
+  const rb = document.getElementById('radius-banner');
+  if (rb) rb.innerHTML = '';
+}
+
+function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {}) {
+  const cfg   = FEATURE_CONFIG[feature];
+  const items = elements
+    .map(el => {
+      const lat = el.lat ?? el.center?.lat;
+      const lon = el.lon ?? el.center?.lon;
+      if (!lat || !lon) return null;
+      const tags = el.tags || {};
+      const name = tags.name || tags.brand || tags['name:en'] || '';
+      if (!name) return null;
+      const dist        = haversineMiFE(searchLat, searchLng, lat, lon);
+      const addr        = [tags['addr:housenumber'], tags['addr:street']].filter(Boolean).join(' ')
+                       || tags['addr:full'] || '';
+      const openStatus  = tags.open_status  || '';   // 'Open now' | 'Closed now' | ''
+      const todayHours  = tags.today_hours  || '';   // e.g. '9:00 AM – 10:00 PM'
+      const rating      = tags.rating       || '';
+      const cuisine     = tags.cuisine      || '';
+      return { name, dist, addr, openStatus, todayHours, rating, cuisine, lat, lon };
+    })
+    .filter(Boolean)
+    .sort((a, b) => a.dist - b.dist)
+    .filter((item, i, arr) => i === 0 || !(item.name === arr[i-1].name && Math.abs(item.dist - arr[i-1].dist) < 0.01))
+    .slice(0, 15);
+
+  if (items.length === 0) {
+    showMessage(`No ${cfg.label} found nearby. OSM data may be incomplete for this area — try a different address.`);
+    return;
+  }
+
+  // Update stats bar with nearby-friendly text
+  statsBar.hidden = false;
+  const countEl = document.getElementById('stat-count');
+  countEl.textContent = items.length;
+  // Temporarily patch the " spots found" label text
+  const statCountParent = countEl.parentElement;
+  if (statCountParent) statCountParent.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${items.length}</strong>&nbsp;${cfg.label.toLowerCase()} found`;
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
+
+  // Show expansion notice if radius was widened to find results
+  if (meta.expanded && meta.radiusLabel) {
+    let rb = document.getElementById('radius-banner');
+    if (!rb) {
+      rb = document.createElement('div');
+      rb.id = 'radius-banner';
+      rb.style.cssText = 'position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;padding:0 20px;box-sizing:border-box;';
+      document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
+    }
+    rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
+      🔍 No results nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+    </div>`;
+  }
+
+  resultsDiv.innerHTML = items.map((item, i) => {
+    const num         = String(i + 1).padStart(2, '0');
+    const isOpen      = item.openStatus === 'Open now';
+    const isClosed    = item.openStatus === 'Closed now';
+    const statusColor = isOpen ? '#16A34A' : isClosed ? '#DC2626' : '';
+    const statusBg    = isOpen ? 'rgba(22,163,74,.10)' : isClosed ? 'rgba(220,38,38,.10)' : '';
+
+    const openBadgeHtml = item.openStatus
+      ? `<span class="status-badge" style="background:${statusBg};color:${statusColor};margin-left:auto">
+           ${isOpen ? '🟢' : '🔴'} ${item.openStatus}
+         </span>`
+      : '';
+
+    const hoursHtml = item.todayHours
+      ? `<span class="detail-item">🕐 Today: ${escHtml(item.todayHours)}</span>`
+      : '';
+
+    const ratingHtml = item.rating
+      ? `<span class="detail-item" style="color:#D97706;font-weight:600">${escHtml(item.rating)}</span>`
+      : '';
+
+    const cuisineHtml = item.cuisine && !item.todayHours
+      ? `<span class="detail-item">ℹ️ ${escHtml(item.cuisine.slice(0, 30))}</span>`
+      : '';
+
+    return `
+      <div class="parking-card nearby-card" style="--status-color:#2563EB;--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div style="flex:1;min-width:0">
+              <h3 class="card-address">${escHtml(item.name)}</h3>
+              <p class="card-landmark">📍 ${item.addr ? escHtml(item.addr) : formatDistFE(item.dist) + ' away'}</p>
+            </div>
+            ${openBadgeHtml || `<span class="status-badge" style="background:rgba(37,99,235,.10);color:#2563EB">${cfg.icon} ${cfg.label}</span>`}
+          </div>
+          <div class="card-details">
+            <span class="detail-item">🗺️ ${formatDistFE(item.dist)}</span>
+            ${hoursHtml}
+            ${ratingHtml}
+            ${cuisineHtml}
+          </div>
+          <a class="gmaps-btn" href="${googleMapsUrl(item.lat, item.lon, item.addr || item.name)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Open in Google Maps
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+
+  if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
+}
+
+function renderTransitResults(elements, meta = {}) {
+  clearInterval(loadingTimer);
+  if (!elements || elements.length === 0) {
+    const r = meta.radiusLabel || 'the search area';
+    showMessage(`No transit stops found within ${r}. Try a different address.`);
+    return;
+  }
+
+  statsBar.hidden = false;
+  const countEl = document.getElementById('stat-count');
+  if (countEl?.parentElement) {
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;transit stops nearby`;
+  }
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
+
+  if (meta.expanded && meta.radiusLabel) {
+    let rb = document.getElementById('radius-banner');
+    if (!rb) {
+      rb = document.createElement('div');
+      rb.id = 'radius-banner';
+      rb.style.cssText = 'position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;padding:0 20px;box-sizing:border-box;';
+      document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
+    }
+    rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
+      🔍 No stops nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+    </div>`;
+  }
+
+  resultsDiv.innerHTML = elements.map((el, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const isPath = el.transitType === 'PATH Train';
+    const typeColor = isPath ? '#004B87'
+      : el.transitType === 'Subway'  ? '#0039A6'
+      : el.transitType.includes('Bus') ? '#006847'
+      : '#374151';
+
+    const typeBadge = `<span class="transit-type-badge" style="background:${typeColor}18;color:${typeColor};border-color:${typeColor}30">${el.transitType}</span>`;
+
+    const departureHtml = el.departures && el.departures.length > 0
+      ? `<div class="transit-departures">
+          ${el.departures.map(d => `
+            <div class="transit-dep-row">
+              <span class="transit-dep-line" style="background:${d.color}"></span>
+              <span class="transit-dep-dest">→ ${escHtml(d.headsign)}</span>
+              <span class="transit-dep-time ${d.arrival === 'Due' ? 'dep-due' : ''}">${escHtml(d.arrival)}</span>
+            </div>`).join('')}
+         </div>`
+      : el.transitType.includes('Bus')
+        ? `<p class="transit-no-rt">🚌 Check schedules via Google Maps</p>`
+        : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+
+    return `
+      <div class="parking-card nearby-card" style="--status-color:${typeColor};--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div style="flex:1;min-width:0">
+              <h3 class="card-address">${escHtml(el.name)}</h3>
+              ${el.address ? `<p class="card-landmark">📍 ${escHtml(el.address)}</p>` : ''}
+            </div>
+            ${typeBadge}
+          </div>
+          <div class="card-details" style="margin-bottom:10px">
+            <span class="detail-item">🗺️ ${escHtml(el.distLabel)}</span>
+          </div>
+          ${departureHtml}
+          <a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, el.address || el.name)}" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+            Directions
+          </a>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderEventsResults(elements) {
+  clearInterval(loadingTimer);
+  if (!elements || elements.length === 0) {
+    showMessage('No public events found within 3 miles in the next 7 days.');
+    return;
+  }
+
+  // Sort by distance to venue — nearest first
+  elements.sort((a, b) =>
+    haversineMiFE(selectedLat, selectedLon, a.lat, a.lon) -
+    haversineMiFE(selectedLat, selectedLon, b.lat, b.lon)
+  );
+
+  statsBar.hidden = false;
+  const countEl = document.getElementById('stat-count');
+  if (countEl?.parentElement) {
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;events this week`;
+  }
+  document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
+  document.getElementById('stat-city').textContent   = selectedCity || '–';
+  document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  document.getElementById('results-tabs-outer').hidden = true;
+  hideRadiusBanner();
+
+  resultsDiv.innerHTML = elements.map((el, i) => {
+    const t   = el.tags || {};
+    const num = String(i + 1).padStart(2, '0');
+    const isFree  = t.is_free;
+    const hasTicket = !!t.ticket_url;
+
+    const priceBadge = isFree
+      ? `<span class="event-badge event-free">🎟️ Free</span>`
+      : t.is_unknown
+        ? `<span class="event-badge event-unknown">🎫 Check Price</span>`
+        : t.price_label
+          ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
+          : `<span class="event-badge event-paid">🎫 Paid</span>`;
+
+    const categoryHtml  = t.category
+      ? `<span class="detail-item">🎭 ${escHtml(t.category)}</span>` : '';
+    const dateHtml = t.date_label
+      ? `<span class="detail-item">📅 ${escHtml(t.date_label)}</span>` : '';
+    const showtimesHtml = t.showtimes
+      ? `<span class="detail-item" style="color:#7C3AED;font-weight:600">🔁 ${escHtml(t.showtimes)}</span>` : '';
+    const distHtml = t.dist_label
+      ? `<span class="detail-item">🗺️ ${escHtml(t.dist_label)} away</span>` : '';
+    const venueHtml = t.venue_name
+      ? `<span class="detail-item">📍 ${escHtml(t.venue_name)}${t['addr:full'] ? ' — ' + escHtml(t['addr:full']) : ''}</span>` : '';
+
+    const ticketBtn = hasTicket
+      ? `<a class="gmaps-btn event-ticket-btn" href="${escHtml(t.ticket_url)}" target="_blank" rel="noopener">
+           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a2 2 0 0 1 0 4v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
+           ${isFree ? 'Register / RSVP' : t.is_unknown ? 'View Event & Pricing' : 'Get Tickets'}
+         </a>` : '';
+
+    const mapsBtn = `<a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, t['addr:full'] || t.venue_name)}" target="_blank" rel="noopener">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
+      Open in Google Maps
+    </a>`;
+
+    return `
+      <div class="parking-card nearby-card" style="--status-color:#7C3AED;--delay:${i * 0.06}s">
+        <div class="spot-number">${num}</div>
+        <div class="card-body">
+          <div class="card-header-row">
+            <div style="flex:1;min-width:0">
+              <h3 class="card-address">${escHtml(t.name)}</h3>
+            </div>
+            ${priceBadge}
+          </div>
+          <div class="card-details">
+            ${dateHtml}
+            ${showtimesHtml}
+            ${categoryHtml}
+            ${distHtml}
+            ${venueHtml}
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${ticketBtn}
+            ${mapsBtn}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+async function loadFeature(feature) {
+  if (!selectedLat || !selectedLon) {
+    showMessage('Enter an address and click Search first, then choose a category.', true);
+    return;
+  }
+
+  activeFeature = feature;
+
+  document.querySelectorAll('.feature-tile').forEach(t => {
+    t.classList.toggle('active', t.dataset.feature === feature);
+  });
+
+  if (feature === 'parking') {
+    hideRadiusBanner();
+    if (allSpots.length > 0) {
+      renderCards(allSpots);
+      statsBar.hidden = false;
+      document.getElementById('results-tabs-outer').hidden = false;
+      // restore parking stat label
+      const countEl = document.getElementById('stat-count');
+      if (countEl?.parentElement) {
+        countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${allSpots.length}</strong>&nbsp;spots found`;
+      }
+    } else {
+      searchParking();
+    }
+    return;
+  }
+
+  showSkeletons(feature);
+  statsBar.hidden = true;
+  hideRadiusBanner();
+
+  try {
+    const res = await fetch('/api/nearby', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lat: selectedLat, lng: selectedLon, feature, units: getUnits() }),
+    });
+    clearInterval(loadingTimer);
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const data = await res.json();
+    if (data.noKey) {
+      showMessage('Events require a Ticketmaster API key. Add TICKETMASTER_API_KEY in Vercel settings.', true);
+      return;
+    }
+    if (data.isTransit) {
+      renderTransitResults(data.elements || [], data);
+    } else if (data.isEvents) {
+      renderEventsResults(data.elements || []);
+    } else {
+      renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);
+    }
+  } catch (err) {
+    clearInterval(loadingTimer);
+    showMessage(`Could not load ${FEATURE_CONFIG[feature].label} data. Please try again.`, true);
+  }
+}
+
+document.querySelectorAll('.feature-tile').forEach(tile => {
+  tile.addEventListener('click', () => loadFeature(tile.dataset.feature));
+});
+
+// ── Attribution toggle ────────────────────────────────────────────────────────
+const attrToggle = document.getElementById('attr-toggle');
+const attrBody   = document.getElementById('attr-body');
+if (attrToggle && attrBody) {
+  attrToggle.addEventListener('click', () => {
+    const open = attrBody.classList.toggle('open');
+    attrToggle.classList.toggle('open', open);
+    attrToggle.setAttribute('aria-expanded', String(open));
+  });
+}
