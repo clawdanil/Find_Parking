@@ -214,6 +214,7 @@ const LOADING_MSGS = [
 ];
 
 let loadingTimer = null;
+let statusPollInterval = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
 function showSkeletons() {
@@ -319,13 +320,24 @@ function renderCards(spots) {
 
   updateMap(spots);
 
-  document.querySelectorAll('.card-report').forEach(el => {
+  const cardReports = Array.from(document.querySelectorAll('.card-report'));
+  cardReports.forEach(el => {
     const spotId = el.dataset.spotId;
     fetchSpotStatus(spotId, el.querySelector('.report-status'));
     el.querySelectorAll('.report-btn').forEach(btn => {
       btn.addEventListener('click', () => handleReport(spotId, btn.dataset.status, el));
     });
   });
+
+  // Refresh crowdsource statuses every 90s while parking results are visible
+  clearInterval(statusPollInterval);
+  if (cardReports.length > 0) {
+    statusPollInterval = setInterval(() => {
+      cardReports.forEach(el => {
+        fetchSpotStatus(el.dataset.spotId, el.querySelector('.report-status'));
+      });
+    }, 90_000);
+  }
 }
 
 // ── Render parking cards ──────────────────────────────────────────────────────
@@ -358,19 +370,22 @@ async function fetchSpotStatus(spotId, statusEl) {
   try {
     const r = await fetch(`/api/status?spot_id=${encodeURIComponent(spotId)}`);
     const data = await r.json();
-    if (data.status) renderStatusBadge(statusEl, data.status, data.minutes_ago);
+    if (data.status) renderStatusBadge(statusEl, data.status, data.minutes_ago, data.free_votes, data.taken_votes);
   } catch {}
 }
 
-function renderStatusBadge(statusEl, status, minutesAgo) {
+function renderStatusBadge(statusEl, status, minutesAgo, freeVotes = 0, takenVotes = 0) {
   const isFree  = status === 'FREE';
   const color   = isFree ? '#30D158' : '#FF453A';
   const icon    = isFree ? '✅' : '❌';
-  const label   = isFree ? 'Reported free' : 'Reported taken';
   const timeStr = minutesAgo < 1 ? 'just now' : `${minutesAgo} min ago`;
+  const parts   = [];
+  if (freeVotes  > 0) parts.push(`${freeVotes} say Free`);
+  if (takenVotes > 0) parts.push(`${takenVotes} say Taken`);
+  const voteStr = parts.length ? parts.join(' · ') + ' · ' : '';
   statusEl.innerHTML = `
     <span class="report-status-badge" style="color:${color};background:${color}12;border-color:${color}40">
-      ${icon} ${label} · ${timeStr}
+      ${icon} ${voteStr}${timeStr}
     </span>`;
 }
 
@@ -383,7 +398,8 @@ async function handleReport(spotId, status, cardReportEl) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ spot_id: spotId, status })
     });
-    renderStatusBadge(cardReportEl.querySelector('.report-status'), status, 0);
+    // Re-fetch to get updated vote counts immediately
+    await fetchSpotStatus(spotId, cardReportEl.querySelector('.report-status'));
   } catch {
     btns.forEach(b => b.disabled = false);
   }
