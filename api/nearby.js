@@ -7,6 +7,24 @@ function haversineMi(lat1, lon1, lat2, lon2) {
   return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
+// Format a distance value based on unit preference
+function fmtDist(mi, units) {
+  if (units === 'imperial') {
+    return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
+  }
+  const km = mi * 1.60934;
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
+}
+
+// Format a radius in metres for display
+function fmtRadius(metres, units) {
+  if (units === 'imperial') {
+    const mi = metres * 0.000621371;
+    return mi < 0.1 ? `${Math.round(metres * 3.28084)} ft` : `${mi.toFixed(1)} mi`;
+  }
+  return metres >= 1000 ? `${(metres / 1000).toFixed(1).replace(/\.0$/, '')} km` : `${metres} m`;
+}
+
 // ── Expansion radius tiers per feature (metres) ───────────────────────────────
 const RADIUS_TIERS = {
   food:     [800,  1600, 4000, 8000, 15000],
@@ -86,9 +104,7 @@ function json(data, status = 200) {
   });
 }
 
-function fmtRadius(metres) {
-  return metres >= 1000 ? `${(metres / 1000).toFixed(1).replace(/\.0$/, '')} km` : `${metres} m`;
-}
+
 
 // ── Places Details: today's hours for one place ───────────────────────────────
 async function fetchPlaceHours(placeId, key) {
@@ -369,23 +385,18 @@ function pathDeparturesForStation(code, table) {
   }).slice(0, 4);
 }
 
-// ── Transit: Google Places stations + PATH real-time ─────────────────────────
-async function queryTransit(lat, lng, googleKey) {
-  if (!googleKey) return [];
+// ── Transit: Google Places stations + PATH real-time, with radius expansion ───
+const TRANSIT_TIERS = [800, 1600, 3200, 8000, 16000]; // metres
 
-  // Fetch PATH real-time and transit stations in parallel
+async function queryTransitAtRadius(lat, lng, googleKey, radiusM) {
   const [pathTable, ...placeArrays] = await Promise.all([
     fetchPathRealtime(),
-    ...[
-      'transit_station',
-      'subway_station',
-      'bus_station',
-    ].map(async type => {
+    ...['transit_station', 'subway_station', 'bus_station'].map(async type => {
       try {
         const ctrl = new AbortController();
         setTimeout(() => ctrl.abort(), 8000);
         const res = await fetch(
-          `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=1000&type=${type}&key=${googleKey}`,
+          `https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=${lat},${lng}&radius=${radiusM}&type=${type}&key=${googleKey}`,
           { signal: ctrl.signal }
         );
         if (!res.ok) return [];
@@ -395,14 +406,9 @@ async function queryTransit(lat, lng, googleKey) {
     }),
   ]);
 
-  // Deduplicate stations by place_id, sort by distance
   const seen = new Set();
   const stations = placeArrays.flat()
-    .filter(p => {
-      if (seen.has(p.place_id)) return false;
-      seen.add(p.place_id);
-      return true;
-    })
+    .filter(p => { if (seen.has(p.place_id)) return false; seen.add(p.place_id); return true; })
     .map(p => ({
       name:     p.name || 'Station',
       lat:      p.geometry.location.lat,
@@ -413,35 +419,42 @@ async function queryTransit(lat, lng, googleKey) {
     .sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon))
     .slice(0, 10);
 
-  return stations.map(s => {
-    const distMi  = haversineMi(lat, lng, s.lat, s.lon);
-    const nameL   = s.name.toLowerCase();
-    const distLabel = distMi < 0.1 ? `${Math.round(distMi * 5280)} ft` : `${distMi.toFixed(2)} mi`;
+  return { stations, pathTable };
+}
 
-    // Match to PATH station code
+async function queryTransit(lat, lng, googleKey, units) {
+  if (!googleKey) return { elements: [], radiusLabel: '', expanded: false };
+
+  let stations = [], pathTable = null, usedRadius = TRANSIT_TIERS[0], expanded = false;
+
+  for (const radius of TRANSIT_TIERS) {
+    usedRadius = radius;
+    const result = await queryTransitAtRadius(lat, lng, googleKey, radius);
+    if (result.stations.length > 0) { stations = result.stations; pathTable = result.pathTable; break; }
+    expanded = true;
+  }
+
+  const elements = stations.map(s => {
+    const distMi    = haversineMi(lat, lng, s.lat, s.lon);
+    const nameL     = s.name.toLowerCase();
+    const distLabel = fmtDist(distMi, units);
+
     let pathCode = null;
     for (const [keyword, code] of Object.entries(PATH_CODE_MAP)) {
       if (nameL.includes(keyword)) { pathCode = code; break; }
     }
-    const departures = pathCode ? pathDeparturesForStation(pathCode, pathTable) : [];
-
-    // Determine transit type label
-    const transitType = pathCode                          ? 'PATH Train'
-      : s.types.includes('subway_station')               ? 'Subway'
-      : s.types.includes('bus_station')                  ? 'Bus Station'
-      : nameL.includes('bus')                            ? 'Bus Stop'
+    const departures  = pathCode ? pathDeparturesForStation(pathCode, pathTable) : [];
+    const transitType = pathCode                             ? 'PATH Train'
+      : s.types.includes('subway_station')                  ? 'Subway'
+      : s.types.includes('bus_station')                     ? 'Bus Station'
+      : nameL.includes('bus')                               ? 'Bus Stop'
       : nameL.includes('ferry') || nameL.includes('light rail') ? 'Light Rail / Ferry'
       : 'Transit';
 
-    return {
-      lat: s.lat, lon: s.lon,
-      name: s.name,
-      address: s.vicinity,
-      transitType,
-      distLabel,
-      departures,  // [{headsign, arrival, color}]
-    };
+    return { lat: s.lat, lon: s.lon, name: s.name, address: s.vicinity, transitType, distLabel, departures };
   });
+
+  return { elements, radiusLabel: fmtRadius(usedRadius, units), expanded };
 }
 
 // ── Handler: try each radius tier until results found ────────────────────────
@@ -450,21 +463,22 @@ export default async function handler(req) {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  let lat, lng, feature;
+  let lat, lng, feature, units;
   if (req.method === 'POST') {
-    try { ({ lat, lng, feature } = await req.json()); } catch { return json({ error: 'Bad request' }, 400); }
+    try { ({ lat, lng, feature, units } = await req.json()); } catch { return json({ error: 'Bad request' }, 400); }
   } else {
     const p = new URL(req.url).searchParams;
-    lat = parseFloat(p.get('lat')); lng = parseFloat(p.get('lng')); feature = p.get('feature');
+    lat = parseFloat(p.get('lat')); lng = parseFloat(p.get('lng')); feature = p.get('feature'); units = p.get('units') || 'metric';
   }
+  units = units || 'metric';
 
   if (!lat || !lng || !feature) return json({ error: 'Missing params' }, 400);
 
   // ── Transit: Google Places + PATH real-time ──────────────────────────────
   if (feature === 'transit') {
     const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
-    const stations  = await queryTransit(lat, lng, googleKey);
-    return json({ elements: stations, feature, count: stations.length, isTransit: true });
+    const { elements, radiusLabel, expanded } = await queryTransit(lat, lng, googleKey, units);
+    return json({ elements, feature, count: elements.length, isTransit: true, radiusLabel, expanded });
   }
 
   // ── Events: Ticketmaster API, not Places/Overpass ─────────────────────────
@@ -505,7 +519,7 @@ export default async function handler(req) {
     feature,
     count:       (elements || []).length,
     searchRadius: usedRadius,
-    radiusLabel:  fmtRadius(usedRadius),
+    radiusLabel:  fmtRadius(usedRadius, units),
     expanded,                          // true when default radius had no results
   });
 }

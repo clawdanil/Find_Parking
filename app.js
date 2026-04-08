@@ -1,12 +1,9 @@
 const TIMEOUT_MS = 28000;
 
-// ── Dark mode ─────────────────────────────────────────────────────────────────
+// ── Dark mode — always start light, honour explicit user choice only ──────────
 (function initDarkMode() {
   const saved = localStorage.getItem('theme');
-  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  if (saved === 'dark' || (!saved && prefersDark)) {
-    document.documentElement.setAttribute('data-theme', 'dark');
-  }
+  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
 })();
 
 document.getElementById('dark-toggle').addEventListener('click', () => {
@@ -661,6 +658,15 @@ locationBtn.addEventListener('click', () => {
   );
 });
 
+// ── Unit detection: US/UK/Myanmar → imperial; everywhere else → metric ────────
+const IMPERIAL_STATES = /,\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i;
+function getUnits() {
+  const text = (streetInput.value || '') + ' ' + (selectedCity || '');
+  if (IMPERIAL_STATES.test(text)) return 'imperial';
+  if (/\b(USA|United States|United Kingdom|England|Scotland|Wales|Myanmar|Burma|Liberia)\b/i.test(text)) return 'imperial';
+  return 'metric';
+}
+
 // ── Feature Tiles ─────────────────────────────────────────────────────────────
 
 const FEATURE_CONFIG = {
@@ -683,7 +689,11 @@ function haversineMiFE(lat1, lon1, lat2, lon2) {
 }
 
 function formatDistFE(mi) {
-  return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
+  if (getUnits() === 'imperial') {
+    return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
+  }
+  const km = mi * 1.60934;
+  return km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(1)} km`;
 }
 
 function hideRadiusBanner() {
@@ -800,10 +810,11 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
-function renderTransitResults(elements) {
+function renderTransitResults(elements, meta = {}) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
-    showMessage('No transit stops found within 1 km. Try a different address.');
+    const r = meta.radiusLabel || 'the search area';
+    showMessage(`No transit stops found within ${r}. Try a different address.`);
     return;
   }
 
@@ -817,6 +828,19 @@ function renderTransitResults(elements) {
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   document.getElementById('results-tabs-outer').hidden = true;
   hideRadiusBanner();
+
+  if (meta.expanded && meta.radiusLabel) {
+    let rb = document.getElementById('radius-banner');
+    if (!rb) {
+      rb = document.createElement('div');
+      rb.id = 'radius-banner';
+      rb.style.cssText = 'position:relative;z-index:10;width:100%;max-width:820px;margin:0 auto 10px;padding:0 20px;box-sizing:border-box;';
+      document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
+    }
+    rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
+      🔍 No stops nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+    </div>`;
+  }
 
   resultsDiv.innerHTML = elements.map((el, i) => {
     const num = String(i + 1).padStart(2, '0');
@@ -988,7 +1012,7 @@ async function loadFeature(feature) {
     const res = await fetch('/api/nearby', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lat: selectedLat, lng: selectedLon, feature }),
+      body: JSON.stringify({ lat: selectedLat, lng: selectedLon, feature, units: getUnits() }),
     });
     clearInterval(loadingTimer);
     if (!res.ok) throw new Error('API error ' + res.status);
@@ -998,7 +1022,7 @@ async function loadFeature(feature) {
       return;
     }
     if (data.isTransit) {
-      renderTransitResults(data.elements || []);
+      renderTransitResults(data.elements || [], data);
     } else if (data.isEvents) {
       renderEventsResults(data.elements || []);
     } else {
