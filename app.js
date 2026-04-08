@@ -1037,3 +1037,14 @@ async function loadFeature(feature) {
 document.querySelectorAll('.feature-tile').forEach(tile => {
   tile.addEventListener('click', () => loadFeature(tile.dataset.feature));
 });
+
+// ── Attribution toggle ────────────────────────────────────────────────────────
+const attrToggle = document.getElementById('attr-toggle');
+const attrBody   = document.getElementById('attr-body');
+if (attrToggle && attrBody) {
+  attrToggle.addEventListener('click', () => {
+    const open = attrBody.classList.toggle('open');
+    attrToggle.classList.toggle('open', open);
+    attrToggle.setAttribute('aria-expanded', String(open));
+  });
+}
