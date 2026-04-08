@@ -388,6 +388,30 @@ function pathDeparturesForStation(code, table) {
 // ── Transit: Google Places stations + PATH real-time, with radius expansion ───
 const TRANSIT_TIERS = [800, 1600, 3200, 8000, 16000]; // metres
 
+// Generic country/region strings Google Places puts in `vicinity` for bus stops
+const USELESS_VICINITY = new Set([
+  'united states', 'new jersey', 'new york', 'usa', 'us', 'nj', 'ny',
+]);
+
+function cleanVicinity(v) {
+  if (!v) return '';
+  const norm = v.toLowerCase().trim();
+  if (USELESS_VICINITY.has(norm)) return '';
+  // If it's just a two-word country/region combo (e.g. "New Jersey, United States") drop it
+  if (/^[a-z\s]+,\s*[a-z\s]+$/.test(norm) && norm.split(',').every(p => USELESS_VICINITY.has(p.trim()))) return '';
+  return v;
+}
+
+// Normalise a stop name for duplicate detection: lowercase, strip direction suffixes,
+// remove punctuation so "(inbound)" / "(outbound)" / "- 1" variants collapse
+function normStopName(name) {
+  return name.toLowerCase()
+    .replace(/\b(inbound|outbound|nb|sb|eb|wb|northbound|southbound|eastbound|westbound)\b/g, '')
+    .replace(/[-–—()\[\]]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 async function queryTransitAtRadius(lat, lng, googleKey, radiusM) {
   const [pathTable, ...placeArrays] = await Promise.all([
     fetchPathRealtime(),
@@ -406,18 +430,32 @@ async function queryTransitAtRadius(lat, lng, googleKey, radiusM) {
     }),
   ]);
 
-  const seen = new Set();
-  const stations = placeArrays.flat()
-    .filter(p => { if (seen.has(p.place_id)) return false; seen.add(p.place_id); return true; })
+  // Step 1: dedup by place_id (same result from multiple type queries)
+  const seenId = new Set();
+  const raw = placeArrays.flat()
+    .filter(p => { if (seenId.has(p.place_id)) return false; seenId.add(p.place_id); return true; })
     .map(p => ({
       name:     p.name || 'Station',
       lat:      p.geometry.location.lat,
       lon:      p.geometry.location.lng,
-      vicinity: p.vicinity || '',
+      vicinity: cleanVicinity(p.vicinity || ''),
       types:    p.types || [],
-    }))
+    }));
+
+  // Step 2: dedup by normalised name + proximity (< 80m / 0.05 mi)
+  // Same physical stop can appear under transit_station AND bus_station with different place_ids
+  const deduped = [];
+  for (const s of raw) {
+    const norm = normStopName(s.name);
+    const isDup = deduped.some(d =>
+      haversineMi(d.lat, d.lon, s.lat, s.lon) < 0.05 && normStopName(d.name) === norm
+    );
+    if (!isDup) deduped.push(s);
+  }
+
+  const stations = deduped
     .sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon))
-    .slice(0, 10);
+    .slice(0, 8);
 
   return { stations, pathTable };
 }
@@ -444,14 +482,22 @@ async function queryTransit(lat, lng, googleKey, units) {
       if (nameL.includes(keyword)) { pathCode = code; break; }
     }
     const departures  = pathCode ? pathDeparturesForStation(pathCode, pathTable) : [];
-    const transitType = pathCode                             ? 'PATH Train'
-      : s.types.includes('subway_station')                  ? 'Subway'
-      : s.types.includes('bus_station')                     ? 'Bus Station'
-      : nameL.includes('bus')                               ? 'Bus Stop'
-      : nameL.includes('ferry') || nameL.includes('light rail') ? 'Light Rail / Ferry'
+    const isBus = s.types.includes('bus_station') || nameL.includes('bus') ||
+      (!s.types.includes('subway_station') && !s.types.includes('train_station') && !pathCode);
+    const transitType = pathCode                                       ? 'PATH Train'
+      : s.types.includes('subway_station')                            ? 'Subway'
+      : s.types.includes('train_station')                             ? 'Train'
+      : nameL.includes('light rail') || nameL.includes('lightrail')  ? 'Light Rail'
+      : nameL.includes('ferry')                                       ? 'Ferry'
+      : isBus                                                         ? 'Bus Stop'
       : 'Transit';
 
-    return { lat: s.lat, lon: s.lon, name: s.name, address: s.vicinity, transitType, distLabel, departures };
+    // For bus stops, build a Google Maps transit directions URL hint
+    const gmapsTransitUrl = isBus
+      ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}&travelmode=transit`
+      : null;
+
+    return { lat: s.lat, lon: s.lon, name: s.name, address: s.vicinity, transitType, distLabel, departures, gmapsTransitUrl };
   });
 
   return { elements, radiusLabel: fmtRadius(usedRadius, units), expanded };

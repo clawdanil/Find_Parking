@@ -868,6 +868,7 @@ function renderTransitResults(elements, meta = {}) {
 
     const typeBadge = `<span class="transit-type-badge" style="background:${typeColor}18;color:${typeColor};border-color:${typeColor}30">${el.transitType}</span>`;
 
+    const isBusStop = el.transitType === 'Bus Stop';
     const departureHtml = el.departures && el.departures.length > 0
       ? `<div class="transit-departures">
           ${el.departures.map(d => `
@@ -877,9 +878,14 @@ function renderTransitResults(elements, meta = {}) {
               <span class="transit-dep-time ${d.arrival === 'Due' ? 'dep-due' : ''}">${escHtml(d.arrival)}</span>
             </div>`).join('')}
          </div>`
-      : el.transitType.includes('Bus')
-        ? `<p class="transit-no-rt">🚌 Check schedules via Google Maps</p>`
+      : isBusStop
+        ? `<p class="transit-no-rt">🚌 Real-time bus data not available — tap Directions for live schedules</p>`
         : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+
+    // For bus stops: link to Google Maps in transit mode so schedules load automatically
+    const directionsHref = isBusStop && el.gmapsTransitUrl
+      ? el.gmapsTransitUrl
+      : googleMapsUrl(el.lat, el.lon, el.address || el.name);
 
     return `
       <div class="parking-card nearby-card" style="--status-color:${typeColor};--delay:${i * 0.06}s">
@@ -896,9 +902,9 @@ function renderTransitResults(elements, meta = {}) {
             <span class="detail-item">🗺️ ${escHtml(el.distLabel)}</span>
           </div>
           ${departureHtml}
-          <a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, el.address || el.name)}" target="_blank" rel="noopener">
+          <a class="gmaps-btn" href="${escHtml(directionsHref)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            Directions
+            ${isBusStop ? 'View Bus Schedules' : 'Directions'}
           </a>
         </div>
       </div>`;
