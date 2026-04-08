@@ -869,6 +869,8 @@ function renderTransitResults(elements, meta = {}) {
     const typeBadge = `<span class="transit-type-badge" style="background:${typeColor}18;color:${typeColor};border-color:${typeColor}30">${el.transitType}</span>`;
 
     const isBusStop = el.transitType === 'Bus Stop';
+
+    // PATH / Subway departure table
     const departureHtml = el.departures && el.departures.length > 0
       ? `<div class="transit-departures">
           ${el.departures.map(d => `
@@ -878,9 +880,21 @@ function renderTransitResults(elements, meta = {}) {
               <span class="transit-dep-time ${d.arrival === 'Due' ? 'dep-due' : ''}">${escHtml(d.arrival)}</span>
             </div>`).join('')}
          </div>`
-      : isBusStop
-        ? `<p class="transit-no-rt">🚌 Real-time bus data not available — tap Directions for live schedules</p>`
-        : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+      : isBusStop ? '' // bus stops use routeHtml instead
+      : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+
+    // Bus route list from OSM
+    const routeHtml = isBusStop
+      ? (el.routes && el.routes.length > 0
+          ? `<div class="bus-routes">
+              ${el.routes.map(r => `
+                <div class="bus-route-row">
+                  <span class="bus-route-badge">${escHtml(r.ref)}</span>
+                  ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : r.from ? `<span class="bus-route-dest">${escHtml(r.from)} line</span>` : ''}
+                </div>`).join('')}
+             </div>`
+          : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
+      : '';
 
     // For bus stops: link to Google Maps in transit mode so schedules load automatically
     const directionsHref = isBusStop && el.gmapsTransitUrl
@@ -901,10 +915,10 @@ function renderTransitResults(elements, meta = {}) {
           <div class="card-details" style="margin-bottom:10px">
             <span class="detail-item">🗺️ ${escHtml(el.distLabel)}</span>
           </div>
-          ${departureHtml}
+          ${departureHtml}${routeHtml}
           <a class="gmaps-btn" href="${escHtml(directionsHref)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            ${isBusStop ? 'View Bus Schedules' : 'Directions'}
+            ${isBusStop ? 'View Schedules' : 'Directions'}
           </a>
         </div>
       </div>`;

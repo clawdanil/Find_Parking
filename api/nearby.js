@@ -349,6 +349,17 @@ const PATH_CODE_MAP = {
   '33rd street':        '33S', '33rd st':      '33S',
 };
 
+// Official station display names — used to normalize "C Columbus Drive at Grove St" → "Grove Street"
+const PATH_STATION_NAMES = {
+  EXP: 'Exchange Place',        GRV: 'Grove Street',
+  JSQ: 'Journal Square',        NEW: 'Newport',
+  HOB: 'Hoboken Terminal',      HAR: 'Harrison',
+  NWK: 'Newark',                WTC: 'World Trade Center',
+  CHR: 'Christopher Street',   '09S': '9th Street',
+  '14S': '14th Street',        '23S': '23rd Street',
+  '33S': '33rd Street',
+};
+
 async function fetchPathRealtime() {
   try {
     const ctrl = new AbortController();
@@ -383,6 +394,49 @@ function pathDeparturesForStation(code, table) {
     const bv = b.arrival === 'Due' ? 0 : parseInt(b.arrival);
     return av - bv;
   }).slice(0, 4);
+}
+
+// ── OSM bus route lookup — finds routes serving a stop via Overpass ──────────
+const OSM_OVERPASS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+];
+
+async function getOsmBusRoutes(slat, slon) {
+  // Find bus/tram stop nodes near the point, then find route relations containing them
+  const query = `[out:json][timeout:6];`
+    + `(node["highway"="bus_stop"](around:80,${slat},${slon});`
+    + `node["public_transport"="stop_position"](around:80,${slat},${slon});)->.s;`
+    + `relation["route"~"^(bus|tram|trolleybus)$"](bn.s);out tags;`;
+  for (const ep of OSM_OVERPASS) {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 6000);
+      const res = await fetch(ep, {
+        method: 'POST',
+        body: `data=${encodeURIComponent(query)}`,
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        signal: ctrl.signal,
+      });
+      if (!res.ok) continue;
+      const data = await res.json();
+      const routes = (data.elements || [])
+        .map(r => ({
+          ref:  (r.tags?.ref  || '').trim(),
+          to:   (r.tags?.to   || r.tags?.destination || '').trim(),
+          from: (r.tags?.from || '').trim(),
+        }))
+        .filter(r => r.ref) // must have a route number
+        .filter((r, i, arr) => arr.findIndex(x => x.ref === r.ref && x.to === r.to) === i) // dedup
+        .sort((a, b) => {
+          const na = parseInt(a.ref) || 9999, nb = parseInt(b.ref) || 9999;
+          return na - nb || a.ref.localeCompare(b.ref);
+        })
+        .slice(0, 8);
+      return routes; // return even if empty — we got a valid response
+    } catch {}
+  }
+  return [];
 }
 
 // ── Transit: Google Places stations + PATH real-time, with radius expansion ───
@@ -440,22 +494,31 @@ async function queryTransitAtRadius(lat, lng, googleKey, radiusM) {
       lon:      p.geometry.location.lng,
       vicinity: cleanVicinity(p.vicinity || ''),
       types:    p.types || [],
-    }));
+    }))
+    // Sort by distance first so "keep first" = keep closest
+    .sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon));
 
-  // Step 2: dedup by normalised name + proximity (< 80m / 0.05 mi)
-  // Same physical stop can appear under transit_station AND bus_station with different place_ids
+  // Step 2: dedup by exact name (case-insensitive) regardless of distance.
+  // Bus stops on opposite sides of a boulevard share the same name — keep the closest.
+  const seenName = new Set();
+  const nameDeduped = raw.filter(s => {
+    const key = s.name.toLowerCase().trim();
+    if (seenName.has(key)) return false;
+    seenName.add(key);
+    return true;
+  });
+
+  // Step 3: dedup by normalised name + 160m proximity to catch "(inbound)"/"(outbound)" variants
   const deduped = [];
-  for (const s of raw) {
+  for (const s of nameDeduped) {
     const norm = normStopName(s.name);
     const isDup = deduped.some(d =>
-      haversineMi(d.lat, d.lon, s.lat, s.lon) < 0.05 && normStopName(d.name) === norm
+      haversineMi(d.lat, d.lon, s.lat, s.lon) < 0.1 && normStopName(d.name) === norm
     );
     if (!isDup) deduped.push(s);
   }
 
-  const stations = deduped
-    .sort((a, b) => haversineMi(lat, lng, a.lat, a.lon) - haversineMi(lat, lng, b.lat, b.lon))
-    .slice(0, 8);
+  const stations = deduped.slice(0, 8);
 
   return { stations, pathTable };
 }
@@ -472,32 +535,72 @@ async function queryTransit(lat, lng, googleKey, units) {
     expanded = true;
   }
 
-  const elements = stations.map(s => {
-    const distMi    = haversineMi(lat, lng, s.lat, s.lon);
-    const nameL     = s.name.toLowerCase();
-    const distLabel = fmtDist(distMi, units);
-
+  // Annotate each station with pathCode and isBus before dedup
+  const annotated = stations.map(s => {
+    const nameL = s.name.toLowerCase();
     let pathCode = null;
     for (const [keyword, code] of Object.entries(PATH_CODE_MAP)) {
       if (nameL.includes(keyword)) { pathCode = code; break; }
     }
-    const departures  = pathCode ? pathDeparturesForStation(pathCode, pathTable) : [];
-    const isBus = s.types.includes('bus_station') || nameL.includes('bus') ||
-      (!s.types.includes('subway_station') && !s.types.includes('train_station') && !pathCode);
-    const transitType = pathCode                                       ? 'PATH Train'
-      : s.types.includes('subway_station')                            ? 'Subway'
-      : s.types.includes('train_station')                             ? 'Train'
-      : nameL.includes('light rail') || nameL.includes('lightrail')  ? 'Light Rail'
-      : nameL.includes('ferry')                                       ? 'Ferry'
-      : isBus                                                         ? 'Bus Stop'
+    const isBus = !pathCode &&
+      (s.types.includes('bus_station') || nameL.includes('bus') ||
+       (!s.types.includes('subway_station') && !s.types.includes('train_station')));
+    return { ...s, pathCode, isBus };
+  });
+
+  // Dedup PATH stations by pathCode — multiple Google Places entries for the same
+  // physical station (e.g. "Grove St" + "C Columbus Drive at Grove St") share a code;
+  // keep only the closest and replace the name with the canonical station name.
+  const seenPath = new Set();
+  const stationsDeduped = annotated.filter(s => {
+    if (!s.pathCode) return true; // non-PATH always kept here
+    if (seenPath.has(s.pathCode)) return false;
+    seenPath.add(s.pathCode);
+    return true;
+  });
+
+  // Fetch OSM bus routes for all bus stops in parallel
+  const busStops = stationsDeduped.filter(s => s.isBus);
+  const busRouteResults = await Promise.all(
+    busStops.map(s => getOsmBusRoutes(s.lat, s.lon).catch(() => []))
+  );
+  const busRouteMap = new Map(busStops.map((s, i) => [s, busRouteResults[i]]));
+
+  const elements = stationsDeduped.map(s => {
+    const distMi    = haversineMi(lat, lng, s.lat, s.lon);
+    const distLabel = fmtDist(distMi, units);
+    const departures = s.pathCode ? pathDeparturesForStation(s.pathCode, pathTable) : [];
+
+    const transitType = s.pathCode
+      ? 'PATH Train'
+      : s.types.includes('subway_station')                           ? 'Subway'
+      : s.types.includes('train_station')                            ? 'Train'
+      : s.name.toLowerCase().includes('light rail')                  ? 'Light Rail'
+      : s.name.toLowerCase().includes('ferry')                       ? 'Ferry'
+      : s.isBus                                                      ? 'Bus Stop'
       : 'Transit';
 
-    // For bus stops, build a Google Maps transit directions URL hint
-    const gmapsTransitUrl = isBus
+    // Use canonical PATH station name to avoid showing entrance-street names
+    const displayName = s.pathCode && PATH_STATION_NAMES[s.pathCode]
+      ? PATH_STATION_NAMES[s.pathCode]
+      : s.name;
+
+    const gmapsTransitUrl = s.isBus
       ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}&travelmode=transit`
       : null;
 
-    return { lat: s.lat, lon: s.lon, name: s.name, address: s.vicinity, transitType, distLabel, departures, gmapsTransitUrl };
+    const routes = s.isBus ? (busRouteMap.get(s) || []) : [];
+
+    return {
+      lat: s.lat, lon: s.lon,
+      name: displayName,
+      address: s.vicinity,
+      transitType,
+      distLabel,
+      departures,
+      routes,
+      gmapsTransitUrl,
+    };
   });
 
   return { elements, radiusLabel: fmtRadius(usedRadius, units), expanded };
