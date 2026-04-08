@@ -18,6 +18,28 @@ function formatDist(mi) {
   return mi < 0.1 ? `${Math.round(mi * 5280)} ft` : `${mi.toFixed(2)} mi`;
 }
 
+// Normalize an address to "housenum + street" for duplicate detection.
+// Strips city/state/country suffix, abbreviates common words, removes punctuation.
+function normAddr(s) {
+  if (!s?.address) return '';
+  return s.address
+    .toLowerCase()
+    // Drop city/state/country portion after first comma
+    .replace(/,.*$/, '')
+    // Expand or normalize common abbreviations so "st" == "street"
+    .replace(/\bstreet\b/g, 'st')
+    .replace(/\bavenue\b/g, 'ave')
+    .replace(/\bboulevard\b/g, 'blvd')
+    .replace(/\broad\b/g, 'rd')
+    .replace(/\bdrive\b/g, 'dr')
+    .replace(/\blane\b/g, 'ln')
+    .replace(/\bplace\b/g, 'pl')
+    // Remove all punctuation
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Street-side/lane tags are road designations, not actual parking facilities — skip them
 const ROAD_PARKING_TYPES = new Set(['street_side','lane','on_street','half_on_kerb','shoulder','street','lay_by']);
 
@@ -512,9 +534,15 @@ export default async function handler(req) {
     }
 
     // Merge layers: HERE → Google → OSM (each layer deduped against higher-priority layers)
-    // 40m threshold = same physical location
+    // 40m distance threshold OR matching street address = same physical location
     const deduped = (candidates, existing) =>
-      candidates.filter(c => !existing.some(e => haversineMi(e.lat, e.lng, c.lat, c.lng) < 0.025));
+      candidates.filter(c => {
+        const ca = normAddr(c);
+        return !existing.some(e =>
+          haversineMi(e.lat, e.lng, c.lat, c.lng) < 0.025 ||
+          (ca.length > 4 && ca === normAddr(e))
+        );
+      });
 
     let spots, source;
     if (hereSpots.length > 0) {
@@ -534,10 +562,14 @@ export default async function handler(req) {
     // Sort merged results by distance — closest first regardless of source
     spots.sort((a, b) => (a._distMi ?? 99) - (b._distMi ?? 99));
 
-    // Deduplicate spots within 15m of each other
+    // Final dedup: same-address OR within 15m
     const seen = [];
     spots = spots.filter(s => {
-      const dup = seen.find(p => haversineMi(p.lat, p.lng, s.lat, s.lng) < 0.009);
+      const sa = normAddr(s);
+      const dup = seen.find(p =>
+        haversineMi(p.lat, p.lng, s.lat, s.lng) < 0.009 ||
+        (sa.length > 4 && sa === normAddr(p))
+      );
       if (dup) return false;
       seen.push(s);
       return true;
