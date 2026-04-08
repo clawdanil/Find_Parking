@@ -439,6 +439,57 @@ async function getOsmBusRoutes(slat, slon) {
   return [];
 }
 
+// ── Google Directions API (transit/bus) — real-time departure schedules ───────
+// Calls Directions API from user's location to nearest transit hub.
+// Returns a map of "lat4,lng4" → [{route, headsign, departureText, departureTs}]
+// keyed by the departure stop coordinates (4 decimal places ≈ 11m precision).
+async function getBusSchedulesNearUser(userLat, userLng, destLat, destLng, googleKey) {
+  const now = Math.floor(Date.now() / 1000);
+  const url = `https://maps.googleapis.com/maps/api/directions/json`
+    + `?origin=${userLat},${userLng}`
+    + `&destination=${destLat},${destLng}`
+    + `&mode=transit&transit_mode=bus`
+    + `&departure_time=${now}&alternatives=true`
+    + `&key=${googleKey}`;
+  try {
+    const ctrl = new AbortController();
+    setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) return {};
+    const data = await res.json();
+    const stopMap = {};
+    for (const route of (data.routes || [])) {
+      for (const leg of (route.legs || [])) {
+        for (const step of (leg.steps || [])) {
+          if (step.travel_mode !== 'TRANSIT') continue;
+          const td = step.transit_details;
+          if (!td) continue;
+          const vType = td.line?.vehicle?.type;
+          if (vType !== 'BUS' && vType !== 'TRAM') continue;
+          const stopLat = td.departure_stop?.location?.lat;
+          const stopLng = td.departure_stop?.location?.lng;
+          if (!stopLat || !stopLng) continue;
+          const key = `${stopLat.toFixed(4)},${stopLng.toFixed(4)}`;
+          if (!stopMap[key]) stopMap[key] = [];
+          const entry = {
+            route:         td.line?.short_name || td.line?.name || '?',
+            headsign:      td.headsign || '',
+            departureText: td.departure_time?.text || '',
+            departureTs:   td.departure_time?.value || 0,
+          };
+          // dedup: same route + same departure time
+          if (!stopMap[key].some(d => d.route === entry.route && d.departureTs === entry.departureTs)) {
+            stopMap[key].push(entry);
+          }
+        }
+      }
+    }
+    return stopMap;
+  } catch {
+    return {};
+  }
+}
+
 // ── Transit: Google Places stations + PATH real-time, with radius expansion ───
 const TRANSIT_TIERS = [800, 1600, 3200, 8000, 16000]; // metres
 
@@ -559,12 +610,20 @@ async function queryTransit(lat, lng, googleKey, units) {
     return true;
   });
 
-  // Fetch OSM bus routes for all bus stops in parallel
   const busStops = stationsDeduped.filter(s => s.isBus);
-  const busRouteResults = await Promise.all(
-    busStops.map(s => getOsmBusRoutes(s.lat, s.lon).catch(() => []))
-  );
-  const busRouteMap = new Map(busStops.map((s, i) => [s, busRouteResults[i]]));
+
+  // Nearest non-bus station (PATH/Subway/Train) used as Directions API destination
+  // so we get scheduled bus departures from stops near the user heading toward transit
+  const transitHub = stationsDeduped.find(s => !s.isBus);
+
+  // Run OSM route lookup + Google Directions bus schedules in parallel
+  const [osmRouteResults, dirSchedules] = await Promise.all([
+    Promise.all(busStops.map(s => getOsmBusRoutes(s.lat, s.lon).catch(() => []))),
+    transitHub
+      ? getBusSchedulesNearUser(lat, lng, transitHub.lat, transitHub.lon, googleKey).catch(() => ({}))
+      : Promise.resolve({}),
+  ]);
+  const osmRouteMap = new Map(busStops.map((s, i) => [s, osmRouteResults[i]]));
 
   const elements = stationsDeduped.map(s => {
     const distMi    = haversineMi(lat, lng, s.lat, s.lon);
@@ -580,7 +639,6 @@ async function queryTransit(lat, lng, googleKey, units) {
       : s.isBus                                                      ? 'Bus Stop'
       : 'Transit';
 
-    // Use canonical PATH station name to avoid showing entrance-street names
     const displayName = s.pathCode && PATH_STATION_NAMES[s.pathCode]
       ? PATH_STATION_NAMES[s.pathCode]
       : s.name;
@@ -589,7 +647,19 @@ async function queryTransit(lat, lng, googleKey, units) {
       ? `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lon}&travelmode=transit`
       : null;
 
-    const routes = s.isBus ? (busRouteMap.get(s) || []) : [];
+    // OSM routes = route numbers + destinations (fallback when no live times)
+    const routes = s.isBus ? (osmRouteMap.get(s) || []) : [];
+
+    // Google Directions schedules = same-day departure times matched by stop proximity (< 160m)
+    let schedules = [];
+    if (s.isBus) {
+      for (const [key, deps] of Object.entries(dirSchedules)) {
+        const [sLat, sLng] = key.split(',').map(Number);
+        if (haversineMi(s.lat, s.lon, sLat, sLng) < 0.1) schedules.push(...deps);
+      }
+      schedules.sort((a, b) => a.departureTs - b.departureTs);
+      schedules = schedules.slice(0, 5);
+    }
 
     return {
       lat: s.lat, lon: s.lon,
@@ -599,6 +669,7 @@ async function queryTransit(lat, lng, googleKey, units) {
       distLabel,
       departures,
       routes,
+      schedules,
       gmapsTransitUrl,
     };
   });

@@ -883,17 +883,28 @@ function renderTransitResults(elements, meta = {}) {
       : isBusStop ? '' // bus stops use routeHtml instead
       : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
 
-    // Bus route list from OSM
+    // Bus stop info: prefer Google Directions schedules (has times), fall back to OSM routes
+    const hasSchedules = isBusStop && el.schedules && el.schedules.length > 0;
+    const hasRoutes    = isBusStop && el.routes    && el.routes.length    > 0;
     const routeHtml = isBusStop
-      ? (el.routes && el.routes.length > 0
+      ? (hasSchedules
           ? `<div class="bus-routes">
-              ${el.routes.map(r => `
+              ${el.schedules.map(s => `
                 <div class="bus-route-row">
-                  <span class="bus-route-badge">${escHtml(r.ref)}</span>
-                  ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : r.from ? `<span class="bus-route-dest">${escHtml(r.from)} line</span>` : ''}
+                  <span class="bus-route-badge">${escHtml(s.route)}</span>
+                  ${s.headsign ? `<span class="bus-route-dest">→ ${escHtml(s.headsign)}</span>` : ''}
+                  <span class="bus-sched-time">${escHtml(s.departureText)}</span>
                 </div>`).join('')}
              </div>`
-          : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
+          : hasRoutes
+            ? `<div class="bus-routes">
+                ${el.routes.map(r => `
+                  <div class="bus-route-row">
+                    <span class="bus-route-badge">${escHtml(r.ref)}</span>
+                    ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : ''}
+                  </div>`).join('')}
+               </div>`
+            : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
       : '';
 
     // For bus stops: link to Google Maps in transit mode so schedules load automatically

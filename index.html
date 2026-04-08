@@ -891,8 +891,15 @@
     .bus-route-dest {
       color: var(--text-secondary, #6b7280); font-size: .82rem;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1;
     }
     [data-theme="dark"] .bus-route-dest { color: rgba(255,255,255,.5); }
+    .bus-sched-time {
+      margin-left: auto; flex-shrink: 0;
+      font-size: .82rem; font-weight: 600;
+      color: var(--text-primary, #111827);
+    }
+    [data-theme="dark"] .bus-sched-time { color: rgba(255,255,255,.85); }
 
     /* ── Dark mode toggle button ───────────────────────────────────────── */
     .dark-toggle {
@@ -1235,7 +1242,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=29"></script>
+  <script src="app.js?v=30"></script>
 
 </div><!-- /.page-wrap -->
 
