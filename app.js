@@ -1,9 +1,9 @@
 const TIMEOUT_MS = 28000;
 
-// ── Dark mode — always start light, honour explicit user choice only ──────────
+// ── Dark mode — default DARK, switch to light only if user chose it ───────────
 (function initDarkMode() {
   const saved = localStorage.getItem('theme');
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
 })();
 
 document.getElementById('dark-toggle').addEventListener('click', () => {

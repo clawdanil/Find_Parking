@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <script>(function(){var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');})()</script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#07070F">
@@ -893,60 +894,109 @@
     .dark-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(10,10,20,.15); }
     .dark-toggle:active { transform: scale(.95); }
 
-    /* ── Orbi dark mode — deep space ──────────────────────────────────── */
+    /* ── Orbi dark mode — premium deep space ──────────────────────────── */
     [data-theme="dark"] {
-      --text:   rgba(228,232,255,.92);
-      --t80:    rgba(228,232,255,.72);
-      --t55:    rgba(228,232,255,.52);
-      --t30:    rgba(228,232,255,.32);
-      --t12:    rgba(228,232,255,.10);
-      --t06:    rgba(228,232,255,.05);
-      --glass:  rgba(255,255,255,.055);
-      --glassH: rgba(255,255,255,.09);
+      --text:   rgba(235,240,255,.94);
+      --t80:    rgba(235,240,255,.74);
+      --t55:    rgba(235,240,255,.54);
+      --t30:    rgba(235,240,255,.34);
+      --t12:    rgba(235,240,255,.11);
+      --t06:    rgba(235,240,255,.05);
+      --glass:  rgba(255,255,255,.052);
+      --glassH: rgba(255,255,255,.088);
       --border: rgba(255,255,255,.09);
       --accent:  #E8ECFF;
       --accentH: #C7D0FF;
       --orbi:    #6B7EFF;
-      --orbi-glow: rgba(107,126,255,.18);
+      --orbi-glow: rgba(107,126,255,.22);
     }
-    [data-theme="dark"] body         { background: #07070F; }
-    [data-theme="dark"] .bg-scene    { background: #07070F; }
-    [data-theme="dark"] .bg-orb-1    { background: radial-gradient(circle, #1a1a50, #0a0a20); opacity: .35; }
-    [data-theme="dark"] .bg-orb-2    { background: radial-gradient(circle, #0e0e38, #080820); opacity: .28; }
-    [data-theme="dark"] .bg-orb-3    { background: radial-gradient(circle, #141448, #08081c); opacity: .22; }
 
-    /* Surfaces */
-    [data-theme="dark"] .logo-pill          { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); box-shadow: 0 4px 24px rgba(0,0,0,.30); }
-    [data-theme="dark"] .glass-panel        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 20px 48px rgba(0,0,0,.30); }
-    [data-theme="dark"] .search-card        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); }
+    /* ── Premium dark body & background ─────────────────────────────── */
+    [data-theme="dark"] body {
+      background: #06060E;
+      background-image:
+        radial-gradient(ellipse 80% 45% at 50% -5%, rgba(61,90,254,.13) 0%, transparent 65%),
+        radial-gradient(ellipse 55% 35% at 90% 95%, rgba(107,94,251,.09) 0%, transparent 55%);
+    }
+    [data-theme="dark"] .bg-scene    { background: #06060E; }
+    [data-theme="dark"] .bg-orb-1    { background: radial-gradient(circle, #1a1a52, #09091e); opacity: .42; }
+    [data-theme="dark"] .bg-orb-2    { background: radial-gradient(circle, #0e0e3a, #07071a); opacity: .32; }
+    [data-theme="dark"] .bg-orb-3    { background: radial-gradient(circle, #15154c, #08081e); opacity: .28; }
+
+    /* ── Surfaces ────────────────────────────────────────────────────── */
+    [data-theme="dark"] .logo-pill {
+      background: rgba(255,255,255,.07);
+      border-color: rgba(107,126,255,.28);
+      box-shadow: 0 0 0 1px rgba(107,126,255,.08), 0 8px 40px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.09);
+    }
+    [data-theme="dark"] .glass-panel {
+      background: rgba(255,255,255,.048);
+      border-color: rgba(255,255,255,.085);
+      box-shadow: 0 24px 64px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.07);
+    }
+    [data-theme="dark"] .search-card        { background: rgba(255,255,255,.048); border-color: rgba(255,255,255,.085); }
     [data-theme="dark"] .input-field        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); color: var(--text); }
-    [data-theme="dark"] .input-field:focus  { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.20); box-shadow: 0 0 0 4px rgba(255,255,255,.05); }
-    [data-theme="dark"] .input-field::placeholder { color: rgba(225,225,245,.28); }
+    [data-theme="dark"] .input-field:focus  { background: rgba(255,255,255,.11); border-color: rgba(107,126,255,.55); box-shadow: 0 0 0 3px rgba(107,126,255,.12); }
+    [data-theme="dark"] .input-field::placeholder { color: rgba(225,228,255,.28); }
     [data-theme="dark"] .location-btn       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .location-btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.15); }
+    [data-theme="dark"] .location-btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); }
     [data-theme="dark"] .chip               { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .chip:hover         { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.16); box-shadow: none; }
+    [data-theme="dark"] .chip:hover         { background: rgba(255,255,255,.11); border-color: rgba(107,126,255,.30); box-shadow: none; }
     [data-theme="dark"] .feature-tile       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .feature-tile:hover { background: rgba(61,90,254,.22); }
-    [data-theme="dark"] .weather-pill       { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); box-shadow: 0 4px 20px rgba(0,0,0,.25); }
-    [data-theme="dark"] .stats-inner        { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .parking-card       { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 2px 12px rgba(0,0,0,.25); }
-    [data-theme="dark"] .parking-card:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 10px 32px rgba(0,0,0,.30); }
-    [data-theme="dark"] .parking-card       { box-shadow: 0 2px 12px rgba(0,0,0,.25); }
+    [data-theme="dark"] .feature-tile:hover { background: rgba(61,90,254,.20); border-color: rgba(107,126,255,.45); }
+    [data-theme="dark"] .weather-pill       { background: rgba(255,255,255,.065); border-color: rgba(255,255,255,.10); box-shadow: 0 4px 24px rgba(0,0,0,.35); }
+    [data-theme="dark"] .stats-inner        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); }
+
+    /* ── Premium cards ───────────────────────────────────────────────── */
+    [data-theme="dark"] .parking-card {
+      background: rgba(255,255,255,.042);
+      border-color: rgba(255,255,255,.08);
+      box-shadow: 0 2px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    [data-theme="dark"] .parking-card:hover {
+      background: rgba(255,255,255,.075);
+      border-color: rgba(107,126,255,.35);
+      box-shadow: 0 0 0 1px rgba(107,126,255,.12), 0 16px 48px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.08);
+      transform: translateY(-3px);
+    }
     [data-theme="dark"] .detail-item        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .tabs-bar           { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .map-header         { background: rgba(20,20,32,.90); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .tabs-bar           { background: rgba(255,255,255,.065); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .map-header         { background: rgba(14,14,24,.92); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .map-panel          { border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .ac-dropdown        { background: rgba(18,18,28,.97); border-color: rgba(255,255,255,.10); }
+    [data-theme="dark"] .ac-dropdown        { background: rgba(12,12,22,.98); border-color: rgba(255,255,255,.12); box-shadow: 0 24px 56px rgba(0,0,0,.60); }
     [data-theme="dark"] .ac-item:hover,
     [data-theme="dark"] .ac-item.focused    { background: rgba(255,255,255,.07); }
     [data-theme="dark"] .ac-item            { border-color: rgba(255,255,255,.07); }
     [data-theme="dark"] .report-btn         { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .card-report        { border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] footer              { border-color: rgba(255,255,255,.08); }
-    [data-theme="dark"] .dark-toggle        { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
+    [data-theme="dark"] footer              { border-color: rgba(255,255,255,.08); color: rgba(235,240,255,.25); }
+    [data-theme="dark"] .dark-toggle        { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.15); box-shadow: 0 4px 20px rgba(0,0,0,.45); }
     [data-theme="dark"] .feature-tiles      { border-color: rgba(255,255,255,.08); }
     [data-theme="dark"] .w-extras           { border-color: rgba(255,255,255,.10); }
+
+    /* ── Premium search button in dark ──────────────────────────────── */
+    [data-theme="dark"] .search-btn {
+      background: linear-gradient(135deg, #5B7AFF 0%, #3D5AFE 55%, #2541E8 100%);
+      box-shadow: 0 4px 24px rgba(91,122,255,.45), 0 0 64px rgba(61,90,254,.15), inset 0 1px 0 rgba(255,255,255,.22);
+    }
+    [data-theme="dark"] .search-btn:hover {
+      box-shadow: 0 8px 40px rgba(91,122,255,.60), 0 0 80px rgba(61,90,254,.22);
+    }
+
+    /* ── Logo name & tagline in dark ─────────────────────────────────── */
+    [data-theme="dark"] .logo-name { color: rgba(235,240,255,.97); }
+    [data-theme="dark"] .logo-sub  { color: rgba(235,240,255,.38); letter-spacing: 2.2px; }
+
+    /* ── Heading accent gradient in dark ─────────────────────────────── */
+    [data-theme="dark"] .hero-headline .accent-word {
+      background: linear-gradient(135deg, #8BA3FF 0%, #C4D0FF 55%, #8BA3FF 100%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    [data-theme="dark"] .hero-sub { color: rgba(235,240,255,.42); }
+    [data-theme="dark"] .sp { background: radial-gradient(circle, rgba(180,185,220,.55) 0%, rgba(180,185,220,0) 70%); }
+    [data-theme="dark"] .card-type-banner   { opacity: .92; }
+    [data-theme="dark"] .leaflet-popup-content-wrapper { background: rgba(14,14,24,.98) !important; border-color: rgba(255,255,255,.12) !important; }
+    [data-theme="dark"] .leaflet-popup-tip  { background: rgba(14,14,24,.98) !important; }
     [data-theme="dark"] .card-type-banner   { opacity: .92; }
     [data-theme="dark"] .leaflet-popup-content-wrapper { background: rgba(18,18,28,.97) !important; border-color: rgba(255,255,255,.12) !important; }
     [data-theme="dark"] .leaflet-popup-tip  { background: rgba(18,18,28,.97) !important; }
@@ -1041,14 +1091,22 @@
     <!-- Orbi logo pill -->
     <div class="logo-pill">
       <div class="logo-icon">
-        <!-- Orbi icon: orbital O ring + location pin -->
+        <!-- Orbi icon: teardrop pin + 3D orbital ring -->
         <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
-          <!-- Main body: thick O ring that tapers into location pin at bottom -->
-          <path d="M50 6 C28 6 10 24 10 46 C10 62 18 75 30 82 L50 96 L70 82 C82 75 90 62 90 46 C90 24 72 6 50 6 Z" fill="white"/>
-          <!-- Inner cutout — creates the O hollow -->
-          <circle cx="50" cy="44" r="21" fill="#07070F"/>
-          <!-- Orbital swoosh ring — diagonal ellipse crossing the icon -->
-          <ellipse cx="50" cy="50" rx="52" ry="11" stroke="white" stroke-width="5" transform="rotate(-16 50 50)"/>
+          <defs>
+            <!-- Clip to show only top portion of orbital ring (in front of pin) -->
+            <clipPath id="orb-clip-front">
+              <rect x="-5" y="-5" width="110" height="52"/>
+            </clipPath>
+          </defs>
+          <!-- Back half of orbital ring — behind pin (lower opacity) -->
+          <ellipse cx="50" cy="48" rx="50" ry="11" stroke="rgba(255,255,255,0.32)" stroke-width="5.5" transform="rotate(-20 50 48)"/>
+          <!-- Pin teardrop body — crisp white -->
+          <path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/>
+          <!-- Inner circle cutout — creates the O / donut shape -->
+          <circle cx="50" cy="43" r="20" fill="#07070F"/>
+          <!-- Front half of orbital ring — over pin (full white) -->
+          <ellipse cx="50" cy="48" rx="50" ry="11" stroke="white" stroke-width="5.5" transform="rotate(-20 50 48)" clip-path="url(#orb-clip-front)"/>
         </svg>
       </div>
       <div class="logo-text-col">
@@ -1160,7 +1218,7 @@
   </div>
 
   <!-- Dark mode toggle -->
-  <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+  <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">☀️</button>
 
   <!-- Data Attribution -->
   <div class="attribution-section">
@@ -1227,7 +1285,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=31"></script>
+  <script src="app.js?v=32"></script>
 
 </div><!-- /.page-wrap -->
 
