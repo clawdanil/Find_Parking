@@ -47,20 +47,20 @@
 
     body {
       font-family: 'Inter', 'Outfit', -apple-system, sans-serif;
-      background: #F4F5FF;
+      background: #F7F7FA;
       min-height: 100vh;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
-    /* ── Orbi cosmic background ──────────────────────────────────────────── */
+    /* ── Orbi background ─────────────────────────────────────────────────── */
     .bg-scene {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: #F4F5FF;
+      background: #F7F7FA;
     }
     .bg-orb {
       position: absolute;
@@ -69,9 +69,9 @@
       opacity: .13;
       animation: orbDrift 22s ease-in-out infinite alternate;
     }
-    .bg-orb-1 { width: 70vw; height: 70vw; top: -20%; left: -15%; background: radial-gradient(circle, #C7D0FF, #E8EAFF); animation-duration: 22s; }
-    .bg-orb-2 { width: 60vw; height: 60vw; top: -5%;  right: -15%; background: radial-gradient(circle, #B8C5FF, #D8E0FF); animation-duration: 18s; animation-delay: -6s; }
-    .bg-orb-3 { width: 55vw; height: 55vw; bottom: 0; left: 15%;  background: radial-gradient(circle, #D0D8FF, #E4E8FF); animation-duration: 25s; animation-delay: -10s; }
+    .bg-orb-1 { width: 70vw; height: 70vw; top: -20%; left: -15%; background: radial-gradient(circle, #DDDDE6, #EBEBF0); animation-duration: 22s; }
+    .bg-orb-2 { width: 60vw; height: 60vw; top: -5%;  right: -15%; background: radial-gradient(circle, #D8D8E4, #E6E6EE); animation-duration: 18s; animation-delay: -6s; }
+    .bg-orb-3 { width: 55vw; height: 55vw; bottom: 0; left: 15%;  background: radial-gradient(circle, #E0E0EA, #EBEBF2); animation-duration: 25s; animation-delay: -10s; }
     @keyframes orbDrift {
       from { transform: translate(0,0) scale(1);   }
       to   { transform: translate(5vw,6vh) scale(1.12); }
@@ -911,17 +911,12 @@
       --orbi-glow: rgba(107,126,255,.22);
     }
 
-    /* ── Premium dark body & background ─────────────────────────────── */
-    [data-theme="dark"] body {
-      background: #06060E;
-      background-image:
-        radial-gradient(ellipse 80% 45% at 50% -5%, rgba(61,90,254,.13) 0%, transparent 65%),
-        radial-gradient(ellipse 55% 35% at 90% 95%, rgba(107,94,251,.09) 0%, transparent 55%);
-    }
-    [data-theme="dark"] .bg-scene    { background: #06060E; }
-    [data-theme="dark"] .bg-orb-1    { background: radial-gradient(circle, #1a1a52, #09091e); opacity: .42; }
-    [data-theme="dark"] .bg-orb-2    { background: radial-gradient(circle, #0e0e3a, #07071a); opacity: .32; }
-    [data-theme="dark"] .bg-orb-3    { background: radial-gradient(circle, #15154c, #08081e); opacity: .28; }
+    /* ── Pure black body & background ───────────────────────────────── */
+    [data-theme="dark"] body      { background: #09090F; }
+    [data-theme="dark"] .bg-scene { background: #09090F; }
+    [data-theme="dark"] .bg-orb-1 { background: radial-gradient(circle, #141420, #0a0a10); opacity: .12; }
+    [data-theme="dark"] .bg-orb-2 { background: radial-gradient(circle, #10101a, #09090f); opacity: .08; }
+    [data-theme="dark"] .bg-orb-3 { background: radial-gradient(circle, #0f0f1c, #09090f); opacity: .06; }
 
     /* ── Surfaces ────────────────────────────────────────────────────── */
     [data-theme="dark"] .logo-pill {
@@ -1285,7 +1280,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=32"></script>
+  <script src="app.js?v=33"></script>
 
 </div><!-- /.page-wrap -->
 
