@@ -82,77 +82,72 @@
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 88px 24px 72px;
+      padding: 120px 24px 96px;
       width: 100%;
       box-sizing: border-box;
       -webkit-transform: translateZ(0);
     }
 
-    /* ── Orbi logo pill ────────────────────────────────────────────────── */
+    /* ── Orbi logo mark — no pill, clean brand ────────────────────────── */
     .logo-pill {
       display: inline-flex;
       align-items: center;
-      gap: 16px;
-      padding: 10px 24px 10px 10px;
-      background: rgba(255,255,255,.88);
-      backdrop-filter: blur(60px) saturate(180%);
-      -webkit-backdrop-filter: blur(60px) saturate(180%);
-      border: 1px solid rgba(0,0,0,.08);
-      border-radius: 100px;
-      box-shadow:
-        0 4px 28px rgba(0,0,0,.07),
-        0 1px 6px rgba(0,0,0,.04),
-        inset 0 1.5px 0 rgba(255,255,255,1);
-      margin-bottom: 40px;
+      gap: 20px;
+      padding: 0;
+      background: none;
+      border: none;
+      box-shadow: none;
+      margin-bottom: 64px;
     }
 
-    /* Orbi icon mark — black circle with white SVG */
+    /* Orbi icon mark — bold black circle */
     .logo-icon {
-      width: 56px; height: 56px;
+      width: 72px; height: 72px;
       border-radius: 50%;
-      background: #07070F;
+      background: #09090F;
+      border: 1.5px solid rgba(255,255,255,.14);
       display: flex; align-items: center; justify-content: center;
       box-shadow:
-        0 4px 20px rgba(7,7,15,.28),
-        inset 0 1px 0 rgba(255,255,255,.08);
+        0 8px 32px rgba(0,0,0,.40),
+        inset 0 1px 0 rgba(255,255,255,.10);
       flex-shrink: 0;
     }
-    .logo-icon svg { width: 36px; height: 36px; display: block; }
+    .logo-icon svg { width: 46px; height: 46px; display: block; }
 
     /* Text col */
     .logo-text-col {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 3px;
+      gap: 4px;
     }
 
     .logo-name {
-      font-family: 'Outfit', 'Inter', sans-serif;
-      font-size: 1.80rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.6rem;
+      font-weight: 900;
+      letter-spacing: -1.5px;
       line-height: 1;
-      color: var(--accent);
+      color: var(--text);
     }
 
     .logo-sub {
-      font-size: .60rem;
-      font-weight: 700;
-      letter-spacing: 2px;
+      font-size: .68rem;
+      font-weight: 600;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       color: var(--t30);
-      padding-left: 1px;
+      padding-left: 2px;
     }
 
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
-      font-size: clamp(1.75rem, 4vw, 2.6rem);
-      font-weight: 800;
-      letter-spacing: -1px;
-      line-height: 1.15;
+      font-size: clamp(3rem, 8.5vw, 5.8rem);
+      font-weight: 900;
+      letter-spacing: -3px;
+      line-height: 1.0;
       color: var(--text);
-      margin-bottom: 16px;
+      margin-bottom: 28px;
     }
     .hero-headline .accent-word {
       background: linear-gradient(135deg, #111118 0%, #3A3A50 55%, #111118 100%);
@@ -181,7 +176,7 @@
       display: block;
       position: relative;
       opacity: 0;
-      font-size: .72em;
+      font-size: 1.15em;
       text-align: center;
       animation: carSlide 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
     }
@@ -254,8 +249,8 @@
     }
 
     .search-card {
-      border-radius: 48px;
-      padding: 26px 26px 22px;
+      border-radius: 32px;
+      padding: 32px 32px 26px;
     }
 
     .search-row {
@@ -272,29 +267,29 @@
     }
 
     .input-group label {
-      font-size: .62rem;
-      font-weight: 800;
-      letter-spacing: 1.6px;
+      font-size: .64rem;
+      font-weight: 700;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
       color: var(--t30);
-      padding-left: 4px;
+      padding-left: 2px;
     }
 
     .input-field {
       width: 100%;
-      padding: 13px 16px;
-      background: rgba(255,255,255,.90);
+      padding: 16px 20px;
+      background: rgba(255,255,255,.92);
       border: 1px solid rgba(10,10,20,.08);
-      border-radius: 16px;
-      font-size: .93rem;
+      border-radius: 14px;
+      font-size: 1rem;
       font-family: 'Inter', sans-serif;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--text);
       outline: none;
       box-shadow: inset 0 1px 3px rgba(10,10,20,.04);
       transition: all .2s;
     }
-    .input-field::placeholder { color: var(--t30); font-weight: 500; }
+    .input-field::placeholder { color: var(--t30); font-weight: 400; }
     /* Suppress Safari autofill / contacts icons that misalign the input */
     .input-field::-webkit-contacts-auto-fill-button,
     .input-field::-webkit-credentials-auto-fill-button,
@@ -306,13 +301,13 @@
     }
 
     .search-btn {
-      padding: 13px 24px;
+      padding: 16px 30px;
       background: #111118;
       color: #fff;
       border: none;
-      border-radius: 16px;
-      font-family: 'Outfit', 'Inter', sans-serif;
-      font-size: .92rem;
+      border-radius: 14px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 1rem;
       font-weight: 800;
       cursor: pointer;
       white-space: nowrap;
@@ -646,11 +641,11 @@
       align-items:flex-start; gap:10px; margin-bottom:8px; flex-wrap:wrap;
     }
     .card-address {
-      font-size:.96rem; font-weight:800;
-      line-height:1.4; color:var(--text); letter-spacing:-.2px;
+      font-size:1.05rem; font-weight:700;
+      line-height:1.35; color:var(--text); letter-spacing:-.3px;
     }
-    .card-side { font-weight:500; color:var(--t55); font-size:.83rem; }
-    .card-landmark { font-size:.77rem; color:var(--t30); margin-top:3px; font-style:italic; }
+    .card-side { font-weight:400; color:var(--t55); font-size:.85rem; }
+    .card-landmark { font-size:.78rem; color:var(--t30); margin-top:4px; font-style:normal; font-weight:500; }
     .status-badge {
       font-size:.62rem; font-weight:800;
       padding:3px 11px; border-radius:100px;
@@ -919,11 +914,8 @@
     [data-theme="dark"] .bg-orb-3 { background: radial-gradient(circle, #0f0f1c, #09090f); opacity: .06; }
 
     /* ── Surfaces ────────────────────────────────────────────────────── */
-    [data-theme="dark"] .logo-pill {
-      background: rgba(255,255,255,.07);
-      border-color: rgba(255,255,255,.16);
-      box-shadow: 0 8px 40px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.09);
-    }
+    [data-theme="dark"] .logo-pill { background: none; border: none; box-shadow: none; }
+    [data-theme="dark"] .logo-icon { background: #09090F; border-color: rgba(255,255,255,.18); box-shadow: 0 8px 32px rgba(0,0,0,.60), inset 0 1px 0 rgba(255,255,255,.12); }
     [data-theme="dark"] .glass-panel {
       background: rgba(255,255,255,.048);
       border-color: rgba(255,255,255,.085);
@@ -1009,15 +1001,15 @@
 
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width:640px) {
-      .hero              { padding:64px 20px 52px; }
-      .logo-pill         { padding:11px 18px 11px 11px; gap:10px; margin-bottom:28px; }
-      .logo-icon         { width:44px; height:44px; font-size:1.25rem; }
-      .logo-name         { font-size:1.45rem; }
-      .fb                { width:24px; height:24px; font-size:.76rem; }
-      .hero-headline     { letter-spacing:-0.5px; }
-      .search-card       { padding:18px 16px; border-radius:40px; }
+      .hero              { padding:72px 20px 60px; }
+      .logo-pill         { gap:14px; margin-bottom:44px; }
+      .logo-icon         { width:54px; height:54px; }
+      .logo-icon svg     { width:34px; height:34px; }
+      .logo-name         { font-size:1.9rem; letter-spacing:-1px; }
+      .hero-headline     { letter-spacing:-1.5px; }
+      .search-card       { padding:22px 18px 18px; border-radius:24px; }
       .search-row        { flex-direction:column; align-items:stretch; }
-      .search-btn        { width:100%; padding:14px; }
+      .search-btn        { width:100%; padding:15px; }
       .stats-inner       { gap:5px 12px; padding:10px 14px; }
       .stats-div         { display:none; }
       .parking-card      { gap:10px; padding:16px; }
@@ -1286,7 +1278,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=34"></script>
+  <script src="app.js?v=35"></script>
 
 </div><!-- /.page-wrap -->
 
