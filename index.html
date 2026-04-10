@@ -1019,6 +1019,182 @@
       #map               { height:280px; }
     }
 
+    /* ── Orbi Chat ───────────────────────────────────────────────────── */
+
+    /* Floating trigger button */
+    .chat-btn {
+      position: fixed; bottom: 26px; right: 26px; z-index: 9980;
+      display: flex; align-items: center; gap: 9px;
+      padding: 13px 22px 13px 16px;
+      background: #FFFFFF; color: #09090F;
+      border: none; border-radius: 100px;
+      font-family: 'Outfit', sans-serif;
+      font-size: .88rem; font-weight: 800; letter-spacing: .2px;
+      cursor: pointer;
+      box-shadow: 0 8px 32px rgba(255,255,255,.13), 0 2px 8px rgba(0,0,0,.25);
+      transition: transform .18s, box-shadow .18s;
+    }
+    .chat-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(255,255,255,.20), 0 2px 8px rgba(0,0,0,.25); }
+    .chat-btn-live {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #16A34A; flex-shrink: 0;
+      animation: dotBlink 2s ease-in-out infinite;
+    }
+    [data-theme="light"] .chat-btn {
+      background: #09090F; color: #FFFFFF;
+      box-shadow: 0 8px 32px rgba(0,0,0,.22);
+    }
+    [data-theme="light"] .chat-btn:hover { box-shadow: 0 14px 40px rgba(0,0,0,.32); }
+
+    /* Panel */
+    .chat-panel {
+      position: fixed; bottom: 88px; right: 26px; z-index: 9979;
+      width: 388px; height: 544px;
+      display: flex; flex-direction: column;
+      border-radius: 24px; overflow: hidden;
+      background: #111118;
+      border: 1px solid rgba(255,255,255,.11);
+      box-shadow: 0 32px 80px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.04);
+      transform: translateY(18px) scale(.96);
+      opacity: 0; pointer-events: none;
+      transition: transform .28s cubic-bezier(.22,1,.36,1), opacity .22s;
+    }
+    .chat-panel.open { transform: translateY(0) scale(1); opacity: 1; pointer-events: all; }
+
+    /* Header */
+    .chat-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 15px 16px 13px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      flex-shrink: 0;
+      background: rgba(255,255,255,.03);
+    }
+    .chat-header-info { display: flex; align-items: center; gap: 11px; }
+    .chat-header-mark {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: #FFFFFF; color: #09090F;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .82rem; font-weight: 900; flex-shrink: 0;
+    }
+    .chat-header-name {
+      font-family: 'Outfit', sans-serif; font-size: .96rem;
+      font-weight: 800; color: rgba(235,240,255,.97); letter-spacing: -.2px;
+    }
+    .chat-header-sub {
+      font-size: .64rem; font-weight: 600;
+      color: rgba(235,240,255,.35); letter-spacing: .4px;
+      margin-top: 1px;
+    }
+    .chat-close {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: rgba(255,255,255,.07); border: none;
+      color: rgba(235,240,255,.50); cursor: pointer; font-size: .80rem;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .15s;
+    }
+    .chat-close:hover { background: rgba(255,255,255,.13); color: rgba(235,240,255,.85); }
+
+    /* Thread */
+    .chat-thread {
+      flex: 1; overflow-y: auto;
+      padding: 16px 13px; display: flex; flex-direction: column;
+      gap: 11px; scroll-behavior: smooth;
+    }
+    .chat-thread::-webkit-scrollbar { width: 3px; }
+    .chat-thread::-webkit-scrollbar-thumb { background: rgba(255,255,255,.10); border-radius: 2px; }
+
+    /* Messages */
+    .chat-msg { display: flex; align-items: flex-end; gap: 7px; max-width: 90%; }
+    .chat-msg-assistant { align-self: flex-start; }
+    .chat-msg-user      { align-self: flex-end; flex-direction: row-reverse; }
+    .chat-orbi-icon {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #FFFFFF; color: #09090F;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .60rem; flex-shrink: 0; margin-bottom: 2px;
+    }
+    .chat-bubble {
+      padding: 11px 14px; border-radius: 18px;
+      font-size: .875rem; line-height: 1.65; font-weight: 400;
+    }
+    .chat-msg-assistant .chat-bubble {
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.09);
+      color: rgba(235,240,255,.92);
+      border-bottom-left-radius: 5px;
+    }
+    .chat-msg-user .chat-bubble {
+      background: #FFFFFF; color: #09090F;
+      font-weight: 500; border-bottom-right-radius: 5px;
+    }
+
+    /* Typing dots */
+    .chat-typing-bubble { display: flex; gap: 4px; align-items: center; padding: 14px 16px !important; }
+    .tdot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(235,240,255,.40);
+      animation: tdotBounce .9s ease-in-out infinite;
+    }
+    .tdot:nth-child(2) { animation-delay: .16s; }
+    .tdot:nth-child(3) { animation-delay: .32s; }
+    @keyframes tdotBounce {
+      0%,60%,100% { transform: translateY(0); }
+      30%          { transform: translateY(-6px); }
+    }
+
+    /* Input area */
+    .chat-input-area {
+      display: flex; gap: 8px; padding: 11px 13px 13px;
+      border-top: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0; background: rgba(255,255,255,.02);
+    }
+    .chat-input {
+      flex: 1; padding: 11px 16px;
+      background: rgba(255,255,255,.07);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 100px;
+      font-size: .875rem; font-family: 'Inter', sans-serif;
+      color: rgba(235,240,255,.94); outline: none;
+      transition: border-color .18s, background .18s;
+    }
+    .chat-input::placeholder { color: rgba(235,240,255,.26); }
+    .chat-input:focus { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.22); }
+    .chat-send {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: #FFFFFF; color: #09090F; border: none;
+      font-size: 1.05rem; font-weight: 900; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: transform .15s, opacity .15s;
+    }
+    .chat-send:hover   { transform: scale(1.08); }
+    .chat-send:disabled { opacity: .30; cursor: default; transform: none; }
+
+    /* Light mode */
+    [data-theme="light"] .chat-panel { background: #FAFAFA; border-color: rgba(0,0,0,.08); box-shadow: 0 32px 80px rgba(0,0,0,.16); }
+    [data-theme="light"] .chat-header { background: #FFFFFF; border-color: rgba(0,0,0,.07); }
+    [data-theme="light"] .chat-header-mark { background: #09090F; color: #FFFFFF; }
+    [data-theme="light"] .chat-header-name { color: #09090F; }
+    [data-theme="light"] .chat-header-sub  { color: rgba(0,0,0,.38); }
+    [data-theme="light"] .chat-close { background: rgba(0,0,0,.05); color: rgba(0,0,0,.40); }
+    [data-theme="light"] .chat-close:hover { background: rgba(0,0,0,.09); color: #09090F; }
+    [data-theme="light"] .chat-thread::-webkit-scrollbar-thumb { background: rgba(0,0,0,.10); }
+    [data-theme="light"] .chat-orbi-icon { background: #09090F; color: #FFFFFF; }
+    [data-theme="light"] .chat-msg-assistant .chat-bubble { background: #F0F0F3; border-color: rgba(0,0,0,.06); color: #09090F; }
+    [data-theme="light"] .chat-msg-user .chat-bubble { background: #09090F; color: #FFFFFF; }
+    [data-theme="light"] .chat-input { background: rgba(0,0,0,.04); border-color: rgba(0,0,0,.09); color: #09090F; }
+    [data-theme="light"] .chat-input::placeholder { color: rgba(0,0,0,.30); }
+    [data-theme="light"] .chat-input:focus { background: rgba(0,0,0,.07); border-color: rgba(0,0,0,.18); }
+    [data-theme="light"] .chat-send { background: #09090F; color: #FFFFFF; }
+    [data-theme="light"] .chat-input-area { background: #FFFFFF; border-color: rgba(0,0,0,.07); }
+    [data-theme="light"] .tdot { background: rgba(0,0,0,.28); }
+
+    /* Mobile */
+    @media (max-width: 640px) {
+      .chat-panel { bottom: 0; right: 0; left: 0; width: 100%; height: 72vh; border-radius: 24px 24px 0 0; }
+      .chat-btn   { bottom: 20px; right: 20px; }
+    }
+
     /* ── AI Insight Panel ────────────────────────────────────────────── */
     .ai-insight-panel {
       display: flex;
@@ -1346,8 +1522,34 @@
     <strong>ParkMe</strong> &ensp;·&ensp; © 2026 &ensp;·&ensp; Always verify posted signs before parking
   </footer>
 
+  <!-- Orbi Chat -->
+  <button class="chat-btn" id="chat-btn" aria-label="Open Orbi Chat" aria-expanded="false">
+    <span class="chat-btn-live"></span>
+    Ask Orbi
+  </button>
+
+  <div class="chat-panel" id="chat-panel" role="dialog" aria-label="Orbi Chat">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <div class="chat-header-mark">✦</div>
+        <div>
+          <div class="chat-header-name">Orbi Chat</div>
+          <div class="chat-header-sub">Your Local Guide</div>
+        </div>
+      </div>
+      <button class="chat-close" id="chat-close" aria-label="Close chat">✕</button>
+    </div>
+    <div class="chat-thread" id="chat-thread"></div>
+    <div class="chat-input-area">
+      <input id="chat-input" class="chat-input" type="text"
+             placeholder="Best tacos nearby? Parking tips? Ask anything…"
+             autocomplete="off" maxlength="300" />
+      <button class="chat-send" id="chat-send" aria-label="Send message">➜</button>
+    </div>
+  </div>
+
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=36"></script>
+  <script src="app.js?v=37"></script>
 
 </div><!-- /.page-wrap -->
 
