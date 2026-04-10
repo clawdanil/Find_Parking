@@ -1019,6 +1019,75 @@
       #map               { height:280px; }
     }
 
+    /* ── AI Insight Panel ────────────────────────────────────────────── */
+    .ai-insight-panel {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      padding: 18px 20px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      animation: fadeUp .4s ease both;
+      position: relative;
+      overflow: hidden;
+      background: rgba(255,255,255,.042);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .ai-insight-panel::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .ai-insight-icon {
+      font-size: .95rem;
+      line-height: 1;
+      flex-shrink: 0;
+      margin-top: 3px;
+      opacity: .55;
+      font-style: normal;
+    }
+    .ai-insight-body { flex: 1; min-width: 0; }
+    .ai-insight-label {
+      font-size: .58rem;
+      font-weight: 800;
+      letter-spacing: 2.2px;
+      text-transform: uppercase;
+      color: var(--t30);
+      margin-bottom: 7px;
+    }
+    .ai-insight-text {
+      font-size: .91rem;
+      line-height: 1.7;
+      color: var(--t80);
+      font-weight: 400;
+    }
+
+    /* Skeleton loading */
+    .ai-skel {
+      display: block;
+      height: 11px;
+      border-radius: 6px;
+      background: var(--t12);
+      margin-bottom: 8px;
+      animation: skelPulse 1.5s ease-in-out infinite;
+    }
+    .ai-skel:nth-child(1) { width: 100%; }
+    .ai-skel:nth-child(2) { width: 85%; animation-delay: .18s; }
+    .ai-skel.ai-skel-sm   { width: 58%; animation-delay: .36s; margin-bottom: 0; }
+    @keyframes skelPulse {
+      0%,100% { opacity: .25; }
+      50%      { opacity: .60; }
+    }
+
+    /* Light mode */
+    [data-theme="light"] .ai-insight-panel {
+      background: rgba(0,0,0,.025);
+      border-color: rgba(0,0,0,.07);
+    }
+    [data-theme="light"] .ai-insight-panel::before { display: none; }
+
     /* ── Data attribution ─────────────────────────────────────────────── */
     .attribution-section {
       position: relative; z-index: 1;
@@ -1278,7 +1347,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=35"></script>
+  <script src="app.js?v=36"></script>
 
 </div><!-- /.page-wrap -->
 

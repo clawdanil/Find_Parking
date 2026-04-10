@@ -823,6 +823,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       </div>`;
   }).join('');
 
+  fetchAiInsight(feature, items);
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
@@ -1020,6 +1021,74 @@ function renderEventsResults(elements) {
         </div>
       </div>`;
   }).join('');
+
+  fetchAiInsight('events', elements);
+}
+
+// ── AI Insights ───────────────────────────────────────────────────────────────
+const AI_INSIGHT_FEATURES = new Set(['food', 'bars', 'coffee', 'gym', 'entertainment', 'events']);
+
+async function fetchAiInsight(feature, items) {
+  if (!AI_INSIGHT_FEATURES.has(feature) || !items?.length) return;
+
+  // Remove any stale panel and inject a loading one at the top of results
+  document.getElementById('ai-insight-panel')?.remove();
+  const panel = document.createElement('div');
+  panel.id        = 'ai-insight-panel';
+  panel.className = 'ai-insight-panel';
+  panel.innerHTML = `
+    <div class="ai-insight-icon">✦</div>
+    <div class="ai-insight-body">
+      <div class="ai-insight-label">Orbi Intelligence</div>
+      <div class="ai-insight-text loading" id="ai-insight-text">
+        <span class="ai-skel"></span><span class="ai-skel"></span><span class="ai-skel ai-skel-sm"></span>
+      </div>
+    </div>`;
+  resultsDiv.insertBefore(panel, resultsDiv.firstChild);
+
+  try {
+    const timeStr = new Date().toLocaleString('en-US', {
+      weekday: 'long', hour: 'numeric', minute: '2-digit', hour12: true,
+    });
+    const wDesc = document.getElementById('w-desc')?.textContent;
+    const wTemp = document.getElementById('w-temp')?.textContent;
+    const weather = wDesc && wTemp && wDesc !== 'Loading…' ? `${wTemp}, ${wDesc}` : null;
+
+    const res = await fetch('/api/ai-insight', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        feature,
+        items: items.slice(0, 8).map(r => ({
+          name:        r.name,
+          rating:      r.rating      ?? r.tags?.rating,
+          price_level: r.price_level,
+          dist:        r.dist        ? (+r.dist).toFixed(2) : undefined,
+          open_now:    r.openStatus === 'Open now'   ? true
+                     : r.openStatus === 'Closed now' ? false : undefined,
+          cuisine:     r.cuisine     ?? r.tags?.cuisine,
+          category:    r.category    ?? r.tags?.category,
+          date_label:  r.tags?.date_label,
+          venue_name:  r.tags?.venue_name,
+        })),
+        location: selectedCity || streetInput.value.split(',')[0] || '',
+        timeStr,
+        weather,
+      }),
+    });
+
+    if (!res.ok) throw new Error('api ' + res.status);
+    const { insight } = await res.json();
+    if (!insight) throw new Error('empty');
+
+    const textEl = document.getElementById('ai-insight-text');
+    if (textEl) {
+      textEl.classList.remove('loading');
+      textEl.textContent = insight;
+    }
+  } catch {
+    document.getElementById('ai-insight-panel')?.remove();
+  }
 }
 
 async function loadFeature(feature) {
