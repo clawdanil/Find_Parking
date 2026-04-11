@@ -569,12 +569,17 @@ async function searchParking() {
       selectedLat = data.searchLat;
       selectedLon = data.searchLng;
     }
-    // Reset to parking tile when a fresh search runs
-    activeFeature = 'parking';
-    document.querySelectorAll('.feature-tile').forEach(t => {
-      t.classList.toggle('active', t.dataset.feature === 'parking');
-    });
-    renderResults(data, street);
+    // Cache parking spots so Parking tile renders instantly when clicked
+    allSpots  = Array.isArray(data.spots) ? data.spots : [];
+    activeTab = 'all';
+    // Activate the first tile and load its results by default
+    const firstTile    = document.querySelector('.feature-tile');
+    const firstFeature = firstTile?.dataset.feature || 'food';
+    activeFeature = firstFeature;
+    document.querySelectorAll('.feature-tile').forEach(t =>
+      t.classList.toggle('active', t.dataset.feature === firstFeature)
+    );
+    await loadFeature(firstFeature);
   } catch (err) {
     console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {
