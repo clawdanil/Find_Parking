@@ -246,7 +246,7 @@
       font-weight: 500;
       color: var(--t55);
       max-width: 400px;
-      margin: 0 auto;
+      margin: 0 auto 26px;
       line-height: 1.65;
     }
 
@@ -369,76 +369,84 @@
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 7px;
-      margin-top: 16px;
+      gap: 6px;
+      margin-top: 14px;
     }
     .chips-label {
-      font-size: .60rem; font-weight: 800;
-      letter-spacing: 1.6px; text-transform: uppercase;
-      color: var(--t30); width: 100%; padding-left: 4px;
+      font-size: .58rem; font-weight: 700;
+      letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--t30); width: 100%; padding-left: 2px;
     }
     .chip {
-      padding: 6px 16px;
-      border: 1px solid rgba(10,10,20,.08);
+      padding: 5px 13px;
+      border: 1px solid rgba(255,255,255,.10);
       border-radius: 100px;
-      background: rgba(255,255,255,.70);
-      font-size: .77rem;
+      background: transparent;
+      font-size: .72rem;
       font-family: 'Inter', sans-serif;
-      font-weight: 700;
-      color: var(--t55);
+      font-weight: 600;
+      color: rgba(235,240,255,.45);
       cursor: pointer;
-      transition: all .18s;
+      transition: all .15s;
     }
     .chip:hover {
-      background: rgba(255,255,255,1);
-      border-color: rgba(10,10,20,.15);
-      color: var(--text);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(10,10,20,.08);
+      background: rgba(255,255,255,.08);
+      border-color: rgba(255,255,255,.20);
+      color: rgba(235,240,255,.85);
     }
 
     /* ── Feature tiles ─────────────────────────────────────────────────── */
     .feature-tiles {
-      margin-top: 18px;
-      border-top: 1px solid rgba(10,10,20,.06);
+      margin-top: 20px;
+      border-top: 1px solid rgba(255,255,255,.08);
       padding-top: 16px;
     }
     .tiles-row {
       display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-    .feature-tile {
-      display: inline-flex;
-      align-items: center;
       gap: 6px;
-      padding: 7px 18px;
-      border-radius: 100px;
-      border: 1.5px solid rgba(10,10,20,.10);
-      background: #F8FAFC;
+      overflow-x: auto;
+      padding: 2px 0 4px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tiles-row::-webkit-scrollbar { display: none; }
+    .feature-tile {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 18px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.09);
+      background: transparent;
       font-family: 'Inter', sans-serif;
-      font-size: .80rem;
-      font-weight: 700;
-      color: var(--t55);
       cursor: pointer;
-      transition: all .18s;
+      flex-shrink: 0;
+      min-width: 74px;
+      color: rgba(235,240,255,.38);
+      transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
+    }
+    .tile-svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .tile-label {
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .7px;
+      text-transform: uppercase;
       white-space: nowrap;
     }
     .feature-tile:hover {
-      border-color: #2563EB;
-      color: #2563EB;
-      background: rgba(37,99,235,.05);
+      color: rgba(235,240,255,.85);
+      background: rgba(255,255,255,.07);
+      border-color: rgba(255,255,255,.18);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(37,99,235,.12);
     }
     .feature-tile.active {
-      background: linear-gradient(135deg, #2563EB 0%, #4F46E5 100%);
+      background: #FFFFFF;
+      color: #09090F;
       border-color: transparent;
-      color: #fff;
-      box-shadow: 0 4px 16px rgba(37,99,235,.30);
+      box-shadow: 0 2px 20px rgba(255,255,255,.10);
     }
-    .feature-tile.active:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,.38); }
+    .feature-tile.active:hover { transform: translateY(-1px); }
 
     /* ── Weather pill ──────────────────────────────────────────────────── */
     .weather-pill {
@@ -960,44 +968,64 @@
     .dark-toggle:hover { transform: scale(1.08); box-shadow: 0 6px 22px rgba(10,10,20,.15); }
     .dark-toggle:active { transform: scale(.95); }
 
-    /* ── Dark mode theme ───────────────────────────────────────────────── */
+    /* ── Orbi dark mode — premium deep space ──────────────────────────── */
     [data-theme="dark"] {
-      --text:   rgba(225,225,245,.92);
-      --t80:    rgba(225,225,245,.72);
-      --t55:    rgba(225,225,245,.52);
-      --t30:    rgba(225,225,245,.32);
-      --t12:    rgba(225,225,245,.10);
-      --t06:    rgba(225,225,245,.06);
-      --glass:  rgba(255,255,255,.055);
-      --glassH: rgba(255,255,255,.09);
+      --text:   rgba(235,240,255,.94);
+      --t80:    rgba(235,240,255,.74);
+      --t55:    rgba(235,240,255,.54);
+      --t30:    rgba(235,240,255,.34);
+      --t12:    rgba(235,240,255,.11);
+      --t06:    rgba(235,240,255,.05);
+      --glass:  rgba(255,255,255,.052);
+      --glassH: rgba(255,255,255,.088);
       --border: rgba(255,255,255,.09);
-      --accent: #A5B4FC;
-      --accentH: #818CF8;
+      --accent:  #E8ECFF;
+      --accentH: #C7D0FF;
+      --orbi:    #FFFFFF;
+      --orbi-glow: rgba(255,255,255,.10);
     }
-    [data-theme="dark"] body         { background: #0C0C14; }
-    [data-theme="dark"] .bg-scene    { background: #0C0C14; }
-    [data-theme="dark"] .bg-orb-1    { background: radial-gradient(circle, #1a1a40, #0c0c20); opacity: .30; }
-    [data-theme="dark"] .bg-orb-2    { background: radial-gradient(circle, #1a1030, #0c0c1c); opacity: .25; }
-    [data-theme="dark"] .bg-orb-3    { background: radial-gradient(circle, #101030, #0c0c18); opacity: .20; }
 
-    /* Surfaces */
-    [data-theme="dark"] .logo-pill          { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.10); box-shadow: 0 4px 24px rgba(0,0,0,.30); }
-    [data-theme="dark"] .glass-panel        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 20px 48px rgba(0,0,0,.30); }
-    [data-theme="dark"] .search-card        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); }
+    /* ── Pure black body & background ───────────────────────────────── */
+    [data-theme="dark"] body      { background: #09090F; }
+    [data-theme="dark"] .bg-scene {
+      background: #09090F;
+      background-image: radial-gradient(ellipse 140% 50% at 50% -8%, rgba(255,255,255,.045) 0%, transparent 60%);
+    }
+    [data-theme="dark"] .bg-orb-1,
+    [data-theme="dark"] .bg-orb-2,
+    [data-theme="dark"] .bg-orb-3 { opacity: 0; animation: none; }
+
+    /* ── Surfaces ────────────────────────────────────────────────────── */
+    [data-theme="dark"] .logo-pill { background: none; border: none; box-shadow: none; }
+    [data-theme="dark"] .logo-icon { background: #09090F; border-color: rgba(255,255,255,.18); box-shadow: 0 8px 32px rgba(0,0,0,.60), inset 0 1px 0 rgba(255,255,255,.12); }
+    [data-theme="dark"] .glass-panel {
+      background: rgba(255,255,255,.048);
+      border-color: rgba(255,255,255,.085);
+      box-shadow: 0 24px 64px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.07);
+    }
+    [data-theme="dark"] .search-card        { background: rgba(255,255,255,.048); border-color: rgba(255,255,255,.085); }
     [data-theme="dark"] .input-field        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.10); color: var(--text); }
     [data-theme="dark"] .input-field:focus  { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.20); box-shadow: 0 0 0 4px rgba(255,255,255,.05); }
     [data-theme="dark"] .input-field::placeholder { color: rgba(225,225,245,.28); }
     [data-theme="dark"] .location-btn       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .location-btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.15); }
-    [data-theme="dark"] .chip               { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .chip:hover         { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.16); box-shadow: none; }
-    [data-theme="dark"] .feature-tile       { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .feature-tile:hover { background: rgba(37,99,235,.20); }
-    [data-theme="dark"] .weather-pill       { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); box-shadow: 0 4px 20px rgba(0,0,0,.25); }
-    [data-theme="dark"] .stats-inner        { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
-    [data-theme="dark"] .parking-card       { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); box-shadow: 0 2px 12px rgba(0,0,0,.25); }
-    [data-theme="dark"] .parking-card:hover { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 10px 32px rgba(0,0,0,.30); }
-    [data-theme="dark"] .parking-card       { box-shadow: 0 2px 12px rgba(0,0,0,.25); }
+    [data-theme="dark"] .location-btn:hover { background: rgba(255,255,255,.10); border-color: rgba(255,255,255,.16); }
+    [data-theme="dark"] .chip               { background: transparent; border-color: rgba(255,255,255,.10); }
+    [data-theme="dark"] .chip:hover         { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.22); }
+    [data-theme="dark"] .weather-pill       { background: rgba(255,255,255,.065); border-color: rgba(255,255,255,.10); box-shadow: 0 4px 24px rgba(0,0,0,.35); }
+    [data-theme="dark"] .stats-inner        { background: rgba(255,255,255,.055); border-color: rgba(255,255,255,.09); }
+
+    /* ── Premium cards ───────────────────────────────────────────────── */
+    [data-theme="dark"] .parking-card {
+      background: rgba(255,255,255,.042);
+      border-color: rgba(255,255,255,.08);
+      box-shadow: 0 2px 16px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    [data-theme="dark"] .parking-card:hover {
+      background: rgba(255,255,255,.075);
+      border-color: rgba(255,255,255,.20);
+      box-shadow: 0 16px 48px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.08);
+      transform: translateY(-3px);
+    }
     [data-theme="dark"] .detail-item        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .tabs-bar           { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .map-header         { background: rgba(20,20,32,.90); border-color: rgba(255,255,255,.09); }
@@ -1012,14 +1040,34 @@
     [data-theme="dark"] .dark-toggle        { background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.14); box-shadow: 0 4px 16px rgba(0,0,0,.35); }
     [data-theme="dark"] .feature-tiles      { border-color: rgba(255,255,255,.08); }
     [data-theme="dark"] .w-extras           { border-color: rgba(255,255,255,.10); }
-    [data-theme="dark"] .card-type-banner   { opacity: .92; }
-    [data-theme="dark"] .leaflet-popup-content-wrapper { background: rgba(18,18,28,.97) !important; border-color: rgba(255,255,255,.12) !important; }
-    [data-theme="dark"] .leaflet-popup-tip  { background: rgba(18,18,28,.97) !important; }
+
+    /* ── White search button in dark (inverted) ─────────────────────── */
+    [data-theme="dark"] .search-btn {
+      background: #FFFFFF;
+      color: #09090F;
+      box-shadow: 0 4px 24px rgba(255,255,255,.14), inset 0 1px 0 rgba(255,255,255,.80);
+    }
+    [data-theme="dark"] .search-btn:hover {
+      box-shadow: 0 8px 36px rgba(255,255,255,.22);
+    }
+
+    /* ── Logo name & tagline in dark ─────────────────────────────────── */
+    [data-theme="dark"] .logo-name { color: rgba(235,240,255,.97); }
+    [data-theme="dark"] .logo-sub  { color: rgba(235,240,255,.38); letter-spacing: 2.2px; }
+
+    /* ── Heading accent gradient in dark ─────────────────────────────── */
     [data-theme="dark"] .hero-headline .accent-word {
-      background: linear-gradient(135deg, rgba(200,200,255,.90) 0%, rgba(180,180,255,.65) 55%, rgba(200,200,255,.80) 100%);
+      background: linear-gradient(160deg, #FFFFFF 0%, rgba(255,248,235,.80) 50%, #FFFFFF 100%);
       -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
     }
-    [data-theme="dark"] .sp { background: radial-gradient(circle, rgba(180,180,200,.55) 0%, rgba(180,180,200,0) 70%); }
+    [data-theme="dark"] .gmaps-btn {
+      background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.14); color: rgba(235,240,255,.82);
+    }
+    [data-theme="dark"] .gmaps-btn:hover { background: rgba(255,255,255,.12); }
+    [data-theme="dark"] .hero-sub { color: rgba(235,240,255,.38); }
+    [data-theme="dark"] .card-type-banner   { opacity: .92; }
+    [data-theme="dark"] .leaflet-popup-content-wrapper { background: rgba(14,14,24,.98) !important; border-color: rgba(255,255,255,.12) !important; }
+    [data-theme="dark"] .leaflet-popup-tip  { background: rgba(14,14,24,.98) !important; }
 
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width:640px) {
@@ -1116,9 +1164,10 @@
     </div>
 
     <h1 class="hero-headline">
-      <span class="hero-line-1">Your Local<span class="smoke-cloud sc1"><i class="sp"></i><i class="sp"></i><i class="sp"></i><i class="sp"></i></span></span>
-      <span class="hero-line-2 accent-word">Universe.<span class="smoke-cloud sc2"><i class="sp"></i><i class="sp"></i><i class="sp"></i><i class="sp"></i></span></span>
+      <span class="hero-line-1">Your Local</span>
+      <span class="hero-line-2 accent-word">Universe.</span>
     </h1>
+    <p class="hero-sub">Food · Bars · Coffee · Events · Transit &amp; more — your city, one search.</p>
 
     <!-- Weather pill -->
     <div class="weather-pill" id="weather-card">
@@ -1169,17 +1218,43 @@
 
       <!-- Feature tiles -->
       <div class="feature-tiles" id="feature-tiles">
-        <span class="chips-label">Explore nearby</span>
         <div class="tiles-row">
-          <button class="feature-tile" data-feature="parking">🅿️ Parking</button>
-          <button class="feature-tile" data-feature="transit">🚇 Transit</button>
-          <button class="feature-tile" data-feature="food">🍔 Food</button>
-          <button class="feature-tile" data-feature="bars">🍺 Bars</button>
-          <button class="feature-tile" data-feature="coffee">☕ Coffee</button>
-          <button class="feature-tile" data-feature="gym">💪 Gym</button>
-          <button class="feature-tile" data-feature="shopping">🛒 Shopping</button>
-          <button class="feature-tile" data-feature="entertainment">🎬 Entertainment</button>
-          <button class="feature-tile" data-feature="events">🎟️ Events</button>
+          <button class="feature-tile" data-feature="food">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3v7"/></svg>
+            <span class="tile-label">Food</span>
+          </button>
+          <button class="feature-tile" data-feature="bars">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22V11.5M16 22V11.5M2 8l2-6h16l2 6H2zm0 0h20"/><line x1="12" y1="8" x2="12" y2="22"/></svg>
+            <span class="tile-label">Bars</span>
+          </button>
+          <button class="feature-tile" data-feature="coffee">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 010 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
+            <span class="tile-label">Coffee</span>
+          </button>
+          <button class="feature-tile" data-feature="gym">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 9v6M21 9v6M6.5 9v6M17.5 9v6"/></svg>
+            <span class="tile-label">Gym</span>
+          </button>
+          <button class="feature-tile" data-feature="shopping">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+            <span class="tile-label">Shopping</span>
+          </button>
+          <button class="feature-tile" data-feature="entertainment">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
+            <span class="tile-label">Cinema</span>
+          </button>
+          <button class="feature-tile" data-feature="events">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="tile-label">Events</span>
+          </button>
+          <button class="feature-tile" data-feature="transit">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M4 10h16M8 6h.01M16 6h.01M8 16l-2 4M16 16l2 4"/></svg>
+            <span class="tile-label">Transit</span>
+          </button>
+          <button class="feature-tile" data-feature="parking">
+            <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg>
+            <span class="tile-label">Parking</span>
+          </button>
         </div>
       </div>
     </div>
@@ -1334,7 +1409,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=39"></script>
+  <script src="app.js?v=47"></script>
 
 </div><!-- /.page-wrap -->
 

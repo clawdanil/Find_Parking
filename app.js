@@ -1,25 +1,5 @@
 const TIMEOUT_MS = 28000;
 
-// ── Dark mode — always start light, honour explicit user choice only ──────────
-(function initDarkMode() {
-  const saved = localStorage.getItem('theme');
-  if (saved === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-})();
-
-document.getElementById('dark-toggle').addEventListener('click', () => {
-  const html   = document.documentElement;
-  const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  localStorage.setItem('theme', isDark ? 'light' : 'dark');
-  document.getElementById('dark-toggle').textContent = isDark ? '🌙' : '☀️';
-});
-
-// Set correct icon on load
-(function syncToggleIcon() {
-  const btn = document.getElementById('dark-toggle');
-  if (btn) btn.textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '☀️' : '🌙';
-})();
-
 const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
@@ -382,6 +362,19 @@ function renderCards(spots) {
       });
     }, 90_000);
   }
+
+  // AI insight for parking
+  const parkingInsightItems = visible.slice(0, 8).map(s => {
+    const meta = TYPE_META[s.type] || TYPE_META['FREE_STREET'];
+    return {
+      name:       s.address,
+      category:   meta.label,
+      dist:       parseFloat((s.distance_from_search || '').replace(/[^\d.]/g, '')) || null,
+      time_limit: s.time_limit || null,
+      cost:       s.avg_cost   || null,
+    };
+  });
+  fetchAiInsight('parking', parkingInsightItems);
 }
 
 // ── Render parking cards ──────────────────────────────────────────────────────
@@ -576,12 +569,17 @@ async function searchParking() {
       selectedLat = data.searchLat;
       selectedLon = data.searchLng;
     }
-    // Reset to parking tile when a fresh search runs
-    activeFeature = 'parking';
-    document.querySelectorAll('.feature-tile').forEach(t => {
-      t.classList.toggle('active', t.dataset.feature === 'parking');
-    });
-    renderResults(data, street);
+    // Cache parking spots so Parking tile renders instantly when clicked
+    allSpots  = Array.isArray(data.spots) ? data.spots : [];
+    activeTab = 'all';
+    // Activate the first tile and load its results by default
+    const firstTile    = document.querySelector('.feature-tile');
+    const firstFeature = firstTile?.dataset.feature || 'food';
+    activeFeature = firstFeature;
+    document.querySelectorAll('.feature-tile').forEach(t =>
+      t.classList.toggle('active', t.dataset.feature === firstFeature)
+    );
+    await loadFeature(firstFeature);
   } catch (err) {
     console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {
@@ -825,6 +823,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       </div>`;
   }).join('');
 
+  fetchAiInsight(feature, items);
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
@@ -885,17 +884,28 @@ function renderTransitResults(elements, meta = {}) {
       : isBusStop ? '' // bus stops use routeHtml instead
       : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
 
-    // Bus route list from OSM
+    // Bus stop info: prefer Google Directions schedules (has times), fall back to OSM routes
+    const hasSchedules = isBusStop && el.schedules && el.schedules.length > 0;
+    const hasRoutes    = isBusStop && el.routes    && el.routes.length    > 0;
     const routeHtml = isBusStop
-      ? (el.routes && el.routes.length > 0
+      ? (hasSchedules
           ? `<div class="bus-routes">
-              ${el.routes.map(r => `
+              ${el.schedules.map(s => `
                 <div class="bus-route-row">
-                  <span class="bus-route-badge">${escHtml(r.ref)}</span>
-                  ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : r.from ? `<span class="bus-route-dest">${escHtml(r.from)} line</span>` : ''}
+                  <span class="bus-route-badge">${escHtml(s.route)}</span>
+                  ${s.headsign ? `<span class="bus-route-dest">→ ${escHtml(s.headsign)}</span>` : ''}
+                  <span class="bus-sched-time">${escHtml(s.departureText)}</span>
                 </div>`).join('')}
              </div>`
-          : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
+          : hasRoutes
+            ? `<div class="bus-routes">
+                ${el.routes.map(r => `
+                  <div class="bus-route-row">
+                    <span class="bus-route-badge">${escHtml(r.ref)}</span>
+                    ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : ''}
+                  </div>`).join('')}
+               </div>`
+            : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
       : '';
 
     // For bus stops: link to Google Maps in transit mode so schedules load automatically
@@ -925,6 +935,14 @@ function renderTransitResults(elements, meta = {}) {
         </div>
       </div>`;
   }).join('');
+
+  // AI insight for transit
+  const transitInsightItems = elements.slice(0, 8).map(el => ({
+    name:     el.name,
+    category: el.transitType,
+    dist:     parseFloat((el.distLabel || '').replace(/[^\d.]/g, '')) || null,
+  }));
+  fetchAiInsight('transit', transitInsightItems);
 }
 
 function renderEventsResults(elements) {
@@ -1011,6 +1029,74 @@ function renderEventsResults(elements) {
         </div>
       </div>`;
   }).join('');
+
+  fetchAiInsight('events', elements);
+}
+
+// ── AI Insights ───────────────────────────────────────────────────────────────
+const AI_INSIGHT_FEATURES = new Set(['food', 'bars', 'coffee', 'gym', 'entertainment', 'events', 'parking', 'transit', 'shopping']);
+
+async function fetchAiInsight(feature, items) {
+  if (!AI_INSIGHT_FEATURES.has(feature) || !items?.length) return;
+
+  // Remove any stale panel and inject a loading one at the top of results
+  document.getElementById('ai-insight-panel')?.remove();
+  const panel = document.createElement('div');
+  panel.id        = 'ai-insight-panel';
+  panel.className = 'ai-insight-panel';
+  panel.innerHTML = `
+    <div class="ai-insight-icon">✦</div>
+    <div class="ai-insight-body">
+      <div class="ai-insight-label">Orbi Intelligence</div>
+      <div class="ai-insight-text loading" id="ai-insight-text">
+        <span class="ai-skel"></span><span class="ai-skel"></span><span class="ai-skel ai-skel-sm"></span>
+      </div>
+    </div>`;
+  resultsDiv.insertBefore(panel, resultsDiv.firstChild);
+
+  try {
+    const timeStr = new Date().toLocaleString('en-US', {
+      weekday: 'long', hour: 'numeric', minute: '2-digit', hour12: true,
+    });
+    const wDesc = document.getElementById('w-desc')?.textContent;
+    const wTemp = document.getElementById('w-temp')?.textContent;
+    const weather = wDesc && wTemp && wDesc !== 'Loading…' ? `${wTemp}, ${wDesc}` : null;
+
+    const res = await fetch('/api/ai-insight', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        feature,
+        items: items.slice(0, 8).map(r => ({
+          name:        r.name,
+          rating:      r.rating      ?? r.tags?.rating,
+          price_level: r.price_level,
+          dist:        r.dist        ? (+r.dist).toFixed(2) : undefined,
+          open_now:    r.openStatus === 'Open now'   ? true
+                     : r.openStatus === 'Closed now' ? false : undefined,
+          cuisine:     r.cuisine     ?? r.tags?.cuisine,
+          category:    r.category    ?? r.tags?.category,
+          date_label:  r.tags?.date_label,
+          venue_name:  r.tags?.venue_name,
+        })),
+        location: selectedCity || streetInput.value.split(',')[0] || '',
+        timeStr,
+        weather,
+      }),
+    });
+
+    if (!res.ok) throw new Error('api ' + res.status);
+    const { insight } = await res.json();
+    if (!insight) throw new Error('empty');
+
+    const textEl = document.getElementById('ai-insight-text');
+    if (textEl) {
+      textEl.classList.remove('loading');
+      textEl.textContent = insight;
+    }
+  } catch {
+    document.getElementById('ai-insight-panel')?.remove();
+  }
 }
 
 async function loadFeature(feature) {
@@ -1075,6 +1161,7 @@ async function loadFeature(feature) {
 document.querySelectorAll('.feature-tile').forEach(tile => {
   tile.addEventListener('click', () => loadFeature(tile.dataset.feature));
 });
+
 
 // ── Attribution toggle ────────────────────────────────────────────────────────
 const attrToggle = document.getElementById('attr-toggle');
