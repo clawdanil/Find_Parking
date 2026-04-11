@@ -7,6 +7,9 @@ const FEATURE_LABEL = {
   gym:           'gyms and fitness centers',
   entertainment: 'entertainment venues',
   events:        'upcoming local events',
+  parking:       'parking spots and garages',
+  transit:       'transit stops and public transport options',
+  shopping:      'shopping stores and retail venues',
 };
 
 export default async function handler(req) {
@@ -30,6 +33,8 @@ export default async function handler(req) {
       if (r.open_now === false) parts.push('currently closed');
       if (r.cuisine)     parts.push(r.cuisine);
       if (r.category)    parts.push(r.category);
+      if (r.time_limit)  parts.push(r.time_limit);
+      if (r.cost)        parts.push(r.cost);
       if (r.date_label)  parts.push(r.date_label);
       if (r.venue_name)  parts.push(`@ ${r.venue_name}`);
       return parts.join(' · ');

@@ -382,6 +382,19 @@ function renderCards(spots) {
       });
     }, 90_000);
   }
+
+  // AI insight for parking
+  const parkingInsightItems = visible.slice(0, 8).map(s => {
+    const meta = TYPE_META[s.type] || TYPE_META['FREE_STREET'];
+    return {
+      name:       s.address,
+      category:   meta.label,
+      dist:       parseFloat((s.distance_from_search || '').replace(/[^\d.]/g, '')) || null,
+      time_limit: s.time_limit || null,
+      cost:       s.avg_cost   || null,
+    };
+  });
+  fetchAiInsight('parking', parkingInsightItems);
 }
 
 // ── Render parking cards ──────────────────────────────────────────────────────
@@ -937,6 +950,14 @@ function renderTransitResults(elements, meta = {}) {
         </div>
       </div>`;
   }).join('');
+
+  // AI insight for transit
+  const transitInsightItems = elements.slice(0, 8).map(el => ({
+    name:     el.name,
+    category: el.transitType,
+    dist:     parseFloat((el.distLabel || '').replace(/[^\d.]/g, '')) || null,
+  }));
+  fetchAiInsight('transit', transitInsightItems);
 }
 
 function renderEventsResults(elements) {
@@ -1028,7 +1049,7 @@ function renderEventsResults(elements) {
 }
 
 // ── AI Insights ───────────────────────────────────────────────────────────────
-const AI_INSIGHT_FEATURES = new Set(['food', 'bars', 'coffee', 'gym', 'entertainment', 'events']);
+const AI_INSIGHT_FEATURES = new Set(['food', 'bars', 'coffee', 'gym', 'entertainment', 'events', 'parking', 'transit', 'shopping']);
 
 async function fetchAiInsight(feature, items) {
   if (!AI_INSIGHT_FEATURES.has(feature) || !items?.length) return;
