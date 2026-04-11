@@ -76,15 +76,80 @@
       to   { transform: translate(5vw,6vh) scale(1.12); }
     }
 
+    /* ── Site nav ──────────────────────────────────────────────────────────── */
+    .site-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+      height: 62px; padding: 0 clamp(16px, 4vw, 40px);
+      display: flex; align-items: center;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease;
+    }
+    .site-nav.scrolled {
+      background: rgba(9,9,15,.90);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border-bottom-color: rgba(255,255,255,.07);
+    }
+    .nav-inner {
+      max-width: 1100px; margin: 0 auto; width: 100%;
+      display: flex; align-items: center; gap: 16px;
+    }
+    .nav-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; flex-shrink: 0; cursor: default;
+    }
+    .nav-icon {
+      width: 30px; height: 30px; border-radius: 50%;
+      background: #09090F; border: 1px solid rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,.55); flex-shrink: 0;
+    }
+    .nav-icon svg { width: 18px; height: 18px; display: block; }
+    .nav-wordmark {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.25rem; font-weight: 900; letter-spacing: -.4px;
+      color: rgba(235,240,255,.92); line-height: 1;
+    }
+    .nav-spacer { flex: 1; }
+    .nav-tag {
+      font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
+      text-transform: uppercase; color: rgba(235,240,255,.24);
+      display: none;
+    }
+    @media (min-width: 540px) { .nav-tag { display: block; } }
+    .nav-cta {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 9px 22px; margin-left: 8px;
+      background: #FFFFFF; color: #09090F; border: none; border-radius: 100px;
+      font-size: .82rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      cursor: pointer; white-space: nowrap; letter-spacing: .1px;
+      box-shadow: 0 2px 14px rgba(255,255,255,.14);
+      transition: opacity .15s, transform .15s, box-shadow .15s;
+    }
+    .nav-cta:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 4px 22px rgba(255,255,255,.22); }
+
     /* ── Hero ──────────────────────────────────────────────────────────── */
     .hero {
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 120px 24px 96px;
+      padding: 152px 24px 72px;
       width: 100%;
       box-sizing: border-box;
       -webkit-transform: translateZ(0);
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 18%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(700px, 90vw);
+      height: 280px;
+      background: radial-gradient(ellipse, rgba(255,255,255,.032) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
 
     /* ── Orbi logo mark — no pill, clean brand ────────────────────────── */
@@ -139,12 +204,35 @@
       padding-left: 2px;
     }
 
+    /* ── Hero eyebrow ──────────────────────────────────────────────────── */
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 10px;
+      margin-bottom: 28px;
+      padding: 7px 18px 7px 12px;
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 100px;
+      background: rgba(255,255,255,.042);
+      font-size: .76rem; font-weight: 600;
+      color: rgba(235,240,255,.46);
+      letter-spacing: .3px;
+      animation: fadeUp .5s ease both .05s;
+    }
+    .eyebrow-pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ADE80; flex-shrink: 0;
+      animation: eyebrowPulse 2.4s ease-in-out infinite;
+    }
+    @keyframes eyebrowPulse {
+      0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.5); opacity: 1; }
+      50%      { box-shadow: 0 0 0 5px rgba(74,222,128,0); opacity: .75; }
+    }
+
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
-      font-size: clamp(3rem, 8.5vw, 5.8rem);
+      font-size: clamp(3.4rem, 10vw, 7rem);
       font-weight: 900;
-      letter-spacing: -3px;
-      line-height: 1.0;
+      letter-spacing: -4px;
+      line-height: .95;
       color: var(--text);
       margin-bottom: 28px;
     }
@@ -419,44 +507,23 @@
     }
     .feature-tile.active:hover { transform: translateY(-1px); }
 
-    /* ── Weather pill ──────────────────────────────────────────────────── */
+    /* ── Weather pill ─ compact ────────────────────────────────────────── */
     .weather-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 22px;
-      padding: 10px 20px 10px 10px;
-      background: rgba(255,255,255,.82);
-      backdrop-filter: blur(40px) saturate(160%);
-      -webkit-backdrop-filter: blur(40px) saturate(160%);
-      border: 1px solid rgba(10,10,20,.07);
-      border-radius: 100px;
-      box-shadow: 0 4px 20px rgba(10,10,20,.06), inset 0 1.5px 0 rgba(255,255,255,1);
-      transition: opacity .35s;
+      display: inline-flex; align-items: center; gap: 9px;
+      margin-top: 20px; padding: 7px 16px 7px 10px;
+      background: rgba(255,255,255,.042); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 100px; transition: opacity .35s;
     }
-    .weather-pill.loading { opacity: .55; }
-    .w-icon-wrap {
-      width: 42px; height: 42px;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .w-svg-icon { width: 42px; height: 42px; }
-    .w-info { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
-    .w-top-row { display: flex; align-items: baseline; gap: 6px; }
-    .w-temp {
-      font-size: 1.1rem; font-weight: 800; color: var(--text); line-height: 1;
-    }
-    .w-desc {
-      font-size: .72rem; font-weight: 600; color: var(--t55); text-transform: capitalize;
-    }
-    .w-city {
-      font-size: .62rem; font-weight: 700; color: var(--t30); letter-spacing: .3px;
-    }
-    .w-extras {
-      display: flex; flex-direction: column; gap: 2px; align-items: flex-end;
-      padding-left: 8px; border-left: 1px solid rgba(10,10,20,.09); margin-left: 4px;
-    }
-    .w-extra { font-size: .68rem; font-weight: 600; color: var(--t55); white-space: nowrap; }
+    .weather-pill.loading { opacity: .35; }
+    .w-icon-wrap { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .w-svg-icon  { width: 22px; height: 22px; }
+    .w-info { display: flex; align-items: center; gap: 8px; }
+    .w-top-row { display: flex; align-items: center; gap: 5px; }
+    .w-temp  { font-size: .84rem; font-weight: 700; color: rgba(235,240,255,.78); line-height: 1; }
+    .w-desc  { font-size: .76rem; font-weight: 500; color: rgba(235,240,255,.42); text-transform: capitalize; }
+    .w-city  { font-size: .68rem; font-weight: 500; color: rgba(235,240,255,.25); padding-left: 8px; border-left: 1px solid rgba(255,255,255,.08); }
+    .w-extras { display: none; }
+    .w-extra  { display: none; }
 
     /* animated SVG weather icons */
     @keyframes spin    { to { transform: rotate(360deg); } }
@@ -951,7 +1018,10 @@
     [data-theme="dark"] body      { background: #09090F; }
     [data-theme="dark"] .bg-scene {
       background: #09090F;
-      background-image: radial-gradient(ellipse 140% 50% at 50% -8%, rgba(255,255,255,.045) 0%, transparent 60%);
+      background-image:
+        radial-gradient(ellipse 120% 60% at 50% -8%, rgba(255,255,255,.052) 0%, transparent 65%),
+        radial-gradient(circle, rgba(255,255,255,.038) 1px, transparent 1px);
+      background-size: 100% 100%, 38px 38px;
     }
     [data-theme="dark"] .bg-orb-1,
     [data-theme="dark"] .bg-orb-2,
@@ -1171,6 +1241,25 @@
 <body>
 <div class="page-wrap">
 
+  <nav class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <div class="nav-icon">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <ellipse cx="50" cy="48" rx="50" ry="11" stroke="rgba(255,255,255,0.32)" stroke-width="5.5" transform="rotate(-20 50 48)"/>
+            <path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/>
+            <circle cx="50" cy="43" r="20" fill="#07070F"/>
+            <ellipse cx="50" cy="48" rx="50" ry="11" stroke="white" stroke-width="5.5" transform="rotate(-20 50 48)" clip-path="url(#orb-clip-front)"/>
+          </svg>
+        </div>
+        <span class="nav-wordmark">Orbi</span>
+      </div>
+      <div class="nav-spacer"></div>
+      <span class="nav-tag">Navigate Your World</span>
+      <button class="nav-cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+    </div>
+  </nav>
+
   <!-- iOS mesh bg -->
   <div class="bg-scene" aria-hidden="true">
     <div class="bg-orb bg-orb-1"></div>
@@ -1181,31 +1270,9 @@
   <!-- Hero -->
   <header class="hero">
 
-    <!-- Orbi logo pill -->
-    <div class="logo-pill">
-      <div class="logo-icon">
-        <!-- Orbi icon: teardrop pin + 3D orbital ring -->
-        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
-          <defs>
-            <!-- Clip to show only top portion of orbital ring (in front of pin) -->
-            <clipPath id="orb-clip-front">
-              <rect x="-5" y="-5" width="110" height="52"/>
-            </clipPath>
-          </defs>
-          <!-- Back half of orbital ring — behind pin (lower opacity) -->
-          <ellipse cx="50" cy="48" rx="50" ry="11" stroke="rgba(255,255,255,0.32)" stroke-width="5.5" transform="rotate(-20 50 48)"/>
-          <!-- Pin teardrop body — crisp white -->
-          <path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/>
-          <!-- Inner circle cutout — creates the O / donut shape -->
-          <circle cx="50" cy="43" r="20" fill="#07070F"/>
-          <!-- Front half of orbital ring — over pin (full white) -->
-          <ellipse cx="50" cy="48" rx="50" ry="11" stroke="white" stroke-width="5.5" transform="rotate(-20 50 48)" clip-path="url(#orb-clip-front)"/>
-        </svg>
-      </div>
-      <div class="logo-text-col">
-        <span class="logo-name">Orbi</span>
-        <span class="logo-sub">Navigate Your World</span>
-      </div>
+    <div class="hero-eyebrow">
+      <span class="eyebrow-pulse"></span>
+      Live local data &nbsp;·&nbsp; 9 categories &nbsp;·&nbsp; 50+ cities
     </div>
 
     <h1 class="hero-headline">
@@ -1450,7 +1517,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=47"></script>
+  <script src="app.js?v=48"></script>
 
 </div><!-- /.page-wrap -->
 
