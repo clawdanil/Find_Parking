@@ -1308,7 +1308,6 @@
       <div class="feature-tiles" id="feature-tiles">
         <span class="chips-label">Explore nearby</span>
         <div class="tiles-row">
-          <button class="feature-tile" data-feature="parking">🅿️ Parking</button>
           <button class="feature-tile" data-feature="transit">🚇 Transit</button>
           <button class="feature-tile" data-feature="food">🍔 Food</button>
           <button class="feature-tile" data-feature="bars">🍺 Bars</button>
@@ -1317,6 +1316,7 @@
           <button class="feature-tile" data-feature="shopping">🛒 Shopping</button>
           <button class="feature-tile" data-feature="entertainment">🎬 Entertainment</button>
           <button class="feature-tile" data-feature="events">🎟️ Events</button>
+          <button class="feature-tile" data-feature="parking">🅿️ Parking</button>
         </div>
       </div>
     </div>
@@ -1330,9 +1330,9 @@
     </svg>
     <span class="radius-bar-label">Radius</span>
     <div class="radius-track-wrap">
-      <input type="range" class="radius-slider" id="radius-slider" min="0" max="4" step="1" value="4">
+      <input type="range" class="radius-slider" id="radius-slider" min="0" max="4" step="1" value="1">
     </div>
-    <span class="radius-value" id="radius-value">5 mi</span>
+    <span class="radius-value" id="radius-value">0.5 mi</span>
   </div>
 
   <!-- Metrics -->
@@ -1480,7 +1480,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=43"></script>
+  <script src="app.js?v=44"></script>
 
 </div><!-- /.page-wrap -->
 

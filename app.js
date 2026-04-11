@@ -433,10 +433,17 @@ function renderResults(parsed, street) {
     ">✅ Showing parking within 2 blocks.${srcBadge}</div>`;
   }
 
-  // Show tabs and render
+  // Show tabs and render — apply current radius filter
   document.getElementById('results-tabs-outer').hidden = false;
   renderTabs(spots);
-  renderCards(spots);
+  const radiusMi = getRadiusMi();
+  const visibleSpots = radiusMi >= 5 ? spots :
+    spots.filter(s => {
+      if (!s.lat || !s.lng) return true;
+      const d = haversineMiFE(selectedLat, selectedLon, s.lat, s.lng);
+      return isFinite(d) && d <= radiusMi;
+    });
+  renderCards(visibleSpots.length > 0 ? visibleSpots : spots);
 }
 
 // ── Crowdsourced report helpers ───────────────────────────────────────────────
@@ -1145,13 +1152,15 @@ async function loadFeature(feature) {
       showMessage('Events require a Ticketmaster API key. Add TICKETMASTER_API_KEY in Vercel settings.', true);
       return;
     }
-    rawCache[feature] = data; // cache for radius slider re-renders
+    rawCache[feature] = data; // cache FULL data for slider re-renders
+    const radiusMi = getRadiusMi();
+    const elements = filterByRadius(data.elements || [], radiusMi);
     if (data.isTransit) {
-      renderTransitResults(data.elements || [], data);
+      renderTransitResults(elements, data);
     } else if (data.isEvents) {
-      renderEventsResults(data.elements || []);
+      renderEventsResults(elements);
     } else {
-      renderNearbyResults(data.elements || [], feature, selectedLat, selectedLon, data);
+      renderNearbyResults(elements, feature, selectedLat, selectedLon, data);
     }
   } catch (err) {
     clearInterval(loadingTimer);
@@ -1168,11 +1177,11 @@ const radiusSliderEl  = document.getElementById('radius-slider');
 const radiusValueEl   = document.getElementById('radius-value');
 
 function getRadiusMi() {
-  return RADIUS_STEPS_MI[+(radiusSliderEl?.value ?? 4)];
+  return RADIUS_STEPS_MI[+(radiusSliderEl?.value ?? 1)];
 }
 
 function updateRadiusUI() {
-  const idx = +(radiusSliderEl?.value ?? 4);
+  const idx = +(radiusSliderEl?.value ?? 1);
   const mi  = RADIUS_STEPS_MI[idx];
   radiusValueEl.textContent = mi < 1 ? `${Math.round(mi * 5280)} ft` : `${mi} mi`;
   // Filled track: left portion white, right portion dim
@@ -1182,12 +1191,13 @@ function updateRadiusUI() {
 }
 
 function filterByRadius(elements, radiusMi) {
-  if (radiusMi >= 5) return elements; // max = no client filter
+  if (!selectedLat || !selectedLon || !elements?.length) return elements || [];
   return elements.filter(el => {
     const lat = el.lat ?? el.center?.lat;
     const lon = el.lon ?? el.center?.lon ?? el.lng;
-    if (lat == null || lon == null) return true;
-    return haversineMiFE(selectedLat, selectedLon, lat, lon) <= radiusMi;
+    if (lat == null || lon == null) return true; // keep if no coords
+    const d = haversineMiFE(selectedLat, selectedLon, lat, lon);
+    return isFinite(d) && d <= radiusMi;
   });
 }
 
@@ -1202,7 +1212,11 @@ function reRenderCurrentFeature() {
   try {
     if (activeFeature === 'parking') {
       const filtered = radiusMi >= 5 ? allSpots :
-        allSpots.filter(s => haversineMiFE(selectedLat, selectedLon, s.lat, s.lng) <= radiusMi);
+        allSpots.filter(s => {
+          if (!s.lat || !s.lng) return true;
+          const d = haversineMiFE(selectedLat, selectedLon, s.lat, s.lng);
+          return isFinite(d) && d <= radiusMi;
+        });
       filtered.length ? renderCards(filtered) : showMessage(noResult('parking'));
       return;
     }
