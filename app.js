@@ -107,6 +107,11 @@ let allSpots     = [];
 let activeTab    = 'all';
 let activeFeature = 'parking';
 
+// ── Radius slider state ───────────────────────────────────────────────────────
+const RADIUS_STEPS_MI = [0.25, 0.5, 1, 2, 5]; // index → miles
+const rawCache = {};     // feature → last raw API response (for slider re-renders)
+let isSliderRender = false; // suppresses AI insight re-fetch on slider move
+
 const TAB_TYPES = {
   all:    null,
   free:   ['FREE_STREET'],
@@ -374,7 +379,7 @@ function renderCards(spots) {
       cost:       s.avg_cost   || null,
     };
   });
-  fetchAiInsight('parking', parkingInsightItems);
+  if (!isSliderRender) fetchAiInsight('parking', parkingInsightItems);
 }
 
 // ── Render parking cards ──────────────────────────────────────────────────────
@@ -818,7 +823,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       </div>`;
   }).join('');
 
-  fetchAiInsight(feature, items);
+  if (!isSliderRender) fetchAiInsight(feature, items);
   if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
 }
 
@@ -937,7 +942,7 @@ function renderTransitResults(elements, meta = {}) {
     category: el.transitType,
     dist:     parseFloat((el.distLabel || '').replace(/[^\d.]/g, '')) || null,
   }));
-  fetchAiInsight('transit', transitInsightItems);
+  if (!isSliderRender) fetchAiInsight('transit', transitInsightItems);
 }
 
 function renderEventsResults(elements) {
@@ -1025,7 +1030,7 @@ function renderEventsResults(elements) {
       </div>`;
   }).join('');
 
-  fetchAiInsight('events', elements);
+  if (!isSliderRender) fetchAiInsight('events', elements);
 }
 
 // ── AI Insights ───────────────────────────────────────────────────────────────
@@ -1140,6 +1145,7 @@ async function loadFeature(feature) {
       showMessage('Events require a Ticketmaster API key. Add TICKETMASTER_API_KEY in Vercel settings.', true);
       return;
     }
+    rawCache[feature] = data; // cache for radius slider re-renders
     if (data.isTransit) {
       renderTransitResults(data.elements || [], data);
     } else if (data.isEvents) {
@@ -1156,6 +1162,76 @@ async function loadFeature(feature) {
 document.querySelectorAll('.feature-tile').forEach(tile => {
   tile.addEventListener('click', () => loadFeature(tile.dataset.feature));
 });
+
+// ── Radius slider ─────────────────────────────────────────────────────────────
+const radiusSliderEl  = document.getElementById('radius-slider');
+const radiusValueEl   = document.getElementById('radius-value');
+
+function getRadiusMi() {
+  return RADIUS_STEPS_MI[+(radiusSliderEl?.value ?? 4)];
+}
+
+function updateRadiusUI() {
+  const idx = +(radiusSliderEl?.value ?? 4);
+  const mi  = RADIUS_STEPS_MI[idx];
+  radiusValueEl.textContent = mi < 1 ? `${Math.round(mi * 5280)} ft` : `${mi} mi`;
+  // Filled track: left portion white, right portion dim
+  const pct = (idx / +(radiusSliderEl.max)) * 100;
+  radiusSliderEl.style.background =
+    `linear-gradient(to right, rgba(255,255,255,.85) ${pct}%, rgba(255,255,255,.12) ${pct}%)`;
+}
+
+function filterByRadius(elements, radiusMi) {
+  if (radiusMi >= 5) return elements; // max = no client filter
+  return elements.filter(el => {
+    const lat = el.lat ?? el.center?.lat;
+    const lon = el.lon ?? el.center?.lon ?? el.lng;
+    if (lat == null || lon == null) return true;
+    return haversineMiFE(selectedLat, selectedLon, lat, lon) <= radiusMi;
+  });
+}
+
+function reRenderCurrentFeature() {
+  if (!selectedLat || !selectedLon) return;
+  const radiusMi = getRadiusMi();
+  const distLabel = radiusMi < 1 ? `${Math.round(radiusMi * 5280)} ft` : `${radiusMi} mi`;
+  const noResult  = feat => `No ${FEATURE_CONFIG[feat]?.label || 'results'} within ${distLabel} — try expanding the radius.`;
+
+  isSliderRender = true;
+
+  try {
+    if (activeFeature === 'parking') {
+      const filtered = radiusMi >= 5 ? allSpots :
+        allSpots.filter(s => haversineMiFE(selectedLat, selectedLon, s.lat, s.lng) <= radiusMi);
+      filtered.length ? renderCards(filtered) : showMessage(noResult('parking'));
+      return;
+    }
+
+    const raw = rawCache[activeFeature];
+    if (!raw) return;
+
+    const elements = filterByRadius(raw.elements || [], radiusMi);
+
+    if (raw.isTransit) {
+      elements.length ? renderTransitResults(elements, raw) : showMessage(noResult('transit'));
+    } else if (raw.isEvents) {
+      elements.length ? renderEventsResults(elements) : showMessage(noResult('events'));
+    } else {
+      elements.length
+        ? renderNearbyResults(elements, activeFeature, selectedLat, selectedLon, raw)
+        : showMessage(noResult(activeFeature));
+    }
+  } finally {
+    isSliderRender = false;
+  }
+}
+
+radiusSliderEl.addEventListener('input', () => {
+  updateRadiusUI();
+  reRenderCurrentFeature();
+});
+
+updateRadiusUI(); // set initial fill
 
 // ── Attribution toggle ────────────────────────────────────────────────────────
 const attrToggle = document.getElementById('attr-toggle');
