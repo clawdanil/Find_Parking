@@ -24,6 +24,7 @@ const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
 const statsBar       = document.getElementById('stats-bar');
+const metricsSection = document.getElementById('metrics-section');
 const resultsWrapper = document.getElementById('results-wrapper');
 const mapPanel       = document.getElementById('map-panel');
 
@@ -250,6 +251,7 @@ let statusPollInterval = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
 function showSkeletons(feature) {
+  if (metricsSection) metricsSection.hidden = true;
   clearInterval(loadingTimer);
   let idx = 0;
   const msgs = (feature && NEARBY_LOADING_MSGS[feature]) || LOADING_MSGS;
