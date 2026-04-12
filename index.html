@@ -12,7 +12,10 @@
   <title>Orbi – Find Parking, Transit &amp; More</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Inter for body/UI -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Satoshi — geometric grotesque used by top-tier startups, closest to Square's display font -->
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,11 +48,13 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif;
+      font-family: 'Inter', -apple-system, sans-serif;
       background: #F7F7FA;
       min-height: 100vh;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
@@ -107,7 +112,7 @@
     }
     .nav-icon svg { width: 18px; height: 18px; display: block; }
     .nav-wordmark {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Satoshi', 'Inter', sans-serif;
       font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em;
       color: rgba(235,240,255,.95); line-height: 1;
     }
@@ -187,7 +192,7 @@
     }
 
     .logo-name {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Satoshi', 'Inter', sans-serif;
       font-size: 2.6rem;
       font-weight: 800;
       letter-spacing: -0.04em;
@@ -229,13 +234,15 @@
 
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Satoshi', 'Inter', sans-serif;
       font-size: clamp(3.6rem, 11vw, 8rem);
       font-weight: 800;
       letter-spacing: -0.04em;
       line-height: .93;
       color: var(--text);
       margin-bottom: 22px;
+      font-optical-sizing: auto;
+      font-feature-settings: "kern" 1, "calt" 1, "ss01" 1;
     }
     .hero-headline .accent-word {
       background: linear-gradient(160deg, #FFFFFF 0%, rgba(255,248,235,.82) 50%, #FFFFFF 100%);
@@ -392,7 +399,7 @@
       color: #fff;
       border: none;
       border-radius: 14px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Satoshi', 'Inter', sans-serif;
       font-size: 1rem;
       font-weight: 800;
       cursor: pointer;
@@ -655,7 +662,7 @@
     .metric-item:hover { background: rgba(255,255,255,.028); }
     .metric-icon { display: none; }
     .metric-value {
-      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.9rem; font-weight: 800;
+      font-family: 'Satoshi', 'Inter', sans-serif; font-size: 1.9rem; font-weight: 800;
       letter-spacing: -0.04em; color: rgba(235,240,255,.95); line-height: 1;
     }
     .metric-label {
@@ -1597,7 +1604,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=49"></script>
+  <script src="app.js?v=50"></script>
 
 </div><!-- /.page-wrap -->
 
