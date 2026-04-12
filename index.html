@@ -144,6 +144,11 @@
       display: none;
     }
     @media (min-width: 540px) { .nav-tag { display: block; } }
+    /* Mobile: stack icon above wordmark so it never crowds the CTA */
+    @media (max-width: 539px) {
+      .nav-brand { flex-direction: column; gap: 1px; }
+      .nav-wordmark { font-size: .62rem; letter-spacing: .5px; font-weight: 700; }
+    }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 9px 22px; margin-left: 8px;
@@ -1614,7 +1619,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=55"></script>
+  <script src="app.js?v=56"></script>
 
 </div><!-- /.page-wrap -->
 
