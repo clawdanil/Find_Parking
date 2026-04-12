@@ -123,10 +123,12 @@
     .nav-inner {
       max-width: 1100px; margin: 0 auto; width: 100%;
       display: flex; align-items: center; gap: 16px;
+      position: relative;
     }
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
       text-decoration: none; flex-shrink: 0; cursor: default;
+      position: absolute; left: 50%; transform: translateX(-50%);
     }
     .nav-icon {
       width: 30px; height: 30px; border-radius: 50%;
@@ -147,6 +149,8 @@
       display: none;
     }
     @media (min-width: 540px) { .nav-tag { display: block; } }
+    /* On narrow phones, hide wordmark so centered icon never overlaps CTA */
+    @media (max-width: 420px) { .nav-wordmark { display: none; } }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 4px;
       padding: 9px 22px; margin-left: 8px;
@@ -492,13 +496,11 @@
     }
     .tiles-row {
       display: flex;
-      gap: 6px;
-      overflow-x: auto;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
       padding: 2px 0 4px;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
     }
-    .tiles-row::-webkit-scrollbar { display: none; }
     .feature-tile {
       display: flex;
       flex-direction: column;
@@ -1619,7 +1621,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=52"></script>
+  <script src="app.js?v=53"></script>
 
 </div><!-- /.page-wrap -->
 
