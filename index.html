@@ -58,27 +58,51 @@
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
-    /* ── Orbi background ─────────────────────────────────────────────────── */
+    /* ── Photo collage background ───────────────────────────────────────── */
     .bg-scene {
       position: fixed;
       inset: 0;
       z-index: 0;
       pointer-events: none;
-      background: #F7F7FA;
+      overflow: hidden;
     }
-    .bg-orb {
+
+    /* 3×3 photo grid covers the entire viewport */
+    .bg-collage {
       position: absolute;
-      border-radius: 50%;
-      filter: blur(140px);
-      opacity: .13;
-      animation: orbDrift 22s ease-in-out infinite alternate;
+      inset: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
     }
-    .bg-orb-1 { width: 70vw; height: 70vw; top: -20%; left: -15%; background: radial-gradient(circle, #DDDDE6, #EBEBF0); animation-duration: 22s; }
-    .bg-orb-2 { width: 60vw; height: 60vw; top: -5%;  right: -15%; background: radial-gradient(circle, #D8D8E4, #E6E6EE); animation-duration: 18s; animation-delay: -6s; }
-    .bg-orb-3 { width: 55vw; height: 55vw; bottom: 0; left: 15%;  background: radial-gradient(circle, #E0E0EA, #EBEBF2); animation-duration: 25s; animation-delay: -10s; }
-    @keyframes orbDrift {
-      from { transform: translate(0,0) scale(1);   }
-      to   { transform: translate(5vw,6vh) scale(1.12); }
+    .bc-cell {
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.15) brightness(.95);
+    }
+    .bc-1 { background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-3 { background-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-4 { background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-5 { background-image: url('https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-6 { background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-7 { background-image: url('https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-8 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1200&q=90'); }
+    .bc-9 { background-image: url('https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?auto=format&fit=crop&w=1200&q=90'); }
+
+    /* Semi-transparent dark overlay — keeps UI readable while images show through */
+    .bg-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(9,9,15,.72);
+    }
+
+    /* Subtle dot grid sits on top of the overlay */
+    .bg-dots {
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.038) 1px, transparent 1px);
+      background-size: 38px 38px;
     }
 
     /* ── Site nav ──────────────────────────────────────────────────────────── */
@@ -1093,16 +1117,7 @@
 
     /* ── Pure black body & background ───────────────────────────────── */
     [data-theme="dark"] body      { background: #09090F; }
-    [data-theme="dark"] .bg-scene {
-      background: #09090F;
-      background-image:
-        radial-gradient(ellipse 120% 60% at 50% -8%, rgba(255,255,255,.052) 0%, transparent 65%),
-        radial-gradient(circle, rgba(255,255,255,.038) 1px, transparent 1px);
-      background-size: 100% 100%, 38px 38px;
-    }
-    [data-theme="dark"] .bg-orb-1,
-    [data-theme="dark"] .bg-orb-2,
-    [data-theme="dark"] .bg-orb-3 { opacity: 0; animation: none; }
+    /* collage bg — no overrides needed in dark mode, overlay handles it */
 
     /* ── Surfaces ────────────────────────────────────────────────────── */
     [data-theme="dark"] .logo-pill { background: none; border: none; box-shadow: none; }
@@ -1337,11 +1352,21 @@
     </div>
   </nav>
 
-  <!-- iOS mesh bg -->
+  <!-- Photo collage bg — fixed, doesn't scroll -->
   <div class="bg-scene" aria-hidden="true">
-    <div class="bg-orb bg-orb-1"></div>
-    <div class="bg-orb bg-orb-2"></div>
-    <div class="bg-orb bg-orb-3"></div>
+    <div class="bg-collage">
+      <div class="bc-cell bc-1"></div><!-- Restaurant interior -->
+      <div class="bc-cell bc-2"></div><!-- Cocktail bar -->
+      <div class="bc-cell bc-3"></div><!-- Coffee shop -->
+      <div class="bc-cell bc-4"></div><!-- Gym / fitness -->
+      <div class="bc-cell bc-5"></div><!-- Cinema -->
+      <div class="bc-cell bc-6"></div><!-- Concert / events -->
+      <div class="bc-cell bc-7"></div><!-- Shopping -->
+      <div class="bc-cell bc-8"></div><!-- City at night -->
+      <div class="bc-cell bc-9"></div><!-- Food close-up -->
+    </div>
+    <div class="bg-overlay"></div>
+    <div class="bg-dots"></div>
   </div>
 
   <!-- Hero -->
@@ -1594,7 +1619,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=51"></script>
+  <script src="app.js?v=52"></script>
 
 </div><!-- /.page-wrap -->
 
