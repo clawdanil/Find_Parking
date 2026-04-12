@@ -12,7 +12,7 @@
   <title>Orbi – Find Parking, Transit &amp; More</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -45,7 +45,7 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', 'Outfit', -apple-system, sans-serif;
+      font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif;
       background: #F7F7FA;
       min-height: 100vh;
       color: var(--text);
@@ -107,9 +107,9 @@
     }
     .nav-icon svg { width: 18px; height: 18px; display: block; }
     .nav-wordmark {
-      font-family: 'Outfit', sans-serif;
-      font-size: 1.25rem; font-weight: 900; letter-spacing: -.4px;
-      color: rgba(235,240,255,.92); line-height: 1;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em;
+      color: rgba(235,240,255,.95); line-height: 1;
     }
     .nav-spacer { flex: 1; }
     .nav-tag {
@@ -187,10 +187,10 @@
     }
 
     .logo-name {
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 2.6rem;
-      font-weight: 900;
-      letter-spacing: -1.5px;
+      font-weight: 800;
+      letter-spacing: -0.04em;
       line-height: 1;
       color: var(--text);
     }
@@ -229,35 +229,32 @@
 
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
-      font-size: clamp(3.4rem, 10vw, 7rem);
-      font-weight: 900;
-      letter-spacing: -4px;
-      line-height: .95;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: clamp(3.6rem, 11vw, 8rem);
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      line-height: .93;
       color: var(--text);
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
     .hero-headline .accent-word {
-      background: linear-gradient(135deg, #111118 0%, #3A3A50 55%, #111118 100%);
+      background: linear-gradient(160deg, #FFFFFF 0%, rgba(255,248,235,.82) 50%, #FFFFFF 100%);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
 
-    /* ── Headline slide-in animation ───────────────────────────────────── */
-    @keyframes carSlide {
-      0%   { opacity: 0; transform: translateX(-160px); }
-      60%  { opacity: 1; transform: translateX(16px); }  /* overshoot — hard brake */
-      74%  { transform: translateX(-7px); }              /* rebound */
-      85%  { transform: translateX(4px); }               /* settle wobble */
-      93%  { transform: translateX(-2px); }
-      100% { opacity: 1; transform: translateX(0); }
+    /* ── Hero text entrance — clean editorial reveal ───────────────────── */
+    @keyframes heroReveal {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
     .hero-line-1 {
       display: block;
       position: relative;
       opacity: 0;
-      animation: carSlide 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
+      animation: heroReveal .75s cubic-bezier(0.22, 1, 0.36, 1) .1s forwards;
     }
     .hero-line-2 {
       display: block;
@@ -265,7 +262,7 @@
       opacity: 0;
       font-size: 1.15em;
       text-align: center;
-      animation: carSlide 1.4s cubic-bezier(0.22, 1, 0.36, 1) 0.75s forwards;
+      animation: heroReveal .75s cubic-bezier(0.22, 1, 0.36, 1) .24s forwards;
     }
 
     /* ── Smoke effect ─────────────────────────────────────────────────── */
@@ -304,9 +301,11 @@
       font-size: 1.05rem;
       font-weight: 500;
       color: var(--t55);
-      max-width: 400px;
-      margin: 0 auto 26px;
-      line-height: 1.65;
+      max-width: 440px;
+      margin: 0 auto 28px;
+      line-height: 1.7;
+      opacity: 0;
+      animation: heroReveal .75s cubic-bezier(0.22, 1, 0.36, 1) .38s forwards;
     }
 
     /* ── Glass mixin (reused) ──────────────────────────────────────────── */
@@ -393,7 +392,7 @@
       color: #fff;
       border: none;
       border-radius: 14px;
-      font-family: 'Outfit', sans-serif;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       font-size: 1rem;
       font-weight: 800;
       cursor: pointer;
@@ -474,14 +473,14 @@
       flex-direction: column;
       align-items: center;
       gap: 8px;
-      padding: 14px 18px 12px;
+      padding: 16px 20px 13px;
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.09);
       background: transparent;
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       flex-shrink: 0;
-      min-width: 74px;
+      min-width: 80px;
       color: rgba(235,240,255,.38);
       transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
     }
@@ -506,6 +505,99 @@
       box-shadow: 0 2px 20px rgba(255,255,255,.10);
     }
     .feature-tile.active:hover { transform: translateY(-1px); }
+
+    /* ── Tile icon animations ───────────────────────────────────────────── */
+    /* Smooth transition base */
+    .tile-svg { transition: transform .25s ease, filter .25s ease; }
+
+    /* Food: fork-and-knife jolt — like a dinner bell */
+    @keyframes tileFood {
+      0%,100% { transform: rotate(0) translateY(0); }
+      20%     { transform: rotate(-14deg) translateY(-3px); }
+      45%     { transform: rotate(9deg) translateY(-1px); }
+      65%     { transform: rotate(-5deg) translateY(-1px); }
+      80%     { transform: rotate(2deg); }
+    }
+    /* Bars: glass raise and clink */
+    @keyframes tileBars {
+      0%,100% { transform: rotate(0) translateY(0); }
+      30%     { transform: rotate(-18deg) translateY(-4px); }
+      55%     { transform: rotate(12deg) translateY(-2px); }
+      75%     { transform: rotate(-6deg); }
+    }
+    /* Coffee: warm lift — steam rising */
+    @keyframes tileCoffee {
+      0%,100% { transform: translateY(0) scale(1); }
+      35%     { transform: translateY(-5px) scale(1.1); }
+      65%     { transform: translateY(-2px) scale(1.04); }
+    }
+    /* Gym: pump and contract */
+    @keyframes tileGym {
+      0%,100% { transform: scale(1); }
+      30%     { transform: scaleX(1.25) scaleY(.88); }
+      55%     { transform: scaleX(.92) scaleY(1.12); }
+      75%     { transform: scaleX(1.08) scaleY(.96); }
+    }
+    /* Shopping: bag swing */
+    @keyframes tileShopping {
+      0%,100% { transform: rotate(0) translateY(0); }
+      25%     { transform: rotate(-9deg) translateY(-2px); }
+      55%     { transform: rotate(9deg) translateY(-2px); }
+      75%     { transform: rotate(-4deg); }
+    }
+    /* Cinema: projector flicker */
+    @keyframes tileCinema {
+      0%,100% { filter: brightness(1);  transform: scale(1); }
+      15%     { filter: brightness(1.9); transform: scale(1.08); }
+      30%     { filter: brightness(.5);  transform: scale(.97); }
+      50%     { filter: brightness(1.5); transform: scale(1.05); }
+      70%     { filter: brightness(.75); transform: scale(.99); }
+      85%     { filter: brightness(1.2); transform: scale(1.02); }
+    }
+    /* Events: pop and spin */
+    @keyframes tileEvents {
+      0%,100% { transform: scale(1) rotate(0); }
+      30%     { transform: scale(1.22) rotate(8deg); }
+      55%     { transform: scale(1.1) rotate(-5deg); }
+      75%     { transform: scale(1.04) rotate(2deg); }
+    }
+    /* Transit: train rushes through */
+    @keyframes tileTransit {
+      0%     { transform: translateX(0) scale(1); }
+      20%    { transform: translateX(-8px) scale(.92); }
+      55%    { transform: translateX(10px) scale(1.06); }
+      78%    { transform: translateX(-3px) scale(.98); }
+      100%   { transform: translateX(0) scale(1); }
+    }
+    /* Parking: neon pulse */
+    @keyframes tileParking {
+      0%,100% { transform: scale(1);    filter: brightness(1); }
+      40%     { transform: scale(1.18); filter: brightness(1.6); }
+      70%     { transform: scale(1.06); filter: brightness(1.2); }
+    }
+
+    /* Apply hover animations */
+    .feature-tile[data-feature="food"]:hover          .tile-svg { animation: tileFood    .65s ease both; }
+    .feature-tile[data-feature="bars"]:hover          .tile-svg { animation: tileBars    .60s ease both; }
+    .feature-tile[data-feature="coffee"]:hover        .tile-svg { animation: tileCoffee  .65s ease both; }
+    .feature-tile[data-feature="gym"]:hover           .tile-svg { animation: tileGym     .55s ease both; }
+    .feature-tile[data-feature="shopping"]:hover      .tile-svg { animation: tileShopping .65s ease both; }
+    .feature-tile[data-feature="entertainment"]:hover .tile-svg { animation: tileCinema  .75s ease both; }
+    .feature-tile[data-feature="events"]:hover        .tile-svg { animation: tileEvents  .55s ease both; }
+    .feature-tile[data-feature="transit"]:hover       .tile-svg { animation: tileTransit .65s ease both; }
+    .feature-tile[data-feature="parking"]:hover       .tile-svg { animation: tileParking .55s ease both; }
+
+    /* Staggered tile entrance on load */
+    .feature-tile { opacity: 0; animation: fadeUp .45s ease both; }
+    .tiles-row .feature-tile:nth-child(1)  { animation-delay: .08s; }
+    .tiles-row .feature-tile:nth-child(2)  { animation-delay: .13s; }
+    .tiles-row .feature-tile:nth-child(3)  { animation-delay: .18s; }
+    .tiles-row .feature-tile:nth-child(4)  { animation-delay: .23s; }
+    .tiles-row .feature-tile:nth-child(5)  { animation-delay: .28s; }
+    .tiles-row .feature-tile:nth-child(6)  { animation-delay: .33s; }
+    .tiles-row .feature-tile:nth-child(7)  { animation-delay: .38s; }
+    .tiles-row .feature-tile:nth-child(8)  { animation-delay: .43s; }
+    .tiles-row .feature-tile:nth-child(9)  { animation-delay: .48s; }
 
     /* ── Weather pill ─ compact ────────────────────────────────────────── */
     .weather-pill {
@@ -539,54 +631,42 @@
     .wicon-pulse { animation: wpulse  2s ease-in-out infinite; }
     .wicon-zap   { animation: wzap    1s ease-in-out infinite; }
 
-    /* ── Metrics section ───────────────────────────────────────────────── */
+    /* ── Metrics strip ──────────────────────────────────────────────────── */
     .metrics-section {
-      width: 100%; max-width: 760px; margin: 0 auto 32px; padding: 0 20px; box-sizing: border-box;
-      position: relative; z-index: 10;
+      width: 100%; max-width: 760px; margin: 0 auto 36px; padding: 0 20px;
+      box-sizing: border-box; position: relative; z-index: 10;
       animation: fadeUp .5s ease both .1s;
     }
     .metrics-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
+      display: flex; align-items: stretch; justify-content: center;
+      flex-wrap: wrap;
+      background: rgba(255,255,255,.032);
+      border: 1px solid rgba(255,255,255,.07);
+      border-radius: 20px;
+      overflow: hidden;
     }
     .metric-item {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 10px;
-      padding: 22px 16px 20px;
-      border-radius: 20px;
-      background: var(--glass);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(20px);
-      text-align: center;
-      transition: transform .2s ease, border-color .2s ease;
+      padding: 22px 0; flex: 1; min-width: 120px; gap: 4px; text-align: center;
+      border-right: 1px solid rgba(255,255,255,.06);
+      transition: background .2s;
     }
-    .metric-item:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255,255,255,.22);
-    }
-    .metric-icon {
-      width: 30px; height: 30px;
-      color: var(--t55);
-    }
+    .metric-item:last-child { border-right: none; }
+    .metric-item:hover { background: rgba(255,255,255,.028); }
+    .metric-icon { display: none; }
     .metric-value {
-      font-family: 'Outfit', sans-serif;
-      font-size: 2rem;
-      font-weight: 900;
-      letter-spacing: -1.5px;
-      color: var(--text);
-      line-height: 1;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.9rem; font-weight: 800;
+      letter-spacing: -0.04em; color: rgba(235,240,255,.95); line-height: 1;
     }
     .metric-label {
-      font-size: .72rem;
-      font-weight: 600;
-      letter-spacing: .3px;
-      color: var(--t55);
-      line-height: 1.4;
+      font-size: .65rem; font-weight: 600; letter-spacing: .4px;
+      color: rgba(235,240,255,.28); line-height: 1.3;
     }
-    @media (max-width: 600px) {
-      .metrics-grid { grid-template-columns: repeat(2, 1fr); }
-      .metric-value { font-size: 1.7rem; }
+    @media (max-width: 500px) {
+      .metrics-grid { flex-direction: row; flex-wrap: wrap; }
+      .metric-item { min-width: 50%; border-bottom: 1px solid rgba(255,255,255,.06); }
+      .metric-item:nth-child(2n) { border-right: none; }
+      .metric-item:nth-last-child(-n+2) { border-bottom: none; }
     }
 
     /* ── Stats bar ─────────────────────────────────────────────────────── */
@@ -1106,8 +1186,8 @@
       .logo-pill         { gap:14px; margin-bottom:44px; }
       .logo-icon         { width:54px; height:54px; }
       .logo-icon svg     { width:34px; height:34px; }
-      .logo-name         { font-size:1.9rem; letter-spacing:-1px; }
-      .hero-headline     { letter-spacing:-1.5px; }
+      .logo-name         { font-size:1.9rem; letter-spacing:-0.03em; }
+      .hero-headline     { letter-spacing:-0.03em; }
       .search-card       { padding:22px 18px 18px; border-radius:24px; }
       .search-row        { flex-direction:column; align-items:stretch; }
       .search-btn        { width:100%; padding:15px; }
@@ -1517,7 +1597,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=48"></script>
+  <script src="app.js?v=49"></script>
 
 </div><!-- /.page-wrap -->
 
