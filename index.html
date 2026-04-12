@@ -107,18 +107,13 @@
 
     /* ── Site nav ──────────────────────────────────────────────────────────── */
     .site-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 2000;
+      position: relative; z-index: 10;
       height: 62px; padding: 0 clamp(16px, 4vw, 40px);
       display: flex; align-items: center;
-      background: transparent;
-      border-bottom: 1px solid transparent;
-      transition: background .35s ease, border-color .35s ease, backdrop-filter .35s ease;
-    }
-    .site-nav.scrolled {
-      background: rgba(9,9,15,.90);
-      backdrop-filter: blur(20px) saturate(160%);
-      -webkit-backdrop-filter: blur(20px) saturate(160%);
-      border-bottom-color: rgba(255,255,255,.07);
+      background: rgba(9,9,15,.50);
+      backdrop-filter: blur(12px) saturate(140%);
+      -webkit-backdrop-filter: blur(12px) saturate(140%);
+      border-bottom: 1px solid rgba(255,255,255,.07);
     }
     .nav-inner {
       max-width: 1100px; margin: 0 auto; width: 100%;
@@ -167,7 +162,7 @@
       position: relative;
       z-index: 1;
       text-align: center;
-      padding: 152px 24px 72px;
+      padding: 80px 24px 72px;
       width: 100%;
       box-sizing: border-box;
       -webkit-transform: translateZ(0);
@@ -1196,7 +1191,7 @@
 
     /* ── Mobile ────────────────────────────────────────────────────────── */
     @media (max-width:640px) {
-      .hero              { padding:72px 20px 60px; }
+      .hero              { padding:40px 20px 60px; }
       .logo-pill         { gap:14px; margin-bottom:44px; }
       .logo-icon         { width:54px; height:54px; }
       .logo-icon svg     { width:34px; height:34px; }
@@ -1621,7 +1616,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=53"></script>
+  <script src="app.js?v=54"></script>
 
 </div><!-- /.page-wrap -->
 
