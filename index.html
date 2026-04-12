@@ -12,10 +12,10 @@
   <title>Orbi – Find Parking, Transit &amp; More</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Inter for body/UI -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Satoshi — geometric grotesque used by top-tier startups, closest to Square's display font -->
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,800&display=swap" rel="stylesheet">
+  <!-- DM Sans — ultra-clean variable-weight font used by premium tech/fintech products -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet">
+  <!-- Cabinet Grotesk — editorial display typeface for headlines -->
+  <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@400,500,700,800,900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -48,7 +48,7 @@
     html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', -apple-system, sans-serif;
+      font-family: 'DM Sans', -apple-system, sans-serif;
       background: #F7F7FA;
       min-height: 100vh;
       color: var(--text);
@@ -133,7 +133,7 @@
     }
     .nav-icon svg { width: 18px; height: 18px; display: block; }
     .nav-wordmark {
-      font-family: 'Satoshi', 'Inter', sans-serif;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif;
       font-size: 1.2rem; font-weight: 800; letter-spacing: -.03em;
       color: rgba(235,240,255,.95); line-height: 1;
     }
@@ -153,7 +153,7 @@
       display: inline-flex; align-items: center; gap: 4px;
       padding: 9px 22px; margin-left: 8px;
       background: #FFFFFF; color: #09090F; border: none; border-radius: 100px;
-      font-size: .82rem; font-weight: 700; font-family: 'Inter', sans-serif;
+      font-size: .82rem; font-weight: 700; font-family: 'DM Sans', sans-serif;
       cursor: pointer; white-space: nowrap; letter-spacing: .1px;
       box-shadow: 0 2px 14px rgba(255,255,255,.14);
       transition: opacity .15s, transform .15s, box-shadow .15s;
@@ -218,7 +218,7 @@
     }
 
     .logo-name {
-      font-family: 'Satoshi', 'Inter', sans-serif;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif;
       font-size: 2.6rem;
       font-weight: 800;
       letter-spacing: -0.04em;
@@ -260,9 +260,9 @@
 
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
-      font-family: 'Satoshi', 'Inter', sans-serif;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif;
       font-size: clamp(3.6rem, 11vw, 8rem);
-      font-weight: 800;
+      font-weight: 900;
       letter-spacing: -0.04em;
       line-height: .93;
       color: var(--text);
@@ -401,7 +401,7 @@
       border: 1px solid rgba(10,10,20,.08);
       border-radius: 14px;
       font-size: 1rem;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-weight: 500;
       color: var(--text);
       outline: none;
@@ -425,7 +425,7 @@
       color: #fff;
       border: none;
       border-radius: 14px;
-      font-family: 'Satoshi', 'Inter', sans-serif;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif;
       font-size: 1rem;
       font-weight: 800;
       cursor: pointer;
@@ -446,7 +446,7 @@
       border: 1px solid rgba(10,10,20,.07);
       border-radius: 14px;
       color: var(--t55);
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: .85rem;
       font-weight: 700;
       cursor: pointer;
@@ -474,7 +474,7 @@
       border-radius: 100px;
       background: transparent;
       font-size: .72rem;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-weight: 600;
       color: rgba(235,240,255,.45);
       cursor: pointer;
@@ -508,7 +508,7 @@
       border-radius: 16px;
       border: 1px solid rgba(255,255,255,.09);
       background: transparent;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       cursor: pointer;
       flex-shrink: 0;
       min-width: 80px;
@@ -676,7 +676,7 @@
     .metric-item:hover { background: rgba(255,255,255,.028); }
     .metric-icon { display: none; }
     .metric-value {
-      font-family: 'Satoshi', 'Inter', sans-serif; font-size: 1.9rem; font-weight: 800;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif; font-size: 1.9rem; font-weight: 800;
       letter-spacing: -0.04em; color: rgba(235,240,255,.95); line-height: 1;
     }
     .metric-label {
@@ -800,7 +800,7 @@
     }
     .meter-p {
       position: relative; z-index:2;
-      font-family:'Inter',sans-serif; font-size:22px; font-weight:900;
+      font-family:'DM Sans',sans-serif; font-size:22px; font-weight:900;
       color: rgba(255,255,255,.80); user-select:none;
     }
     .meter-coin-slot {
@@ -837,12 +837,7 @@
       transition: background .2s, box-shadow .2s, transform .2s, border-color .2s;
       box-shadow: 0 2px 12px rgba(10,10,20,.05), inset 0 1.5px 0 rgba(255,255,255,1);
     }
-    .parking-card::before {
-      content:''; position:absolute;
-      left:0; top:14px; bottom:14px;
-      width:3.5px; border-radius:0 3px 3px 0;
-      background: var(--status-color, var(--green)); opacity:.85;
-    }
+    .parking-card::before { display: none; }
     .parking-card:hover {
       background: rgba(255,255,255,.97);
       border-color: rgba(10,10,20,.11);
@@ -855,10 +850,11 @@
     }
     .spot-number {
       font-size: 2.1rem; font-weight:900;
-      color: var(--status-color, var(--green));
-      opacity:.12; min-width:48px; line-height:1;
+      color: rgba(235,240,255,.55);
+      min-width:48px; line-height:1;
       padding-top:2px; text-align:center;
       flex-shrink:0; letter-spacing:-2px;
+      font-family: 'Cabinet Grotesk', 'DM Sans', sans-serif;
     }
     .card-body { flex:1; min-width:0; }
     .card-header-row {
@@ -934,7 +930,7 @@
       flex:1; padding:8px 10px; border-radius:12px;
       border:1px solid rgba(10,10,20,.07);
       font-size:.79rem; font-weight:700;
-      font-family:'Inter',sans-serif; cursor:pointer;
+      font-family:'DM Sans',sans-serif; cursor:pointer;
       background:rgba(255,255,255,.70); color:var(--t55);
       transition: all .15s;
     }
@@ -1008,7 +1004,7 @@
       padding: 8px 10px;
       border: none; border-radius: 100px;
       background: transparent;
-      font-family: 'Inter', sans-serif;
+      font-family: 'DM Sans', sans-serif;
       font-size: .75rem; font-weight: 700;
       color: var(--t55);
       cursor: pointer;
@@ -1292,7 +1288,7 @@
       width: 100%; padding: 10px 16px;
       background: none; border: 1px solid var(--border);
       border-radius: 100px; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: .72rem;
+      font-family: 'DM Sans', sans-serif; font-size: .72rem;
       font-weight: 700; color: var(--t30); letter-spacing: .3px;
       transition: color .15s, border-color .15s, background .15s;
     }
@@ -1619,7 +1615,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=56"></script>
+  <script src="app.js?v=57"></script>
 
 </div><!-- /.page-wrap -->
 
