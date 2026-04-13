@@ -412,19 +412,21 @@
       align-items: flex-start;
       -webkit-transform: translateZ(0);
     }
-    .search-main { flex: 0 0 740px; max-width: 740px; }
+    /* Desktop: search card left, flight board right */
+    @media (min-width: 1061px) {
+      .search-main { flex: 0 0 740px; max-width: 740px; }
+      .flap-col { flex: 0 0 300px; width: 300px; margin-left: auto; }
+    }
+    /* Mobile/tablet: single column, board full-width below card */
     @media (max-width: 1060px) {
       .search-section { flex-direction: column; max-width: 760px; }
       .search-main { flex: none; width: 100%; max-width: 100%; }
-      .flap-col { flex: none; width: 100%; max-width: 100%; margin-left: 0; }
-      .flap-board { border-radius: 20px; }
-      /* Compact rows on mobile */
+      .flap-col { width: 100%; max-width: 100%; margin: 0 auto; box-sizing: border-box; }
       .flap-row { padding: 4px 8px; }
       .flap-city { font-size: .78rem; letter-spacing: 1px; }
     }
 
     /* ── Flight board ───────────────────────────────────────────────────── */
-    .flap-col { flex: 0 0 300px; width: 300px; margin-left: auto; }
     .flap-board {
       background: rgba(6,6,14,.92);
       border: 1px solid rgba(255,255,255,.10);
@@ -1762,7 +1764,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=62"></script>
+  <script src="app.js?v=63"></script>
 
 </div><!-- /.page-wrap -->
 
