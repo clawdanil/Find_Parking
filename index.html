@@ -1907,7 +1907,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=67"></script>
+  <script src="app.js?v=68"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -1940,8 +1940,9 @@
       const container = document.getElementById('flap-rows');
       if (!container) return;
 
-      // Build rows
+      // Build rows — pre-fill with real city text immediately (no blank flash)
       const rows = [];
+      const initPool = [...CITIES].sort(() => Math.random() - .5);
       for (let r = 0; r < ROWS; r++) {
         const row = document.createElement('div');
         row.className = 'flap-row';
@@ -1952,10 +1953,11 @@
         const cityEl = document.createElement('span');
         cityEl.className = 'flap-city';
         const chars = [];
+        const initCity = (initPool[r % initPool.length] || '').slice(0, COLS).padEnd(COLS, ' ');
         for (let c = 0; c < COLS; c++) {
           const s = document.createElement('span');
           s.className = 'flap-char';
-          s.textContent = ' ';
+          s.textContent = initCity[c] || ' ';  // visible immediately
           cityEl.appendChild(s);
           chars.push(s);
         }
@@ -2001,8 +2003,8 @@
         Promise.all(ps).then(() => { rows[r].busy = false; });
       }
 
-      // Initial staggered fill
-      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 160));
+      // Initial staggered flip — rows already pre-filled so this is polish, not first-show
+      rows.forEach((_, i) => setTimeout(() => flipRow(i), 600 + i * 120));
 
       // Continuous random flips
       function kick() {
@@ -2011,7 +2013,7 @@
         order.slice(0, count).forEach(i => flipRow(i));
         setTimeout(kick, 1200 + Math.random() * 1000);
       }
-      setTimeout(kick, ROWS * 160 + 900);
+      setTimeout(kick, 600 + ROWS * 120 + 800);
     })();
 
     // ── Live preview card rotation ───────────────────────────────────────
