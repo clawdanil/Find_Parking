@@ -239,20 +239,36 @@
     }
 
     /* ── Hero live-preview panel (right side) ──────────────────────────── */
+    @keyframes panelFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-7px); }
+    }
+    @keyframes shimmerSweep {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    @keyframes badgePulse {
+      0%,100% { opacity: 1; }
+      50%      { opacity: .55; }
+    }
+    @keyframes cardSlideIn {
+      from { opacity: 0; transform: translateY(-10px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
     .hero-preview {
       position: absolute;
-      top: 50%; right: 20px;
-      transform: translateY(-50%);
-      width: 270px;
+      top: 64px; right: 20px;
+      width: 278px;
       display: flex;
       flex-direction: column;
       gap: 7px;
-      animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
+      animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both,
+                 panelFloat 5s ease-in-out 1.8s infinite;
     }
     .hp-label {
       display: flex; align-items: center; gap: 6px;
       font-size: .58rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: rgba(235,240,255,.30);
+      text-transform: uppercase; color: rgba(235,240,255,.35);
       margin-bottom: 2px;
     }
     .hp-dot {
@@ -262,40 +278,53 @@
     .preview-card {
       display: flex; align-items: center; gap: 11px;
       padding: 10px 13px;
-      background: rgba(255,255,255,.06);
-      backdrop-filter: blur(14px) saturate(130%);
-      -webkit-backdrop-filter: blur(14px) saturate(130%);
-      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.065);
+      backdrop-filter: blur(16px) saturate(140%);
+      -webkit-backdrop-filter: blur(16px) saturate(140%);
+      border: 1px solid rgba(255,255,255,.12);
       border-left: 2.5px solid var(--pc-accent, rgba(255,255,255,.15));
       border-radius: 13px;
+      position: relative; overflow: hidden;
       transition: background .2s, transform .2s;
       animation: fadeUp .55s ease both;
       animation-delay: var(--d, 0s);
     }
-    .preview-card:hover { background: rgba(255,255,255,.10); transform: translateX(-3px); }
+    /* shimmer sweep on each card */
+    .preview-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0;
+      width: 50%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,.055), transparent);
+      animation: shimmerSweep 3.5s ease-in-out infinite;
+      animation-delay: var(--d, 0s);
+      pointer-events: none;
+    }
+    .preview-card:hover { background: rgba(255,255,255,.11); transform: translateX(-3px); }
+    .preview-card.refreshing { animation: cardSlideIn .4s ease both; }
     .pc-icon {
       width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
       background: var(--pc-bg, rgba(255,255,255,.08));
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; line-height: 1;
+      font-size: 1rem; line-height: 1; z-index: 1;
     }
-    .pc-body { flex: 1; min-width: 0; }
+    .pc-body { flex: 1; min-width: 0; z-index: 1; }
     .pc-name {
       font-size: .8rem; font-weight: 700;
-      color: rgba(235,240,255,.90);
+      color: rgba(235,240,255,.92);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .pc-meta {
       font-size: .66rem; font-weight: 500;
-      color: rgba(235,240,255,.38); margin-top: 2px;
+      color: rgba(235,240,255,.40); margin-top: 2px;
     }
     .pc-status {
       font-size: .6rem; font-weight: 800;
-      padding: 2px 7px; border-radius: 100px;
-      white-space: nowrap; flex-shrink: 0;
+      padding: 2px 8px; border-radius: 100px;
+      white-space: nowrap; flex-shrink: 0; z-index: 1;
     }
-    .pc-open  { background: rgba(22,163,74,.18);  color: #4ADE80; }
-    .pc-busy  { background: rgba(234,179, 8,.15);  color: #FCD34D; }
+    .pc-open { background: rgba(22,163,74,.20); color: #4ADE80;
+               animation: badgePulse 2.8s ease-in-out infinite; }
+    .pc-busy { background: rgba(234,179,8,.18); color: #FCD34D; }
     /* Hide on small screens — hero text needs full width */
     @media (max-width: 900px) { .hero-preview { display: none; } }
 
@@ -1878,7 +1907,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=66"></script>
+  <script src="app.js?v=67"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -1983,6 +2012,45 @@
         setTimeout(kick, 1200 + Math.random() * 1000);
       }
       setTimeout(kick, ROWS * 160 + 900);
+    })();
+
+    // ── Live preview card rotation ───────────────────────────────────────
+    (function() {
+      const VENUES = [
+        { icon:'🍺', name:'The Rooftop Bar',      meta:'0.3 mi · ★ 4.7', status:'Open',    sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+        { icon:'🅿️', name:'Central Parking',       meta:'142 ft · $8 / hr', status:'42 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'0.8 mi · Tonight 8 PM', status:'On now', sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
+        { icon:'☕', name:'Blue Bottle Coffee',     meta:'0.5 mi · ★ 4.6', status:'Busy',    sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'0.1 mi · ★ 4.4', status:'Open',    sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+        { icon:'🏋️', name:'Crunch Fitness',         meta:'0.6 mi · Open 24h', status:'Open', sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
+        { icon:'🎬', name:'AMC Theatres',            meta:'0.4 mi · 8:30 PM show', status:'On now',sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+        { icon:'🛍️', name:'Westfield Mall',          meta:'0.9 mi · Closes 9 PM', status:'Open',sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+        { icon:'🅿️', name:'QuickPark Garage',        meta:'0.2 mi · $6 / hr', status:'18 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🍕', name:'Grimaldi's Pizzeria',     meta:'0.3 mi · ★ 4.5', status:'Busy',   sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
+      ];
+      const cards = document.querySelectorAll('.preview-card');
+      if (!cards.length) return;
+      let venueIdx = VENUES.length; // start after initial 5
+
+      function refreshCard(card, venue) {
+        card.style.setProperty('--pc-accent', venue.accent);
+        card.style.setProperty('--pc-bg', venue.bg);
+        card.querySelector('.pc-icon').textContent = venue.icon;
+        card.querySelector('.pc-name').textContent = venue.name;
+        card.querySelector('.pc-meta').textContent = venue.meta;
+        const st = card.querySelector('.pc-status');
+        st.textContent = venue.status;
+        st.className = 'pc-status ' + venue.sc;
+        card.classList.remove('refreshing');
+        void card.offsetWidth; // reflow
+        card.classList.add('refreshing');
+      }
+
+      setInterval(() => {
+        const card = cards[Math.floor(Math.random() * cards.length)];
+        refreshCard(card, VENUES[venueIdx % VENUES.length]);
+        venueIdx++;
+      }, 3800);
     })();
 
     // ── Rotating search placeholder ──────────────────────────────────────
