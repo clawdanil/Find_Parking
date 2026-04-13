@@ -39,13 +39,13 @@ async function fetchACSuggestions(q) {
   if (!window._gmapsReady) return [];
   return new Promise(resolve => {
     window._acService.getPlacePredictions(
-      { input: q, componentRestrictions: { country: 'us' }, types: ['address'] },
+      { input: q, types: ['address'] },
       (preds, status) => {
         if (status !== google.maps.places.PlacesServiceStatus.OK || !preds) { resolve([]); return; }
         resolve(preds.map(p => ({
-          display:  p.description.replace(', USA', ''),
+          display:  p.description,
           main:     p.structured_formatting.main_text,
-          sub:      (p.structured_formatting.secondary_text || '').replace(', USA', ''),
+          sub:      p.structured_formatting.secondary_text || '',
           place_id: p.place_id,
         })));
       }
