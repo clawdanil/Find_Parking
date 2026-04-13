@@ -416,7 +416,11 @@
     @media (max-width: 1060px) {
       .search-section { flex-direction: column; max-width: 760px; }
       .search-main { flex: none; width: 100%; max-width: 100%; }
-      .flap-col { display: none; }
+      .flap-col { flex: none; width: 100%; max-width: 100%; margin-left: 0; }
+      .flap-board { border-radius: 20px; }
+      /* Compact rows on mobile */
+      .flap-row { padding: 4px 8px; }
+      .flap-city { font-size: .78rem; letter-spacing: 1px; }
     }
 
     /* ── Flight board ───────────────────────────────────────────────────── */
@@ -1758,7 +1762,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=61"></script>
+  <script src="app.js?v=62"></script>
 
 </div><!-- /.page-wrap -->
 
