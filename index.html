@@ -397,19 +397,95 @@
         inset 0 1.5px 0 rgba(255,255,255,1);
     }
 
-    /* ── Search card ───────────────────────────────────────────────────── */
+    /* ── Search layout (2-col on wide screens) ─────────────────────────── */
     .search-section {
       position: relative;
       z-index: 10;
       width: 100%;
-      max-width: 760px;
+      max-width: 1180px;
       margin-left: auto;
       margin-right: auto;
       padding: 0 20px 52px;
       box-sizing: border-box;
-      /* Prevent iOS from shifting content left */
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
       -webkit-transform: translateZ(0);
     }
+    .search-main { flex: 0 0 740px; max-width: 740px; }
+    @media (max-width: 1060px) {
+      .search-section { flex-direction: column; max-width: 760px; }
+      .search-main { flex: none; width: 100%; max-width: 100%; }
+      .flap-col { display: none; }
+    }
+
+    /* ── Flight board ───────────────────────────────────────────────────── */
+    .flap-col { flex: 1; min-width: 0; }
+    .flap-board {
+      background: rgba(6,6,14,.92);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 20px;
+      padding: 18px 16px 14px;
+      overflow: hidden;
+    }
+    .flap-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 11px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .flap-title {
+      font-size: .56rem;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(235,240,255,.32);
+    }
+    .flap-live {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: .52rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #4ADE80;
+    }
+    .flap-live-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #4ADE80;
+      animation: eyebrowPulse 2.4s ease-in-out infinite;
+    }
+    .flap-rows { display: flex; flex-direction: column; gap: 2px; }
+    .flap-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 8px;
+      border-radius: 6px;
+    }
+    .flap-row:nth-child(odd) { background: rgba(255,255,255,.022); }
+    .flap-num {
+      font-size: .58rem;
+      font-weight: 600;
+      color: rgba(235,240,255,.18);
+      width: 18px;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
+    .flap-city {
+      font-family: 'Courier New', 'Courier', monospace;
+      font-size: .82rem;
+      font-weight: 700;
+      color: rgba(235,240,255,.88);
+      letter-spacing: 1.5px;
+      flex: 1;
+      line-height: 1;
+    }
+    .flap-char { display: inline-block; }
+    .flap-char.flipping { color: #FFD60A; }
 
     .search-card {
       border-radius: 32px;
@@ -1458,8 +1534,9 @@
 
   </header>
 
-  <!-- Search -->
+  <!-- Search + Flight board -->
   <section class="search-section">
+   <div class="search-main">
     <div class="search-card glass-panel">
       <div class="search-row">
         <div class="input-group ac-wrap">
@@ -1521,6 +1598,19 @@
         </div>
       </div>
     </div>
+   </div><!-- /.search-main -->
+
+   <!-- ✈ Flight information board -->
+   <div class="flap-col">
+     <div class="flap-board">
+       <div class="flap-header">
+         <span class="flap-title">Cities · Worldwide</span>
+         <span class="flap-live"><span class="flap-live-dot"></span>Live</span>
+       </div>
+       <div class="flap-rows" id="flap-rows"></div>
+     </div>
+   </div>
+
   </section>
 
   <!-- Metrics -->
@@ -1668,11 +1758,113 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=59"></script>
+  <script src="app.js?v=60"></script>
 
 </div><!-- /.page-wrap -->
 
   <script>
+    // ── Flight board (split-flap) ────────────────────────────────────────
+    (function() {
+      const CITIES = [
+        'NEW YORK','LOS ANGELES','CHICAGO','HOUSTON','PHOENIX',
+        'PHILADELPHIA','SAN DIEGO','DALLAS','SAN JOSE','AUSTIN',
+        'JACKSONVILLE','FORT WORTH','COLUMBUS','CHARLOTTE','INDIANAPOLIS',
+        'SAN FRANCISCO','SEATTLE','DENVER','NASHVILLE','LAS VEGAS',
+        'MEMPHIS','LOUISVILLE','PORTLAND','BALTIMORE','MILWAUKEE',
+        'LONDON','PARIS','TORONTO','SYDNEY','TOKYO',
+        'DUBAI','SINGAPORE','MUMBAI','BARCELONA','AMSTERDAM',
+        'BERLIN','MADRID','ROME','MEXICO CITY','SAO PAULO',
+        'SEOUL','HONG KONG','VIENNA','PRAGUE','ISTANBUL',
+        'VANCOUVER','MELBOURNE','DUBLIN','STOCKHOLM','ZURICH',
+        'MIAMI','ATLANTA','MINNEAPOLIS','ORLANDO','PITTSBURGH',
+        'CAIRO','JOHANNESBURG','NAIROBI','CAPE TOWN','LAGOS',
+        'BANGKOK','JAKARTA','MANILA','KUALA LUMPUR','TAIPEI',
+        'BUENOS AIRES','SANTIAGO','BOGOTA','LIMA','MONTREAL',
+        'MOSCOW','WARSAW','BUDAPEST','BRUSSELS','LISBON',
+        'ATHENS','MILAN','MUNICH','FRANKFURT','RIYADH',
+        'DOHA','ABU DHABI','AUCKLAND','BRISBANE','EDINBURGH',
+        'AMSTERDAM','COPENHAGEN','OSLO','HELSINKI','REYKJAVIK',
+        'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO',
+      ];
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
+      const ROWS = 14, COLS = 13;
+      const container = document.getElementById('flap-rows');
+      if (!container) return;
+
+      // Build rows
+      const rows = [];
+      for (let r = 0; r < ROWS; r++) {
+        const row = document.createElement('div');
+        row.className = 'flap-row';
+        const num = document.createElement('span');
+        num.className = 'flap-num';
+        num.textContent = String(r + 1).padStart(2, '0');
+        row.appendChild(num);
+        const cityEl = document.createElement('span');
+        cityEl.className = 'flap-city';
+        const chars = [];
+        for (let c = 0; c < COLS; c++) {
+          const s = document.createElement('span');
+          s.className = 'flap-char';
+          s.textContent = ' ';
+          cityEl.appendChild(s);
+          chars.push(s);
+        }
+        row.appendChild(cityEl);
+        container.appendChild(row);
+        rows.push({ chars, busy: false });
+      }
+
+      // Shuffle pool
+      let pool = [...CITIES].sort(() => Math.random() - .5);
+      let poolIdx = 0;
+      function pickCity() {
+        const c = pool[poolIdx++ % pool.length];
+        if (poolIdx >= pool.length) { pool = [...CITIES].sort(() => Math.random() - .5); poolIdx = 0; }
+        return c;
+      }
+
+      function animChar(span, target, delay) {
+        return new Promise(res => {
+          setTimeout(() => {
+            let t = 0, total = 5 + Math.floor(Math.random() * 6);
+            const iv = setInterval(() => {
+              if (t < total - 1) {
+                span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+                span.classList.add('flipping');
+              } else {
+                span.textContent = target === undefined ? ' ' : target;
+                span.classList.remove('flipping');
+                clearInterval(iv);
+                res();
+              }
+              t++;
+            }, 52);
+          }, delay);
+        });
+      }
+
+      function flipRow(r) {
+        if (rows[r].busy) return;
+        rows[r].busy = true;
+        const city = pickCity().slice(0, COLS).padEnd(COLS, ' ');
+        const ps = rows[r].chars.map((s, i) => animChar(s, city[i], i * 38));
+        Promise.all(ps).then(() => { rows[r].busy = false; });
+      }
+
+      // Initial staggered fill
+      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 160));
+
+      // Continuous random flips
+      function kick() {
+        const count = 2 + Math.floor(Math.random() * 3);
+        const order = [...Array(ROWS).keys()].sort(() => Math.random() - .5);
+        order.slice(0, count).forEach(i => flipRow(i));
+        setTimeout(kick, 1200 + Math.random() * 1000);
+      }
+      setTimeout(kick, ROWS * 160 + 900);
+    })();
+
     // ── Rotating search placeholder ──────────────────────────────────────
     (function() {
       const hints = [
