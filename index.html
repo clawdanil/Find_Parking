@@ -238,6 +238,67 @@
       padding-left: 2px;
     }
 
+    /* ── Hero live-preview panel (right side) ──────────────────────────── */
+    .hero-preview {
+      position: absolute;
+      top: 50%; right: 20px;
+      transform: translateY(-50%);
+      width: 270px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
+    }
+    .hp-label {
+      display: flex; align-items: center; gap: 6px;
+      font-size: .58rem; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(235,240,255,.30);
+      margin-bottom: 2px;
+    }
+    .hp-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: #4ADE80;
+      animation: eyebrowPulse 2.4s ease-in-out infinite;
+    }
+    .preview-card {
+      display: flex; align-items: center; gap: 11px;
+      padding: 10px 13px;
+      background: rgba(255,255,255,.06);
+      backdrop-filter: blur(14px) saturate(130%);
+      -webkit-backdrop-filter: blur(14px) saturate(130%);
+      border: 1px solid rgba(255,255,255,.10);
+      border-left: 2.5px solid var(--pc-accent, rgba(255,255,255,.15));
+      border-radius: 13px;
+      transition: background .2s, transform .2s;
+      animation: fadeUp .55s ease both;
+      animation-delay: var(--d, 0s);
+    }
+    .preview-card:hover { background: rgba(255,255,255,.10); transform: translateX(-3px); }
+    .pc-icon {
+      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      background: var(--pc-bg, rgba(255,255,255,.08));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; line-height: 1;
+    }
+    .pc-body { flex: 1; min-width: 0; }
+    .pc-name {
+      font-size: .8rem; font-weight: 700;
+      color: rgba(235,240,255,.90);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .pc-meta {
+      font-size: .66rem; font-weight: 500;
+      color: rgba(235,240,255,.38); margin-top: 2px;
+    }
+    .pc-status {
+      font-size: .6rem; font-weight: 800;
+      padding: 2px 7px; border-radius: 100px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .pc-open  { background: rgba(22,163,74,.18);  color: #4ADE80; }
+    .pc-busy  { background: rgba(234,179, 8,.15);  color: #FCD34D; }
+    /* Hide on small screens — hero text needs full width */
+    @media (max-width: 900px) { .hero-preview { display: none; } }
+
     /* ── Hero eyebrow ──────────────────────────────────────────────────── */
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 10px;
@@ -1541,6 +1602,56 @@
       </div>
     </div>
 
+    <!-- Live preview cards — right side fill -->
+    <div class="hero-preview" aria-hidden="true">
+      <div class="hp-label"><span class="hp-dot"></span>Live near you</div>
+
+      <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
+        <div class="pc-icon">🍺</div>
+        <div class="pc-body">
+          <div class="pc-name">The Rooftop Bar</div>
+          <div class="pc-meta">0.3 mi &nbsp;·&nbsp; ★ 4.7</div>
+        </div>
+        <span class="pc-status pc-open">Open</span>
+      </div>
+
+      <div class="preview-card" style="--d:.58s;--pc-accent:#4ADE80;--pc-bg:rgba(74,222,128,.10)">
+        <div class="pc-icon">🅿️</div>
+        <div class="pc-body">
+          <div class="pc-name">Central Parking</div>
+          <div class="pc-meta">142 ft &nbsp;·&nbsp; $8 / hr</div>
+        </div>
+        <span class="pc-status pc-open">42 spots</span>
+      </div>
+
+      <div class="preview-card" style="--d:.71s;--pc-accent:#C084FC;--pc-bg:rgba(192,132,252,.10)">
+        <div class="pc-icon">🎶</div>
+        <div class="pc-body">
+          <div class="pc-name">Jazz Night · Blue Note</div>
+          <div class="pc-meta">0.8 mi &nbsp;·&nbsp; Tonight 8 PM</div>
+        </div>
+        <span class="pc-status pc-open">On now</span>
+      </div>
+
+      <div class="preview-card" style="--d:.84s;--pc-accent:#67E8F9;--pc-bg:rgba(103,232,249,.09)">
+        <div class="pc-icon">☕</div>
+        <div class="pc-body">
+          <div class="pc-name">Blue Bottle Coffee</div>
+          <div class="pc-meta">0.5 mi &nbsp;·&nbsp; ★ 4.6</div>
+        </div>
+        <span class="pc-status pc-busy">Busy</span>
+      </div>
+
+      <div class="preview-card" style="--d:.97s;--pc-accent:#FB7185;--pc-bg:rgba(251,113,133,.10)">
+        <div class="pc-icon">🍽️</div>
+        <div class="pc-body">
+          <div class="pc-name">O'Hara's Bar &amp; Grill</div>
+          <div class="pc-meta">0.1 mi &nbsp;·&nbsp; ★ 4.4</div>
+        </div>
+        <span class="pc-status pc-open">Open</span>
+      </div>
+    </div>
+
   </header>
 
   <!-- Search + Flight board -->
@@ -1767,7 +1878,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=65"></script>
+  <script src="app.js?v=66"></script>
 
 </div><!-- /.page-wrap -->
 
