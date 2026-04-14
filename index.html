@@ -582,6 +582,7 @@
       line-height: 1;
     }
     .flap-char { display: inline-block; }
+    .flap-char.flipping { color: #FFD60A; }
 
     .search-card {
       border-radius: 32px;
@@ -1921,14 +1922,14 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=73"></script>
+  <script src="app.js?v=74"></script>
 
 </div><!-- /.page-wrap -->
 
   <script>
-    // ── Flight board (split-flap) ────────────────────────────────────────
+    // ── Flight board (split-flap) — restored original working version ─────
     (function() {
-      var CITIES = [
+      const CITIES = [
         'NEW YORK','LOS ANGELES','CHICAGO','HOUSTON','PHOENIX',
         'PHILADELPHIA','SAN DIEGO','DALLAS','SAN JOSE','AUSTIN',
         'JACKSONVILLE','FORT WORTH','COLUMBUS','CHARLOTTE','INDIANAPOLIS',
@@ -1947,63 +1948,88 @@
         'ATHENS','MILAN','MUNICH','FRANKFURT','RIYADH',
         'DOHA','ABU DHABI','AUCKLAND','BRISBANE','EDINBURGH',
         'AMSTERDAM','COPENHAGEN','OSLO','HELSINKI','REYKJAVIK',
-        'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO'
+        'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO',
       ];
-      var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
-      var LEN = 11; // fixed display width
-
-      var container = document.getElementById('flap-rows');
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
+      const ROWS = 14, COLS = 13;
+      const container = document.getElementById('flap-rows');
       if (!container) return;
-      var cityEls = container.querySelectorAll('.flap-city');
-      if (!cityEls.length) return;
+
+      // Clear any static HTML rows — JS owns this container
+      container.innerHTML = '';
+
+      // Build rows dynamically (original approach that worked)
+      const rows = [];
+      for (let r = 0; r < ROWS; r++) {
+        const row = document.createElement('div');
+        row.className = 'flap-row';
+        const num = document.createElement('span');
+        num.className = 'flap-num';
+        num.textContent = String(r + 1).padStart(2, '0');
+        row.appendChild(num);
+        const cityEl = document.createElement('span');
+        cityEl.className = 'flap-city';
+        const chars = [];
+        for (let c = 0; c < COLS; c++) {
+          const s = document.createElement('span');
+          s.className = 'flap-char';
+          s.textContent = ' ';
+          cityEl.appendChild(s);
+          chars.push(s);
+        }
+        row.appendChild(cityEl);
+        container.appendChild(row);
+        rows.push({ chars, busy: false });
+      }
 
       // Shuffle pool
-      var pool = CITIES.slice().sort(function(){ return Math.random()-.5; });
-      var pidx = 0;
-      function pick() {
-        var c = pool[pidx++ % pool.length];
-        if (pidx >= pool.length) { pool = CITIES.slice().sort(function(){ return Math.random()-.5; }); pidx = 0; }
+      let pool = [...CITIES].sort(() => Math.random() - .5);
+      let poolIdx = 0;
+      function pickCity() {
+        const c = pool[poolIdx++ % pool.length];
+        if (poolIdx >= pool.length) { pool = [...CITIES].sort(() => Math.random() - .5); poolIdx = 0; }
         return c;
       }
-      function pad(s) { return (s+'          ').slice(0,LEN); }
-      function rndChar() { return CHARS[Math.floor(Math.random()*CHARS.length)]; }
 
-      // Flip one element: scramble text for 5 steps then show city
-      function flip(el) {
-        var city = pad(pick());
-        var step = 0, total = 5;
-        function tick() {
-          if (step < total) {
-            // Progressively reveal chars left-to-right during scramble
-            var revealed = Math.floor(city.length * step / total);
-            var txt = city.slice(0, revealed);
-            for (var k = revealed; k < city.length; k++) txt += rndChar();
-            el.textContent = txt;
-            el.style.color = (step % 2) ? '#FFD60A' : 'rgba(255,235,100,.55)';
-            step++;
-            setTimeout(tick, 90);
-          } else {
-            el.textContent = city;
-            el.style.color = '';
-          }
-        }
-        tick();
+      function animChar(span, target, delay) {
+        return new Promise(res => {
+          setTimeout(() => {
+            let t = 0, total = 5 + Math.floor(Math.random() * 6);
+            const iv = setInterval(() => {
+              if (t < total - 1) {
+                span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+                span.classList.add('flipping');
+              } else {
+                span.textContent = target === undefined ? ' ' : target;
+                span.classList.remove('flipping');
+                clearInterval(iv);
+                res();
+              }
+              t++;
+            }, 52);
+          }, delay);
+        });
       }
 
-      var els = Array.prototype.slice.call(cityEls);
+      function flipRow(r) {
+        if (rows[r].busy) return;
+        rows[r].busy = true;
+        const city = pickCity().slice(0, COLS).padEnd(COLS, ' ');
+        const ps = rows[r].chars.map((s, i) => animChar(s, city[i], i * 38));
+        Promise.all(ps).then(() => { rows[r].busy = false; });
+      }
 
-      // Stagger initial flip across all rows
-      els.forEach(function(el, i) {
-        setTimeout(function(){ flip(el); }, 300 + i * 130);
-      });
+      // Initial staggered fill
+      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 160));
 
-      // Keep flipping 2-3 random rows every 1.4s
-      setInterval(function() {
-        var shuffled = els.slice().sort(function(){ return Math.random()-.5; });
-        shuffled.slice(0, 2 + Math.floor(Math.random()*2)).forEach(function(el){
-          flip(el);
-        });
-      }, 1400);
+      // Continuous random flips
+      function kick() {
+        const count = 2 + Math.floor(Math.random() * 3);
+        const order = [...Array(ROWS).keys()].sort(() => Math.random() - .5);
+        order.slice(0, count).forEach(i => flipRow(i));
+        setTimeout(kick, 1200 + Math.random() * 1000);
+      }
+      setTimeout(kick, ROWS * 160 + 900);
     })();
 
     // ── Live preview card rotation ───────────────────────────────────────
