@@ -58,7 +58,7 @@
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
-    /* ── Photo collage background ───────────────────────────────────────── */
+    /* ── Background slideshow ────────────────────────────────────────────── */
     .bg-scene {
       position: fixed;
       inset: 0;
@@ -67,14 +67,44 @@
       overflow: hidden;
     }
 
-    /* 3×3 photo grid covers the entire viewport */
-    .bg-collage {
+    /* Slideshow container — stacks slides on top of each other */
+    .bg-slideshow {
       position: absolute;
       inset: 0;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 1fr);
     }
+
+    /* Each slide: full-viewport, starts invisible, crossfades in/out */
+    .bg-slide {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      /* mute the photos so they blend with the white-wash overlay */
+      filter: saturate(0.55) brightness(1.08) contrast(0.90);
+      animation: bgSlide 36s infinite ease-in-out;
+      will-change: opacity;
+    }
+
+    /* Crossfade keyframes — 6 slides × 6s each = 36s cycle
+       Each slide: 1s fade-in · 4s hold · 1s fade-out · 30s invisible */
+    @keyframes bgSlide {
+      0%      { opacity: 0; }
+      2.78%   { opacity: 1; }   /* fade in complete  (1s / 36s) */
+      13.89%  { opacity: 1; }   /* hold ends         (5s / 36s) */
+      16.67%  { opacity: 0; }   /* fade out complete (6s / 36s) */
+      100%    { opacity: 0; }   /* invisible until next cycle   */
+    }
+
+    /* Staggered delays — each slide starts 6s after the previous */
+    .bs-1 { background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1920&q=85'); animation-delay: 0s; }
+    .bs-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=85'); animation-delay: 6s; }
+    .bs-3 { background-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=85'); animation-delay: 12s; }
+    .bs-4 { background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&q=85'); animation-delay: 18s; }
+    .bs-5 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=85'); animation-delay: 24s; }
+    .bs-6 { background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1920&q=85'); animation-delay: 30s; }
+
+    /* Keep legacy .bc-cell selector harmless — collage no longer used */
     .bc-cell {
       background-size: cover;
       background-position: center;
@@ -1558,10 +1588,10 @@
        Accent: #0062FF  |  Text: #0A0A0A  |  No purple
     ═══════════════════════════════════════════════════════════════ */
 
-    /* 1 — Photo collage: desaturate + mute (watermark feel) */
-    .bc-cell    { filter: saturate(0.35) brightness(1.12) contrast(0.88) !important; }
-    .bg-overlay { background: rgba(255,255,255,.82) !important; }
-    .bg-dots    { background-image: radial-gradient(circle, rgba(0,0,0,.030) 1px, transparent 1px) !important; }
+    /* 1 — Slideshow + overlay tuned for bright UI */
+    /* .bg-slide filter is set in base CSS (saturate .55 / brightness 1.08) */
+    .bg-overlay { background: rgba(255,255,255,.80) !important; }
+    .bg-dots    { background-image: radial-gradient(circle, rgba(0,0,0,.028) 1px, transparent 1px) !important; }
     body        { background: #FFFFFF; }
 
     /* 2 — Nav */
@@ -1772,18 +1802,15 @@
     </div>
   </nav>
 
-  <!-- Photo collage bg — fixed, doesn't scroll -->
+  <!-- Slideshow bg — fixed, crossfades through venue photos -->
   <div class="bg-scene" aria-hidden="true">
-    <div class="bg-collage">
-      <div class="bc-cell bc-1"></div><!-- Restaurant interior -->
-      <div class="bc-cell bc-2"></div><!-- Cocktail bar -->
-      <div class="bc-cell bc-3"></div><!-- Coffee shop -->
-      <div class="bc-cell bc-4"></div><!-- Gym / fitness -->
-      <div class="bc-cell bc-5"></div><!-- Cinema -->
-      <div class="bc-cell bc-6"></div><!-- Concert / events -->
-      <div class="bc-cell bc-7"></div><!-- Shopping -->
-      <div class="bc-cell bc-8"></div><!-- City at night -->
-      <div class="bc-cell bc-9"></div><!-- Food close-up -->
+    <div class="bg-slideshow">
+      <div class="bg-slide bs-1"></div><!-- Restaurant interior -->
+      <div class="bg-slide bs-2"></div><!-- Cocktail bar -->
+      <div class="bg-slide bs-3"></div><!-- Coffee shop -->
+      <div class="bg-slide bs-4"></div><!-- Gym / fitness -->
+      <div class="bg-slide bs-5"></div><!-- City at night -->
+      <div class="bg-slide bs-6"></div><!-- Live events -->
     </div>
     <div class="bg-overlay"></div>
     <div class="bg-dots"></div>
@@ -2132,7 +2159,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=83"></script>
+  <script src="app.js?v=84"></script>
 
 </div><!-- /.page-wrap -->
 
