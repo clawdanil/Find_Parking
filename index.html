@@ -581,11 +581,7 @@
       flex: 1;
       line-height: 1;
     }
-    .flap-char { display: inline-block; transform-origin: center center; }
-    @keyframes charFold   { 0%{transform:scaleY(1);opacity:1} 100%{transform:scaleY(0.05);opacity:.1;color:#FFD60A} }
-    @keyframes charUnfold { 0%{transform:scaleY(0.05);opacity:.1;color:#FFD60A} 100%{transform:scaleY(1);opacity:1} }
-    .flap-char.folding   { animation: charFold   0.10s ease-in  forwards; }
-    .flap-char.unfolding { animation: charUnfold 0.10s ease-out forwards; }
+    .flap-char { display: inline-block; }
 
     .search-card {
       border-radius: 32px;
@@ -1925,7 +1921,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=71"></script>
+  <script src="app.js?v=72"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -1954,10 +1950,11 @@
         'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO',
       ];
       const COLS = 13;
+      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
       const container = document.getElementById('flap-rows');
       if (!container) return;
 
-      // Work with pre-built HTML rows — convert city text to individual char spans for animation
+      // Convert each city text into individual char spans (done once at startup)
       const rows = Array.from(container.querySelectorAll('.flap-row')).map(row => {
         const cityEl = row.querySelector('.flap-city');
         if (!cityEl) return null;
@@ -1985,51 +1982,47 @@
         return c;
       }
 
-      // CSS-animation-based flip: fold char → swap text → unfold
-      // animationend events are compositor-driven — never throttled
+      // setTimeout-chain flip — no setInterval, no animationend, no rAF.
+      // Each char shows 4 random glyphs (80ms each) then lands on target.
+      // Chars stagger 35ms apart across the 13-char row.
       function flipRow(r) {
         if (rows[r].busy) return;
         rows[r].busy = true;
         const city = pickCity().slice(0, COLS).padEnd(COLS, ' ');
-        let pending = COLS;
-
-        // Safety: release row after 3s even if animationend is lost
-        const guard = setTimeout(() => {
-          rows[r].busy = false;
-          rows[r].chars.forEach(s => { s.className = 'flap-char'; s.style.animationDelay = ''; });
-        }, 3000);
+        let done = 0;
 
         rows[r].chars.forEach((span, i) => {
-          const ch = city[i] !== undefined ? city[i] : ' ';
-          span.style.animationDelay = (i * 28) + 'ms';
-          span.classList.add('folding');
+          const target = city[i] !== undefined ? city[i] : ' ';
+          const STEPS = 4, STEP_MS = 80;
+          let step = 0;
 
-          span.addEventListener('animationend', function onFold() {
-            span.removeEventListener('animationend', onFold);
-            span.textContent = ch;
-            span.classList.remove('folding');
-            span.style.animationDelay = '0ms';
-            span.classList.add('unfolding');
+          function tick() {
+            if (step < STEPS) {
+              span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+              span.style.color = (step & 1) ? '#FFD60A' : 'rgba(255,220,100,.32)';
+              step++;
+              setTimeout(tick, STEP_MS);
+            } else {
+              span.textContent = target;
+              span.style.color = '';
+              if (++done === COLS) rows[r].busy = false;
+            }
+          }
 
-            span.addEventListener('animationend', function onUnfold() {
-              span.removeEventListener('animationend', onUnfold);
-              span.classList.remove('unfolding');
-              if (--pending === 0) { clearTimeout(guard); rows[r].busy = false; }
-            }, { once: true });
-          }, { once: true });
+          setTimeout(tick, i * 35); // stagger each char
         });
       }
 
       // Cascade all rows on load, then keep flipping continuously
-      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 80));
+      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 90));
 
       function kick() {
         const count = 3 + Math.floor(Math.random() * 4);
         const order = [...Array(ROWS).keys()].sort(() => Math.random() - .5);
         order.slice(0, count).forEach(i => flipRow(i));
-        setTimeout(kick, 900 + Math.random() * 600);
+        setTimeout(kick, 1000 + Math.random() * 800);
       }
-      setTimeout(kick, ROWS * 80 + 600);
+      setTimeout(kick, ROWS * 90 + 600);
     })();
 
     // ── Live preview card rotation ───────────────────────────────────────
