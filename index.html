@@ -1921,14 +1921,14 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=72"></script>
+  <script src="app.js?v=73"></script>
 
 </div><!-- /.page-wrap -->
 
   <script>
     // ── Flight board (split-flap) ────────────────────────────────────────
     (function() {
-      const CITIES = [
+      var CITIES = [
         'NEW YORK','LOS ANGELES','CHICAGO','HOUSTON','PHOENIX',
         'PHILADELPHIA','SAN DIEGO','DALLAS','SAN JOSE','AUSTIN',
         'JACKSONVILLE','FORT WORTH','COLUMBUS','CHARLOTTE','INDIANAPOLIS',
@@ -1947,82 +1947,63 @@
         'ATHENS','MILAN','MUNICH','FRANKFURT','RIYADH',
         'DOHA','ABU DHABI','AUCKLAND','BRISBANE','EDINBURGH',
         'AMSTERDAM','COPENHAGEN','OSLO','HELSINKI','REYKJAVIK',
-        'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO',
+        'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO'
       ];
-      const COLS = 13;
-      const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
-      const container = document.getElementById('flap-rows');
-      if (!container) return;
+      var CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
+      var LEN = 11; // fixed display width
 
-      // Convert each city text into individual char spans (done once at startup)
-      const rows = Array.from(container.querySelectorAll('.flap-row')).map(row => {
-        const cityEl = row.querySelector('.flap-city');
-        if (!cityEl) return null;
-        const text = (cityEl.textContent || '').toUpperCase().slice(0, COLS).padEnd(COLS, ' ');
-        cityEl.textContent = '';
-        const chars = [];
-        for (let c = 0; c < COLS; c++) {
-          const s = document.createElement('span');
-          s.className = 'flap-char';
-          s.textContent = text[c] || ' ';
-          cityEl.appendChild(s);
-          chars.push(s);
-        }
-        return { chars, busy: false };
-      }).filter(Boolean);
-      const ROWS = rows.length;
-      if (!ROWS) return;
+      var container = document.getElementById('flap-rows');
+      if (!container) return;
+      var cityEls = container.querySelectorAll('.flap-city');
+      if (!cityEls.length) return;
 
       // Shuffle pool
-      let pool = [...CITIES].sort(() => Math.random() - .5);
-      let poolIdx = 0;
-      function pickCity() {
-        const c = pool[poolIdx++ % pool.length];
-        if (poolIdx >= pool.length) { pool = [...CITIES].sort(() => Math.random() - .5); poolIdx = 0; }
+      var pool = CITIES.slice().sort(function(){ return Math.random()-.5; });
+      var pidx = 0;
+      function pick() {
+        var c = pool[pidx++ % pool.length];
+        if (pidx >= pool.length) { pool = CITIES.slice().sort(function(){ return Math.random()-.5; }); pidx = 0; }
         return c;
       }
+      function pad(s) { return (s+'          ').slice(0,LEN); }
+      function rndChar() { return CHARS[Math.floor(Math.random()*CHARS.length)]; }
 
-      // setTimeout-chain flip — no setInterval, no animationend, no rAF.
-      // Each char shows 4 random glyphs (80ms each) then lands on target.
-      // Chars stagger 35ms apart across the 13-char row.
-      function flipRow(r) {
-        if (rows[r].busy) return;
-        rows[r].busy = true;
-        const city = pickCity().slice(0, COLS).padEnd(COLS, ' ');
-        let done = 0;
-
-        rows[r].chars.forEach((span, i) => {
-          const target = city[i] !== undefined ? city[i] : ' ';
-          const STEPS = 4, STEP_MS = 80;
-          let step = 0;
-
-          function tick() {
-            if (step < STEPS) {
-              span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
-              span.style.color = (step & 1) ? '#FFD60A' : 'rgba(255,220,100,.32)';
-              step++;
-              setTimeout(tick, STEP_MS);
-            } else {
-              span.textContent = target;
-              span.style.color = '';
-              if (++done === COLS) rows[r].busy = false;
-            }
+      // Flip one element: scramble text for 5 steps then show city
+      function flip(el) {
+        var city = pad(pick());
+        var step = 0, total = 5;
+        function tick() {
+          if (step < total) {
+            // Progressively reveal chars left-to-right during scramble
+            var revealed = Math.floor(city.length * step / total);
+            var txt = city.slice(0, revealed);
+            for (var k = revealed; k < city.length; k++) txt += rndChar();
+            el.textContent = txt;
+            el.style.color = (step % 2) ? '#FFD60A' : 'rgba(255,235,100,.55)';
+            step++;
+            setTimeout(tick, 90);
+          } else {
+            el.textContent = city;
+            el.style.color = '';
           }
+        }
+        tick();
+      }
 
-          setTimeout(tick, i * 35); // stagger each char
+      var els = Array.prototype.slice.call(cityEls);
+
+      // Stagger initial flip across all rows
+      els.forEach(function(el, i) {
+        setTimeout(function(){ flip(el); }, 300 + i * 130);
+      });
+
+      // Keep flipping 2-3 random rows every 1.4s
+      setInterval(function() {
+        var shuffled = els.slice().sort(function(){ return Math.random()-.5; });
+        shuffled.slice(0, 2 + Math.floor(Math.random()*2)).forEach(function(el){
+          flip(el);
         });
-      }
-
-      // Cascade all rows on load, then keep flipping continuously
-      rows.forEach((_, i) => setTimeout(() => flipRow(i), i * 90));
-
-      function kick() {
-        const count = 3 + Math.floor(Math.random() * 4);
-        const order = [...Array(ROWS).keys()].sort(() => Math.random() - .5);
-        order.slice(0, count).forEach(i => flipRow(i));
-        setTimeout(kick, 1000 + Math.random() * 800);
-      }
-      setTimeout(kick, ROWS * 90 + 600);
+      }, 1400);
     })();
 
     // ── Live preview card rotation ───────────────────────────────────────
