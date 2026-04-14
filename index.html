@@ -80,8 +80,8 @@
       background-size: cover;
       background-position: center;
       opacity: 0;
-      /* mute the photos so they blend with the white-wash overlay */
-      filter: saturate(0.55) brightness(1.08) contrast(0.90);
+      /* vivid, slightly darkened — night photos pop on dark overlay */
+      filter: saturate(1.25) brightness(0.80) contrast(1.05);
       animation: bgSlide 36s infinite ease-in-out;
       animation-fill-mode: backwards;
       will-change: opacity;
@@ -101,12 +101,13 @@
     }
 
     /* Staggered delays — each slide starts 6s after the previous */
-    .bs-1 { background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1920&q=85'); animation-delay: 0s; }
-    .bs-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=85'); animation-delay: 6s; }
-    .bs-3 { background-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=1920&q=85'); animation-delay: 12s; }
-    .bs-4 { background-image: url('https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=1920&q=85'); animation-delay: 18s; }
-    .bs-5 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=85'); animation-delay: 24s; }
-    .bs-6 { background-image: url('https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1920&q=85'); animation-delay: 30s; }
+    /* Vivid night / neon scenes — naturally dark bg, vivid color pops */
+    .bs-1 { background-image: url('https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1920&q=85'); animation-delay: 0s; }  /* concert stage — vivid colored lights */
+    .bs-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=85'); animation-delay: 6s; }  /* neon cocktail bar */
+    .bs-3 { background-image: url('https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1920&q=85'); animation-delay: 12s; } /* neon city street at night */
+    .bs-4 { background-image: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=1920&q=85'); animation-delay: 18s; } /* candlelit fine-dining restaurant */
+    .bs-5 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=85'); animation-delay: 24s; } /* city skyline at night */
+    .bs-6 { background-image: url('https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1920&q=85'); animation-delay: 30s; } /* DJ / music venue with colour wash */
 
     /* Keep legacy .bc-cell selector harmless — collage no longer used */
     .bc-cell {
@@ -1593,10 +1594,10 @@
        All text ≥ WCAG AA (4.5:1) — most elements meet AAA (7:1)
     ═══════════════════════════════════════════════════════════════ */
 
-    /* 1 — Dark slideshow overlay + slide filter */
-    .bg-overlay { background: rgba(8,8,18,.82) !important; }
-    .bg-dots    { background-image: radial-gradient(circle, rgba(255,255,255,.018) 1px, transparent 1px) !important; }
-    .bg-slide   { filter: saturate(0.40) brightness(0.55) contrast(0.85) !important; }
+    /* 1 — Dark overlay: opaque enough to keep text readable, open enough to show nighttime photos */
+    .bg-overlay { background: rgba(8,8,18,.65) !important; }
+    .bg-dots    { background-image: radial-gradient(circle, rgba(255,255,255,.025) 1px, transparent 1px) !important; }
+    /* Remove any per-slide brightness throttling — base filter handles it */
     body        { background: #09090F; }
 
     /* 2 — Nav: dark frosted glass */
@@ -2208,7 +2209,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=87"></script>
+  <script src="app.js?v=88"></script>
 
 </div><!-- /.page-wrap -->
 
