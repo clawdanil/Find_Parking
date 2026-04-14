@@ -581,8 +581,7 @@
       flex: 1;
       line-height: 1;
     }
-    .flap-char { display: inline-block; }
-    .flap-char.flipping { color: #FFD60A; }
+    .flap-char { display: inline-block; transform-origin: center; will-change: transform, color; }
 
     .search-card {
       border-radius: 32px;
@@ -1922,7 +1921,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=69"></script>
+  <script src="app.js?v=70"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -1983,23 +1982,38 @@
         return c;
       }
 
-      function animChar(span, target, delay) {
+      // rAF-based flip: immune to Safari setInterval throttling
+      function animChar(span, target, delayMs) {
         return new Promise(res => {
-          setTimeout(() => {
-            let t = 0, total = 5 + Math.floor(Math.random() * 6);
-            const iv = setInterval(() => {
-              if (t < total - 1) {
-                span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
-                span.classList.add('flipping');
+          const TICK_MS = 75;   // ms per random char (visible, not too blurry)
+          const ticks = 4 + Math.floor(Math.random() * 5); // 4-8 flicker steps
+          const startAt = performance.now() + delayMs;
+          let lastTick = -1;
+
+          function frame(now) {
+            if (now < startAt) { requestAnimationFrame(frame); return; }
+            const tick = Math.floor((now - startAt) / TICK_MS);
+            if (tick >= ticks) {
+              span.textContent  = target !== undefined ? target : ' ';
+              span.style.cssText = '';   // clear inline styles → restore normal color
+              res();
+              return;
+            }
+            if (tick !== lastTick) {
+              lastTick = tick;
+              span.textContent = CHARS[Math.floor(Math.random() * CHARS.length)];
+              // Alternate yellow / dim for a crisp flicker
+              if (tick & 1) {
+                span.style.color     = '#FFD60A';
+                span.style.transform = 'scaleY(0.82)';
               } else {
-                span.textContent = target === undefined ? ' ' : target;
-                span.classList.remove('flipping');
-                clearInterval(iv);
-                res();
+                span.style.color     = 'rgba(255,240,160,.35)';
+                span.style.transform = 'scaleY(1)';
               }
-              t++;
-            }, 52);
-          }, delay);
+            }
+            requestAnimationFrame(frame);
+          }
+          requestAnimationFrame(frame);
         });
       }
 
@@ -2007,21 +2021,20 @@
         if (rows[r].busy) return;
         rows[r].busy = true;
         const city = pickCity().slice(0, COLS).padEnd(COLS, ' ');
-        const ps = rows[r].chars.map((s, i) => animChar(s, city[i], i * 38));
+        const ps = rows[r].chars.map((s, i) => animChar(s, city[i], i * 30));
         Promise.all(ps).then(() => { rows[r].busy = false; });
       }
 
-      // Initial staggered flip — rows already pre-filled so this is polish, not first-show
-      rows.forEach((_, i) => setTimeout(() => flipRow(i), 600 + i * 120));
+      // Cascade all rows on load, then keep flipping continuously
+      rows.forEach((_, i) => setTimeout(() => flipRow(i), 120 + i * 60));
 
-      // Continuous random flips
       function kick() {
-        const count = 2 + Math.floor(Math.random() * 3);
+        const count = 3 + Math.floor(Math.random() * 4); // 3-6 rows per burst
         const order = [...Array(ROWS).keys()].sort(() => Math.random() - .5);
         order.slice(0, count).forEach(i => flipRow(i));
-        setTimeout(kick, 1200 + Math.random() * 1000);
+        setTimeout(kick, 800 + Math.random() * 600);
       }
-      setTimeout(kick, 600 + ROWS * 120 + 800);
+      setTimeout(kick, 120 + ROWS * 60 + 500);
     })();
 
     // ── Live preview card rotation ───────────────────────────────────────
