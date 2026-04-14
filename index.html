@@ -1756,7 +1756,22 @@
          <span class="flap-title">Cities · Worldwide</span>
          <span class="flap-live"><span class="flap-live-dot"></span>Live</span>
        </div>
-       <div class="flap-rows" id="flap-rows"></div>
+       <div class="flap-rows" id="flap-rows">
+         <div class="flap-row"><span class="flap-num">01</span><span class="flap-city">NEW YORK</span></div>
+         <div class="flap-row"><span class="flap-num">02</span><span class="flap-city">LONDON</span></div>
+         <div class="flap-row"><span class="flap-num">03</span><span class="flap-city">TOKYO</span></div>
+         <div class="flap-row"><span class="flap-num">04</span><span class="flap-city">PARIS</span></div>
+         <div class="flap-row"><span class="flap-num">05</span><span class="flap-city">DUBAI</span></div>
+         <div class="flap-row"><span class="flap-num">06</span><span class="flap-city">SINGAPORE</span></div>
+         <div class="flap-row"><span class="flap-num">07</span><span class="flap-city">LOS ANGELES</span></div>
+         <div class="flap-row"><span class="flap-num">08</span><span class="flap-city">TORONTO</span></div>
+         <div class="flap-row"><span class="flap-num">09</span><span class="flap-city">SYDNEY</span></div>
+         <div class="flap-row"><span class="flap-num">10</span><span class="flap-city">AMSTERDAM</span></div>
+         <div class="flap-row"><span class="flap-num">11</span><span class="flap-city">HONG KONG</span></div>
+         <div class="flap-row"><span class="flap-num">12</span><span class="flap-city">BARCELONA</span></div>
+         <div class="flap-row"><span class="flap-num">13</span><span class="flap-city">BERLIN</span></div>
+         <div class="flap-row"><span class="flap-num">14</span><span class="flap-city">MIAMI</span></div>
+       </div>
      </div>
    </div>
 
@@ -1907,7 +1922,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=68"></script>
+  <script src="app.js?v=69"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -1936,35 +1951,28 @@
         'JERSEY CITY','BOSTON','WASHINGTON DC','SAN ANTONIO','EL PASO',
       ];
       const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ·- ';
-      const ROWS = 14, COLS = 13;
+      const COLS = 13;
       const container = document.getElementById('flap-rows');
       if (!container) return;
 
-      // Build rows — pre-fill with real city text immediately (no blank flash)
-      const rows = [];
-      const initPool = [...CITIES].sort(() => Math.random() - .5);
-      for (let r = 0; r < ROWS; r++) {
-        const row = document.createElement('div');
-        row.className = 'flap-row';
-        const num = document.createElement('span');
-        num.className = 'flap-num';
-        num.textContent = String(r + 1).padStart(2, '0');
-        row.appendChild(num);
-        const cityEl = document.createElement('span');
-        cityEl.className = 'flap-city';
+      // Work with pre-built HTML rows — convert city text to individual char spans for animation
+      const rows = Array.from(container.querySelectorAll('.flap-row')).map(row => {
+        const cityEl = row.querySelector('.flap-city');
+        if (!cityEl) return null;
+        const text = (cityEl.textContent || '').toUpperCase().slice(0, COLS).padEnd(COLS, ' ');
+        cityEl.textContent = '';
         const chars = [];
-        const initCity = (initPool[r % initPool.length] || '').slice(0, COLS).padEnd(COLS, ' ');
         for (let c = 0; c < COLS; c++) {
           const s = document.createElement('span');
           s.className = 'flap-char';
-          s.textContent = initCity[c] || ' ';  // visible immediately
+          s.textContent = text[c] || ' ';
           cityEl.appendChild(s);
           chars.push(s);
         }
-        row.appendChild(cityEl);
-        container.appendChild(row);
-        rows.push({ chars, busy: false });
-      }
+        return { chars, busy: false };
+      }).filter(Boolean);
+      const ROWS = rows.length;
+      if (!ROWS) return;
 
       // Shuffle pool
       let pool = [...CITIES].sort(() => Math.random() - .5);
@@ -2222,17 +2230,22 @@
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
 
-    // ── Load weather: GPS first (accurate), IP as quick fallback ──────────
+    // ── Load weather: GPS first, IP chain fallback, hard 4s default ─────
     (async () => {
-      let gpsResolved = false;
+      let weatherResolved = false;
 
-      // 1. Try GPS immediately — most accurate, updates weather to real location
+      // Hard fallback: if nothing loads in 4s, show New York so it's never stuck
+      setTimeout(() => {
+        if (!weatherResolved) fetchWeather(40.7128, -74.0060, 'New York, NY');
+      }, 4000);
+
+      // 1. Try GPS — most accurate
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async pos => {
-          gpsResolved = true;
+          if (weatherResolved) return;
+          weatherResolved = true;
           const { latitude: lat, longitude: lon } = pos.coords;
           try {
-            // Use Google Geocoder if loaded, else Nominatim
             let lbl = 'Your Location';
             if (window._gmapsReady && window._geocoder) {
               await new Promise(resolve => {
@@ -2251,23 +2264,37 @@
             }
             fetchWeather(lat, lon, lbl);
           } catch { fetchWeather(lat, lon, 'Your Location'); }
-        }, () => { /* GPS denied — IP fallback already ran */ }, { timeout: 8000, maximumAge: 60000 });
+        }, () => { /* GPS denied */ }, { timeout: 8000, maximumAge: 60000 });
       }
 
-      // 2. IP geolocation runs in parallel as fast fallback (may be inaccurate by ~10mi)
+      // 2. IP geolocation chain — runs in parallel, tries two services
       setTimeout(async () => {
-        if (gpsResolved) return; // GPS already succeeded, skip IP
-        try {
-          const res = await fetch('https://ipapi.co/json/');
-          const d   = await res.json();
-          if (d.latitude && d.longitude && !gpsResolved) {
-            const label = [d.city, d.region_code].filter(Boolean).join(', ');
-            fetchWeather(d.latitude, d.longitude, label || 'Nearby');
-          }
-        } catch {
-          if (!gpsResolved) fetchWeather(40.7128, -74.0060, 'New York, NY');
+        if (weatherResolved) return;
+        const ipSources = [
+          async () => {
+            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+            if (!d.latitude || !d.longitude) throw new Error('no coords');
+            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region_code].filter(Boolean).join(', ') };
+          },
+          async () => {
+            const d = await fetch('https://ipwho.is/').then(r => r.json());
+            if (!d.latitude || !d.longitude) throw new Error('no coords');
+            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region].filter(Boolean).join(', ') };
+          },
+        ];
+        for (const src of ipSources) {
+          if (weatherResolved) return;
+          try {
+            const { lat, lon, label } = await src();
+            if (!weatherResolved) {
+              weatherResolved = true;
+              fetchWeather(lat, lon, label || 'Nearby');
+              return;
+            }
+          } catch { /* try next */ }
         }
-      }, 300); // slight delay so GPS has a chance to win first
+        // All IP sources failed — hard fallback timer fires at 4s
+      }, 300);
     })();
 
     // Update weather when a city chip is clicked
