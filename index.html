@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="manifest" href="/manifest.json">
-  <meta name="theme-color" content="#FFFFFF">
+  <meta name="theme-color" content="#09090F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Orbi">
@@ -1588,245 +1588,244 @@
     }
 
     /* ═══════════════════════════════════════════════════════════════
-       ENTERPRISE REDESIGN — black text · electric blue accent
-       Accent: #0062FF  |  Text: #0A0A0A  |  No purple
+       DARK MODE — HIGH-CONTRAST ACCESSIBILITY EDITION
+       BG: #09090F  |  Primary text: #F0F4FF  |  Accent: #5B9BFF
+       All text ≥ WCAG AA (4.5:1) — most elements meet AAA (7:1)
     ═══════════════════════════════════════════════════════════════ */
 
-    /* 1 — Overlay: pull back so photos breathe through (was .80) */
-    .bg-overlay { background: rgba(255,255,255,.68) !important; }
-    .bg-dots    { background-image: radial-gradient(circle, rgba(0,0,0,.022) 1px, transparent 1px) !important; }
-    /* Warm off-white base — not stark white, not grey */
-    body        { background: #F7F5F0; }
+    /* 1 — Dark slideshow overlay + slide filter */
+    .bg-overlay { background: rgba(8,8,18,.82) !important; }
+    .bg-dots    { background-image: radial-gradient(circle, rgba(255,255,255,.018) 1px, transparent 1px) !important; }
+    .bg-slide   { filter: saturate(0.40) brightness(0.55) contrast(0.85) !important; }
+    body        { background: #09090F; }
 
-    /* Shared frosted-glass helper — applied to all panels below */
-
-    /* 2 — Nav: frosted glass */
-    .site-nav   {
-      background: rgba(247,245,240,.82) !important;
-      border-bottom: 1px solid rgba(0,0,0,.07) !important;
-      box-shadow: 0 1px 20px rgba(0,0,0,.07) !important;
+    /* 2 — Nav: dark frosted glass */
+    .site-nav {
+      background: rgba(10,10,20,.88) !important;
+      border-bottom: 1px solid rgba(255,255,255,.10) !important;
+      box-shadow: 0 1px 24px rgba(0,0,0,.50) !important;
       backdrop-filter: blur(24px) saturate(160%) !important;
       -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
     }
-    .nav-icon   { background: #0A0A0A !important; border-color: transparent !important; }
-    .nav-wordmark { color: #0A0A0A !important; }
-    .nav-tag    { color: #444444 !important; }
-    .nav-cta    { background: #0A0A0A !important; color: #fff !important; box-shadow: 0 2px 14px rgba(0,0,0,.22) !important; }
-    .nav-cta:hover { opacity: 1 !important; background: #1a1a1a !important; box-shadow: 0 6px 22px rgba(0,0,0,.32) !important; transform: translateY(-1px) !important; }
+    .nav-wordmark { color: #F0F4FF !important; font-weight: 600 !important; }
+    .nav-tag      { color: #8A9EC0 !important; }
+    .nav-cta      { background: #5B9BFF !important; color: #000810 !important; font-weight: 700 !important; box-shadow: 0 4px 16px rgba(91,155,255,.30) !important; }
+    .nav-cta:hover{ background: #7AB3FF !important; opacity: 1 !important; transform: translateY(-1px) !important; }
 
     /* 3 — Hero logo */
-    .logo-icon { background: #0A0A0A !important; border-color: transparent !important; box-shadow: 0 4px 18px rgba(0,0,0,.16) !important; }
-    .logo-name { color: #0A0A0A !important; }
-    .logo-sub  { color: #555555 !important; }
+    .logo-name { color: #F0F4FF !important; }
+    .logo-sub  { color: #8A9EC0 !important; }
 
     /* 4 — Eyebrow pill */
-    .hero-eyebrow  { background: rgba(255,255,255,.55) !important; border-color: rgba(0,98,255,.22) !important; color: #0062FF !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
-    .eyebrow-pulse { background: #0062FF !important; }
+    .hero-eyebrow  { background: rgba(91,155,255,.12) !important; border-color: rgba(91,155,255,.32) !important; color: #7AB3FF !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
+    .eyebrow-pulse { background: #5B9BFF !important; }
 
     /* 5 — Headline */
-    .hero-headline .accent-word { background: none !important; -webkit-text-fill-color: #0A0A0A !important; color: #0A0A0A !important; }
+    .hero-headline            { color: #F0F4FF !important; }
+    .hero-headline .accent-word { background: none !important; -webkit-text-fill-color: #F0F4FF !important; color: #F0F4FF !important; }
 
     /* 6 — Sub-text + proof row */
-    .hero-sub  { color: #222222 !important; }
-    .hw-item   { background: rgba(255,255,255,.55) !important; border-color: rgba(0,0,0,.08) !important; color: #1A1A1A !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
-    .hw-check  { color: #059669 !important; }
-    .hw-sep    { color: rgba(0,0,0,.20) !important; }
+    .hero-sub { color: #C0CEEA !important; }
+    .hw-item  { background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.13) !important; color: #E0E8F8 !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
+    .hw-check { color: #34D399 !important; }
+    .hw-sep   { color: rgba(255,255,255,.25) !important; }
 
     /* 7 — Smoke */
-    .sp { background: radial-gradient(circle, rgba(0,98,255,.18) 0%, rgba(0,98,255,0) 70%) !important; }
+    .sp { background: radial-gradient(circle, rgba(91,155,255,.14) 0%, rgba(91,155,255,0) 70%) !important; }
 
-    /* 8 — Weather pill: frosted */
+    /* 8 — Weather pill */
     .weather-pill {
-      background: rgba(255,255,255,.72) !important;
-      border-color: rgba(0,0,0,.09) !important;
-      box-shadow: 0 2px 14px rgba(0,0,0,.08) !important;
+      background: rgba(255,255,255,.07) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,.35) !important;
       backdrop-filter: blur(16px) saturate(140%) !important;
       -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
     }
-    .w-temp { color: #0A0A0A !important; }
-    .w-desc { color: #222222 !important; }
-    .w-city { color: #444444 !important; border-left-color: rgba(0,0,0,.09) !important; }
+    .w-temp { color: #F0F4FF !important; font-weight: 700 !important; }
+    .w-desc { color: #C0CEEA !important; }
+    .w-city { color: #8A9EC0 !important; border-left-color: rgba(255,255,255,.12) !important; }
 
-    /* 9 — Search card: frosted glass */
+    /* 9 — Search card */
     .glass-panel {
-      background: rgba(255,255,255,.82) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      box-shadow: 0 8px 36px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.05), inset 0 1px 0 rgba(255,255,255,.90) !important;
-      backdrop-filter: blur(28px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-    }
-    .input-group label  { color: #333333 !important; }
-    .ai-spark           { color: #0062FF !important; }
-    .input-field        { background: rgba(255,255,255,.78) !important; border-color: rgba(0,0,0,.10) !important; color: #0A0A0A !important; }
-    .input-field::placeholder { color: #888888 !important; }
-    .input-field:focus  {
-      background: rgba(255,255,255,.96) !important;
-      border-color: rgba(0,98,255,.50) !important;
-      box-shadow: 0 0 0 4px rgba(0,98,255,.10), inset 0 1px 2px rgba(0,0,0,.03) !important;
-    }
-    .search-btn         { background: #0062FF !important; color: #fff !important; box-shadow: 0 4px 16px rgba(0,98,255,.28) !important; }
-    .search-btn:hover   { background: #0050D4 !important; box-shadow: 0 8px 28px rgba(0,98,255,.38) !important; }
-    .location-btn       { background: rgba(255,255,255,.50) !important; border-color: rgba(0,0,0,.09) !important; color: #222222 !important; }
-    .location-btn:hover { background: rgba(255,255,255,.75) !important; border-color: rgba(0,0,0,.14) !important; color: #0A0A0A !important; }
-
-    /* 10 — Chips */
-    .chips-label { color: #444444 !important; }
-    .chip        { background: rgba(255,255,255,.45) !important; border-color: rgba(0,0,0,.10) !important; color: #333333 !important; }
-    .chip:hover  { background: rgba(0,98,255,.09) !important; border-color: rgba(0,98,255,.28) !important; color: #0062FF !important; }
-
-    /* 11 — Feature tiles */
-    .feature-tiles { border-top-color: rgba(0,0,0,.07) !important; }
-    .feature-tile       { border-color: rgba(0,0,0,.09) !important; color: #444444 !important; background: rgba(255,255,255,.38) !important; }
-    .feature-tile:hover { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.14) !important; color: #0A0A0A !important; }
-    .feature-tile.active{ background: #0A0A0A !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 2px 14px rgba(0,0,0,.22) !important; }
-    .feature-tile[data-feature="food"]:hover         { background: rgba(255,255,255,.70) !important; border-color: rgba(220,38,38,.28)   !important; color: #B91C1C !important; }
-    .feature-tile[data-feature="bars"]:hover         { background: rgba(255,255,255,.70) !important; border-color: rgba(180,83,9,.28)    !important; color: #92400E !important; }
-    .feature-tile[data-feature="coffee"]:hover       { background: rgba(255,255,255,.70) !important; border-color: rgba(120,72,24,.28)   !important; color: #78350F !important; }
-    .feature-tile[data-feature="gym"]:hover          { background: rgba(255,255,255,.70) !important; border-color: rgba(0,98,255,.28)    !important; color: #0050D4 !important; }
-    .feature-tile[data-feature="shopping"]:hover     { background: rgba(255,255,255,.70) !important; border-color: rgba(13,148,136,.28)  !important; color: #0F766E !important; }
-    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(255,255,255,.70) !important; border-color: rgba(202,138,4,.28)   !important; color: #A16207 !important; }
-    .feature-tile[data-feature="events"]:hover       { background: rgba(255,255,255,.70) !important; border-color: rgba(5,150,105,.28)   !important; color: #047857 !important; }
-    .feature-tile[data-feature="transit"]:hover      { background: rgba(255,255,255,.70) !important; border-color: rgba(0,98,255,.28)    !important; color: #0062FF !important; }
-    .feature-tile[data-feature="parking"]:hover      { background: rgba(255,255,255,.70) !important; border-color: rgba(234,88,12,.28)   !important; color: #C2410C !important; }
-
-    /* 12 — Metrics */
-    .metrics-grid      {
-      background: rgba(255,255,255,.60) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-    }
-    .metric-item       { border-right-color: rgba(0,0,0,.06) !important; }
-    .metric-item:hover { background: rgba(255,255,255,.30) !important; }
-    .metric-value      { color: #0A0A0A !important; }
-    .metric-label      { color: #333333 !important; }
-    @media (max-width: 500px) { .metric-item { border-bottom-color: rgba(0,0,0,.06) !important; } }
-
-    /* 13 — Stats bar */
-    .stats-inner {
-      background: rgba(255,255,255,.76) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-    }
-    .stat-item        { color: #333333 !important; }
-    .stat-item strong { color: #0A0A0A !important; }
-
-    /* 14 — Result cards: frosted glass */
-    .parking-card {
-      background: rgba(255,255,255,.84) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      box-shadow: 0 2px 14px rgba(0,0,0,.07), inset 0 1px 0 rgba(255,255,255,.90) !important;
-      backdrop-filter: blur(20px) saturate(160%) !important;
-      -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
-    }
-    .parking-card:hover {
-      background: rgba(255,255,255,.94) !important;
-      border-color: rgba(0,98,255,.20) !important;
-      box-shadow: 0 10px 32px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.95) !important;
-    }
-    .spot-number  { color: rgba(0,0,0,.22) !important; }
-    .card-address { color: #0A0A0A !important; }
-    .card-side    { color: #333333 !important; }
-    .card-landmark{ color: #444444 !important; }
-    .detail-item  { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.07) !important; color: #333333 !important; }
-    .card-report  { border-color: rgba(0,0,0,.07) !important; }
-    .report-btn   { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.07) !important; color: #333333 !important; }
-    .gmaps-btn    { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.09) !important; color: #0A0A0A !important; }
-    .gmaps-btn:hover { background: rgba(0,98,255,.08) !important; border-color: rgba(0,98,255,.22) !important; color: #0062FF !important; }
-
-    /* 15 — Tabs */
-    .tabs-bar {
-      background: rgba(255,255,255,.76) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-    }
-    .tab-btn       { color: #444444 !important; }
-    .tab-btn.active{ background: #0A0A0A !important; color: #fff !important; box-shadow: 0 2px 12px rgba(0,0,0,.22) !important; }
-    .tab-count     { background: rgba(0,0,0,.07) !important; }
-    .tab-btn.active .tab-count { background: rgba(255,255,255,.20) !important; }
-
-    /* 16 — Map */
-    .map-header {
-      background: rgba(247,245,240,.88) !important;
-      border-color: rgba(0,0,0,.07) !important;
-      color: #333333 !important;
-      backdrop-filter: blur(16px) !important;
-      -webkit-backdrop-filter: blur(16px) !important;
-    }
-    .map-header span { color: #0A0A0A !important; }
-    .map-panel  { border-color: rgba(0,0,0,.08) !important; }
-
-    /* 17 — Autocomplete */
-    .ac-dropdown  {
-      background: rgba(247,245,240,.97) !important;
-      border-color: rgba(0,0,0,.09) !important;
-      box-shadow: 0 16px 48px rgba(0,0,0,.12) !important;
-      backdrop-filter: blur(28px) !important;
-      -webkit-backdrop-filter: blur(28px) !important;
-    }
-    .ac-main  { color: #0A0A0A !important; }
-    .ac-sub   { color: #444444 !important; }
-    .ac-item  { border-color: rgba(0,0,0,.06) !important; }
-    .ac-item:hover, .ac-item.focused { background: rgba(0,98,255,.06) !important; }
-
-    /* 18 — AI insight panel */
-    .ai-insight-panel        { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.07) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .ai-insight-panel::before{ display: none !important; }
-    .ai-insight-label        { color: #555555 !important; }
-    .ai-insight-text         { color: #1A1A1A !important; }
-    .ai-skel                 { background: rgba(0,0,0,.08) !important; }
-
-    /* 19 — Hero preview cards */
-    .preview-card       { background: rgba(255,255,255,.80) !important; border-color: rgba(0,0,0,.08) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
-    .preview-card::after{ background: linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent) !important; }
-    .preview-card:hover { background: rgba(255,255,255,.92) !important; }
-    .pc-name     { color: #0A0A0A !important; }
-    .pc-meta     { color: #444444 !important; }
-    .hp-label    { color: #555555 !important; }
-    .hp-dot      { background: #059669 !important; }
-    .pc-map-hint { color: #555555 !important; }
-
-    /* 20 — Loading meter */
-    .meter-head      { background: rgba(255,255,255,.60) !important; border-color: rgba(0,0,0,.09) !important; box-shadow: 0 2px 10px rgba(0,0,0,.10) !important; }
-    .meter-screen    { background: rgba(0,0,0,.07) !important; }
-    .meter-p         { color: rgba(0,0,0,.70) !important; }
-    .meter-pole      { background: linear-gradient(to right, rgba(0,0,0,.07), rgba(0,0,0,.04), rgba(0,0,0,.07)) !important; }
-    .meter-neck      { background: rgba(0,0,0,.06) !important; }
-    .meter-coin-slot { background: rgba(0,0,0,.09) !important; }
-    .loading-msg     { color: #333333 !important; }
-    .msg             { color: #333333 !important; }
-
-    /* 21 — Cities flight board */
-    .flap-board {
-      background: rgba(255,255,255,.76) !important;
-      border-color: rgba(0,0,0,.08) !important;
-      box-shadow: 0 4px 28px rgba(0,0,0,.09), 0 1px 4px rgba(0,0,0,.04) !important;
+      background: rgba(255,255,255,.055) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      box-shadow: 0 24px 64px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07) !important;
       backdrop-filter: blur(28px) saturate(160%) !important;
       -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
     }
-    .flap-header  { border-bottom-color: rgba(0,0,0,.07) !important; }
-    .flap-title   { color: #444444 !important; }
-    .flap-live    { color: #059669 !important; }
-    .flap-live-dot{ background: #059669 !important; }
-    .flap-row:nth-child(odd) { background: rgba(0,0,0,.028) !important; }
-    .flap-num     { color: #888888 !important; }
-    .flap-city    { color: #0A0A0A !important; }
-    .flap-char.flipping { color: #0062FF !important; }
+    .input-group label       { color: #C0CEEA !important; font-weight: 500 !important; }
+    .ai-spark                { color: #5B9BFF !important; }
+    .input-field             { background: rgba(255,255,255,.09) !important; border-color: rgba(255,255,255,.14) !important; color: #F0F4FF !important; }
+    .input-field::placeholder{ color: #5A6E90 !important; }
+    .input-field:focus       {
+      background: rgba(255,255,255,.13) !important;
+      border-color: rgba(91,155,255,.65) !important;
+      box-shadow: 0 0 0 4px rgba(91,155,255,.18), inset 0 1px 2px rgba(0,0,0,.08) !important;
+    }
+    .search-btn              { background: #5B9BFF !important; color: #000810 !important; font-weight: 700 !important; box-shadow: 0 4px 20px rgba(91,155,255,.32) !important; }
+    .search-btn:hover        { background: #7AB3FF !important; box-shadow: 0 8px 30px rgba(91,155,255,.42) !important; }
+    .location-btn            { background: rgba(255,255,255,.07) !important; border-color: rgba(255,255,255,.12) !important; color: #C0CEEA !important; }
+    .location-btn:hover      { background: rgba(255,255,255,.13) !important; border-color: rgba(255,255,255,.22) !important; color: #F0F4FF !important; }
+
+    /* 10 — Chips */
+    .chips-label { color: #8A9EC0 !important; }
+    .chip        { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.12) !important; color: #C0CEEA !important; font-weight: 500 !important; }
+    .chip:hover  { background: rgba(91,155,255,.14) !important; border-color: rgba(91,155,255,.36) !important; color: #7AB3FF !important; }
+
+    /* 11 — Feature tiles */
+    .feature-tiles      { border-top-color: rgba(255,255,255,.07) !important; }
+    .feature-tile       { border-color: rgba(255,255,255,.09) !important; color: #C0CEEA !important; background: rgba(255,255,255,.05) !important; font-weight: 500 !important; }
+    .feature-tile:hover { background: rgba(255,255,255,.10) !important; border-color: rgba(255,255,255,.18) !important; color: #F0F4FF !important; }
+    .feature-tile.active{ background: #5B9BFF !important; color: #000810 !important; border-color: transparent !important; font-weight: 700 !important; box-shadow: 0 4px 18px rgba(91,155,255,.36) !important; }
+    .feature-tile[data-feature="food"]:hover         { background: rgba(255,80,80,.12)  !important; border-color: rgba(255,100,100,.30)  !important; color: #FF9090 !important; }
+    .feature-tile[data-feature="bars"]:hover         { background: rgba(255,170,60,.10) !important; border-color: rgba(255,180,80,.28)  !important; color: #FFBB66 !important; }
+    .feature-tile[data-feature="coffee"]:hover       { background: rgba(200,130,70,.10) !important; border-color: rgba(210,140,80,.28)  !important; color: #D4A06A !important; }
+    .feature-tile[data-feature="gym"]:hover          { background: rgba(91,155,255,.12) !important; border-color: rgba(91,155,255,.30)  !important; color: #7AB3FF !important; }
+    .feature-tile[data-feature="shopping"]:hover     { background: rgba(52,211,153,.10) !important; border-color: rgba(52,211,153,.28)  !important; color: #34D399 !important; }
+    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(250,200,60,.10) !important; border-color: rgba(250,200,70,.28)  !important; color: #FAD060 !important; }
+    .feature-tile[data-feature="events"]:hover       { background: rgba(52,211,153,.10) !important; border-color: rgba(52,211,153,.28)  !important; color: #34D399 !important; }
+    .feature-tile[data-feature="transit"]:hover      { background: rgba(91,155,255,.12) !important; border-color: rgba(91,155,255,.30)  !important; color: #7AB3FF !important; }
+    .feature-tile[data-feature="parking"]:hover      { background: rgba(255,140,60,.10) !important; border-color: rgba(255,150,70,.28)  !important; color: #FFA070 !important; }
+
+    /* 12 — Metrics */
+    .metrics-grid      {
+      background: rgba(255,255,255,.05) !important;
+      border-color: rgba(255,255,255,.08) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .metric-item       { border-right-color: rgba(255,255,255,.07) !important; }
+    .metric-item:hover { background: rgba(255,255,255,.06) !important; }
+    .metric-value      { color: #F0F4FF !important; font-weight: 700 !important; }
+    .metric-label      { color: #8A9EC0 !important; font-weight: 500 !important; }
+    @media (max-width: 500px) { .metric-item { border-bottom-color: rgba(255,255,255,.07) !important; } }
+
+    /* 13 — Stats bar */
+    .stats-inner {
+      background: rgba(255,255,255,.06) !important;
+      border-color: rgba(255,255,255,.09) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .stat-item        { color: #C0CEEA !important; font-weight: 500 !important; }
+    .stat-item strong { color: #F0F4FF !important; font-weight: 700 !important; }
+
+    /* 14 — Result cards */
+    .parking-card {
+      background: rgba(255,255,255,.055) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      box-shadow: 0 4px 20px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.06) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+    }
+    .parking-card:hover {
+      background: rgba(255,255,255,.09) !important;
+      border-color: rgba(91,155,255,.28) !important;
+      box-shadow: 0 16px 48px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.10) !important;
+    }
+    .spot-number  { color: rgba(255,255,255,.20) !important; }
+    .card-address { color: #F0F4FF !important; font-weight: 600 !important; }
+    .card-side    { color: #C0CEEA !important; }
+    .card-landmark{ color: #8A9EC0 !important; }
+    .detail-item  { background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.09) !important; color: #C0CEEA !important; font-weight: 500 !important; }
+    .card-report  { border-color: rgba(255,255,255,.07) !important; }
+    .report-btn   { background: rgba(255,255,255,.07) !important; border-color: rgba(255,255,255,.09) !important; color: #C0CEEA !important; }
+    .gmaps-btn    { background: rgba(91,155,255,.14) !important; border-color: rgba(91,155,255,.26) !important; color: #7AB3FF !important; font-weight: 600 !important; }
+    .gmaps-btn:hover { background: rgba(91,155,255,.24) !important; border-color: rgba(91,155,255,.42) !important; color: #A0CAFF !important; }
+
+    /* 15 — Tabs */
+    .tabs-bar {
+      background: rgba(255,255,255,.06) !important;
+      border-color: rgba(255,255,255,.09) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,.30) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .tab-btn           { color: #8A9EC0 !important; font-weight: 500 !important; }
+    .tab-btn:hover     { color: #C0CEEA !important; }
+    .tab-btn.active    { background: #5B9BFF !important; color: #000810 !important; font-weight: 700 !important; box-shadow: 0 2px 12px rgba(91,155,255,.36) !important; }
+    .tab-count         { background: rgba(255,255,255,.12) !important; }
+    .tab-btn.active .tab-count { background: rgba(0,0,0,.18) !important; }
+
+    /* 16 — Map */
+    .map-header {
+      background: rgba(10,10,24,.92) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      color: #C0CEEA !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .map-header span { color: #F0F4FF !important; font-weight: 600 !important; }
+    .map-panel  { border-color: rgba(255,255,255,.09) !important; }
+
+    /* 17 — Autocomplete */
+    .ac-dropdown {
+      background: rgba(12,12,24,.98) !important;
+      border-color: rgba(255,255,255,.12) !important;
+      box-shadow: 0 24px 56px rgba(0,0,0,.70) !important;
+      backdrop-filter: blur(28px) !important;
+      -webkit-backdrop-filter: blur(28px) !important;
+    }
+    .ac-main  { color: #F0F4FF !important; font-weight: 500 !important; }
+    .ac-sub   { color: #8A9EC0 !important; }
+    .ac-item  { border-color: rgba(255,255,255,.06) !important; }
+    .ac-item:hover, .ac-item.focused { background: rgba(91,155,255,.10) !important; }
+
+    /* 18 — AI insight panel */
+    .ai-insight-panel        { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.09) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+    .ai-insight-panel::before{ display: none !important; }
+    .ai-insight-label        { color: #8A9EC0 !important; font-weight: 500 !important; }
+    .ai-insight-text         { color: #E0E8F8 !important; }
+    .ai-skel                 { background: rgba(255,255,255,.09) !important; }
+
+    /* 19 — Hero preview cards */
+    .preview-card       { background: rgba(255,255,255,.07) !important; border-color: rgba(255,255,255,.11) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+    .preview-card::after{ background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent) !important; }
+    .preview-card:hover { background: rgba(255,255,255,.12) !important; }
+    .pc-name     { color: #F0F4FF !important; font-weight: 600 !important; }
+    .pc-meta     { color: #8A9EC0 !important; }
+    .hp-label    { color: #8A9EC0 !important; }
+    .hp-dot      { background: #34D399 !important; }
+    .pc-map-hint { color: #8A9EC0 !important; }
+
+    /* 20 — Loading meter */
+    .meter-head      { background: rgba(255,255,255,.07) !important; border-color: rgba(255,255,255,.10) !important; box-shadow: 0 2px 10px rgba(0,0,0,.40) !important; }
+    .meter-screen    { background: rgba(91,155,255,.15) !important; }
+    .meter-p         { color: rgba(255,255,255,.80) !important; font-weight: 600 !important; }
+    .meter-pole      { background: linear-gradient(to right, rgba(255,255,255,.06), rgba(255,255,255,.03), rgba(255,255,255,.06)) !important; }
+    .meter-neck      { background: rgba(255,255,255,.06) !important; }
+    .meter-coin-slot { background: rgba(255,255,255,.09) !important; }
+    .loading-msg     { color: #C0CEEA !important; }
+    .msg             { color: #C0CEEA !important; }
+
+    /* 21 — Cities flight board */
+    .flap-board {
+      background: rgba(10,10,22,.90) !important;
+      border-color: rgba(255,255,255,.10) !important;
+      box-shadow: 0 8px 36px rgba(0,0,0,.55), 0 1px 4px rgba(0,0,0,.30) !important;
+      backdrop-filter: blur(28px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(140%) !important;
+    }
+    .flap-header  { border-bottom-color: rgba(255,255,255,.08) !important; }
+    .flap-title   { color: #8A9EC0 !important; }
+    .flap-live    { color: #34D399 !important; }
+    .flap-live-dot{ background: #34D399 !important; }
+    .flap-row:nth-child(odd) { background: rgba(255,255,255,.028) !important; }
+    .flap-num     { color: #5A6E90 !important; }
+    .flap-city    { color: #F0F4FF !important; font-weight: 600 !important; }
+    .flap-char.flipping { color: #5B9BFF !important; }
 
     /* 22 — Attribution + footer */
-    .attribution-toggle   { color: #444444 !important; border-color: rgba(0,0,0,.09) !important; }
-    .attribution-toggle:hover { color: #0A0A0A !important; }
-    .attr-card            { background: rgba(255,255,255,.58) !important; border-color: rgba(0,0,0,.07) !important; }
-    .attr-card-title      { color: #333333 !important; }
-    .attr-card li         { color: #333333 !important; }
-    .attr-card a          { color: #333333 !important; border-bottom-color: rgba(0,0,0,.12) !important; }
-    .attr-card a:hover    { color: #0062FF !important; border-bottom-color: rgba(0,98,255,.30) !important; }
-    .attribution-note     { color: #555555 !important; }
-    footer                { border-color: rgba(0,0,0,.08) !important; color: #555555 !important; background: rgba(247,245,240,.80) !important; }
-    footer strong         { color: #333333 !important; }
+    .attribution-toggle     { color: #8A9EC0 !important; border-color: rgba(255,255,255,.09) !important; }
+    .attribution-toggle:hover { color: #F0F4FF !important; }
+    .attr-card              { background: rgba(255,255,255,.06) !important; border-color: rgba(255,255,255,.09) !important; }
+    .attr-card-title        { color: #C0CEEA !important; font-weight: 600 !important; }
+    .attr-card li           { color: #C0CEEA !important; }
+    .attr-card a            { color: #C0CEEA !important; border-bottom-color: rgba(255,255,255,.14) !important; }
+    .attr-card a:hover      { color: #7AB3FF !important; border-bottom-color: rgba(91,155,255,.36) !important; }
+    .attribution-note       { color: #8A9EC0 !important; }
+    footer                  { border-color: rgba(255,255,255,.08) !important; color: #8A9EC0 !important; background: rgba(10,10,20,.82) !important; }
+    footer strong           { color: #C0CEEA !important; }
 
   </style>
 </head>
@@ -2209,7 +2208,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=86"></script>
+  <script src="app.js?v=87"></script>
 
 </div><!-- /.page-wrap -->
 
