@@ -1592,14 +1592,22 @@
        Accent: #0062FF  |  Text: #0A0A0A  |  No purple
     ═══════════════════════════════════════════════════════════════ */
 
-    /* 1 — Slideshow + overlay tuned for bright UI */
-    /* .bg-slide filter is set in base CSS (saturate .55 / brightness 1.08) */
-    .bg-overlay { background: rgba(255,255,255,.80) !important; }
-    .bg-dots    { background-image: radial-gradient(circle, rgba(0,0,0,.028) 1px, transparent 1px) !important; }
-    body        { background: #FFFFFF; }
+    /* 1 — Overlay: pull back so photos breathe through (was .80) */
+    .bg-overlay { background: rgba(255,255,255,.68) !important; }
+    .bg-dots    { background-image: radial-gradient(circle, rgba(0,0,0,.022) 1px, transparent 1px) !important; }
+    /* Warm off-white base — not stark white, not grey */
+    body        { background: #F7F5F0; }
 
-    /* 2 — Nav */
-    .site-nav   { background: rgba(255,255,255,.92) !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; box-shadow: 0 1px 16px rgba(0,0,0,.06) !important; }
+    /* Shared frosted-glass helper — applied to all panels below */
+
+    /* 2 — Nav: frosted glass */
+    .site-nav   {
+      background: rgba(247,245,240,.82) !important;
+      border-bottom: 1px solid rgba(0,0,0,.07) !important;
+      box-shadow: 0 1px 20px rgba(0,0,0,.07) !important;
+      backdrop-filter: blur(24px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    }
     .nav-icon   { background: #0A0A0A !important; border-color: transparent !important; }
     .nav-wordmark { color: #0A0A0A !important; }
     .nav-tag    { color: #444444 !important; }
@@ -1611,131 +1619,170 @@
     .logo-name { color: #0A0A0A !important; }
     .logo-sub  { color: #555555 !important; }
 
-    /* 4 — Eyebrow pill: electric blue tint */
-    .hero-eyebrow  { background: rgba(0,98,255,.06) !important; border-color: rgba(0,98,255,.18) !important; color: #0062FF !important; }
+    /* 4 — Eyebrow pill */
+    .hero-eyebrow  { background: rgba(255,255,255,.55) !important; border-color: rgba(0,98,255,.22) !important; color: #0062FF !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; }
     .eyebrow-pulse { background: #0062FF !important; }
 
-    /* 5 — Headline: solid black — no gradient, pure typographic weight */
-    .hero-headline .accent-word {
-      background: none !important;
-      -webkit-text-fill-color: #0A0A0A !important;
-      color: #0A0A0A !important;
-    }
+    /* 5 — Headline */
+    .hero-headline .accent-word { background: none !important; -webkit-text-fill-color: #0A0A0A !important; color: #0A0A0A !important; }
 
-    /* 6 — Sub-text + proof row — full black readability */
+    /* 6 — Sub-text + proof row */
     .hero-sub  { color: #222222 !important; }
-    .hw-item   { background: rgba(0,0,0,.04) !important; border-color: rgba(0,0,0,.09) !important; color: #1A1A1A !important; }
+    .hw-item   { background: rgba(255,255,255,.55) !important; border-color: rgba(0,0,0,.08) !important; color: #1A1A1A !important; backdrop-filter: blur(8px) !important; -webkit-backdrop-filter: blur(8px) !important; }
     .hw-check  { color: #059669 !important; }
-    .hw-sep    { color: rgba(0,0,0,.18) !important; }
+    .hw-sep    { color: rgba(0,0,0,.20) !important; }
 
-    /* 7 — Smoke particles */
+    /* 7 — Smoke */
     .sp { background: radial-gradient(circle, rgba(0,98,255,.18) 0%, rgba(0,98,255,0) 70%) !important; }
 
-    /* 8 — Weather pill */
-    .weather-pill { background: rgba(255,255,255,.95) !important; border-color: rgba(0,0,0,.09) !important; box-shadow: 0 2px 12px rgba(0,0,0,.07) !important; }
+    /* 8 — Weather pill: frosted */
+    .weather-pill {
+      background: rgba(255,255,255,.72) !important;
+      border-color: rgba(0,0,0,.09) !important;
+      box-shadow: 0 2px 14px rgba(0,0,0,.08) !important;
+      backdrop-filter: blur(16px) saturate(140%) !important;
+      -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+    }
     .w-temp { color: #0A0A0A !important; }
     .w-desc { color: #222222 !important; }
     .w-city { color: #444444 !important; border-left-color: rgba(0,0,0,.09) !important; }
 
-    /* 9 — Search card */
+    /* 9 — Search card: frosted glass */
     .glass-panel {
-      background: rgba(255,255,255,.96) !important;
-      border-color: rgba(0,0,0,.08) !important;
-      box-shadow: 0 4px 28px rgba(0,0,0,.09), 0 1px 4px rgba(0,0,0,.05), inset 0 1px 0 #fff !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
+      background: rgba(255,255,255,.82) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      box-shadow: 0 8px 36px rgba(0,0,0,.10), 0 1px 4px rgba(0,0,0,.05), inset 0 1px 0 rgba(255,255,255,.90) !important;
+      backdrop-filter: blur(28px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
     }
     .input-group label  { color: #333333 !important; }
     .ai-spark           { color: #0062FF !important; }
-    .input-field        { background: #F5F5F5 !important; border-color: rgba(0,0,0,.10) !important; color: #0A0A0A !important; }
+    .input-field        { background: rgba(255,255,255,.78) !important; border-color: rgba(0,0,0,.10) !important; color: #0A0A0A !important; }
     .input-field::placeholder { color: #888888 !important; }
     .input-field:focus  {
-      background: #fff !important;
+      background: rgba(255,255,255,.96) !important;
       border-color: rgba(0,98,255,.50) !important;
       box-shadow: 0 0 0 4px rgba(0,98,255,.10), inset 0 1px 2px rgba(0,0,0,.03) !important;
     }
     .search-btn         { background: #0062FF !important; color: #fff !important; box-shadow: 0 4px 16px rgba(0,98,255,.28) !important; }
     .search-btn:hover   { background: #0050D4 !important; box-shadow: 0 8px 28px rgba(0,98,255,.38) !important; }
-    .location-btn       { background: rgba(0,0,0,.04) !important; border-color: rgba(0,0,0,.09) !important; color: #222222 !important; }
-    .location-btn:hover { background: rgba(0,0,0,.07) !important; border-color: rgba(0,0,0,.15) !important; color: #0A0A0A !important; }
+    .location-btn       { background: rgba(255,255,255,.50) !important; border-color: rgba(0,0,0,.09) !important; color: #222222 !important; }
+    .location-btn:hover { background: rgba(255,255,255,.75) !important; border-color: rgba(0,0,0,.14) !important; color: #0A0A0A !important; }
 
     /* 10 — Chips */
     .chips-label { color: #444444 !important; }
-    .chip        { border-color: rgba(0,0,0,.12) !important; color: #333333 !important; }
-    .chip:hover  { background: rgba(0,98,255,.07) !important; border-color: rgba(0,98,255,.28) !important; color: #0062FF !important; }
+    .chip        { background: rgba(255,255,255,.45) !important; border-color: rgba(0,0,0,.10) !important; color: #333333 !important; }
+    .chip:hover  { background: rgba(0,98,255,.09) !important; border-color: rgba(0,98,255,.28) !important; color: #0062FF !important; }
 
-    /* 11 — Feature tiles: black base, enterprise-semantic hover colors */
+    /* 11 — Feature tiles */
     .feature-tiles { border-top-color: rgba(0,0,0,.07) !important; }
-    .feature-tile       { border-color: rgba(0,0,0,.09) !important; color: #444444 !important; background: transparent !important; }
-    .feature-tile:hover { background: rgba(0,0,0,.03) !important; border-color: rgba(0,0,0,.15) !important; color: #0A0A0A !important; }
+    .feature-tile       { border-color: rgba(0,0,0,.09) !important; color: #444444 !important; background: rgba(255,255,255,.38) !important; }
+    .feature-tile:hover { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.14) !important; color: #0A0A0A !important; }
     .feature-tile.active{ background: #0A0A0A !important; color: #fff !important; border-color: transparent !important; box-shadow: 0 2px 14px rgba(0,0,0,.22) !important; }
-    /* Semantic hover colors — no purple anywhere */
-    .feature-tile[data-feature="food"]:hover         { background: rgba(220,38,38,.07)   !important; border-color: rgba(220,38,38,.22)   !important; color: #B91C1C !important; }
-    .feature-tile[data-feature="bars"]:hover         { background: rgba(180,83,9,.07)    !important; border-color: rgba(180,83,9,.22)    !important; color: #92400E !important; }
-    .feature-tile[data-feature="coffee"]:hover       { background: rgba(120,72,24,.07)   !important; border-color: rgba(120,72,24,.22)   !important; color: #78350F !important; }
-    .feature-tile[data-feature="gym"]:hover          { background: rgba(0,98,255,.07)    !important; border-color: rgba(0,98,255,.22)    !important; color: #0050D4 !important; }
-    .feature-tile[data-feature="shopping"]:hover     { background: rgba(13,148,136,.07)  !important; border-color: rgba(13,148,136,.22)  !important; color: #0F766E !important; }
-    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(202,138,4,.07)   !important; border-color: rgba(202,138,4,.22)   !important; color: #A16207 !important; }
-    .feature-tile[data-feature="events"]:hover       { background: rgba(5,150,105,.07)   !important; border-color: rgba(5,150,105,.22)   !important; color: #047857 !important; }
-    .feature-tile[data-feature="transit"]:hover      { background: rgba(0,98,255,.07)    !important; border-color: rgba(0,98,255,.22)    !important; color: #0062FF !important; }
-    .feature-tile[data-feature="parking"]:hover      { background: rgba(234,88,12,.07)   !important; border-color: rgba(234,88,12,.22)   !important; color: #C2410C !important; }
+    .feature-tile[data-feature="food"]:hover         { background: rgba(255,255,255,.70) !important; border-color: rgba(220,38,38,.28)   !important; color: #B91C1C !important; }
+    .feature-tile[data-feature="bars"]:hover         { background: rgba(255,255,255,.70) !important; border-color: rgba(180,83,9,.28)    !important; color: #92400E !important; }
+    .feature-tile[data-feature="coffee"]:hover       { background: rgba(255,255,255,.70) !important; border-color: rgba(120,72,24,.28)   !important; color: #78350F !important; }
+    .feature-tile[data-feature="gym"]:hover          { background: rgba(255,255,255,.70) !important; border-color: rgba(0,98,255,.28)    !important; color: #0050D4 !important; }
+    .feature-tile[data-feature="shopping"]:hover     { background: rgba(255,255,255,.70) !important; border-color: rgba(13,148,136,.28)  !important; color: #0F766E !important; }
+    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(255,255,255,.70) !important; border-color: rgba(202,138,4,.28)   !important; color: #A16207 !important; }
+    .feature-tile[data-feature="events"]:hover       { background: rgba(255,255,255,.70) !important; border-color: rgba(5,150,105,.28)   !important; color: #047857 !important; }
+    .feature-tile[data-feature="transit"]:hover      { background: rgba(255,255,255,.70) !important; border-color: rgba(0,98,255,.28)    !important; color: #0062FF !important; }
+    .feature-tile[data-feature="parking"]:hover      { background: rgba(255,255,255,.70) !important; border-color: rgba(234,88,12,.28)   !important; color: #C2410C !important; }
 
     /* 12 — Metrics */
-    .metrics-grid      { background: rgba(0,0,0,.02) !important; border-color: rgba(0,0,0,.08) !important; }
+    .metrics-grid      {
+      background: rgba(255,255,255,.60) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
     .metric-item       { border-right-color: rgba(0,0,0,.06) !important; }
-    .metric-item:hover { background: rgba(0,98,255,.03) !important; }
+    .metric-item:hover { background: rgba(255,255,255,.30) !important; }
     .metric-value      { color: #0A0A0A !important; }
     .metric-label      { color: #333333 !important; }
     @media (max-width: 500px) { .metric-item { border-bottom-color: rgba(0,0,0,.06) !important; } }
 
     /* 13 — Stats bar */
-    .stats-inner { background: rgba(255,255,255,.92) !important; border-color: rgba(0,0,0,.08) !important; }
-    .stat-item   { color: #333333 !important; }
+    .stats-inner {
+      background: rgba(255,255,255,.76) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
+    .stat-item        { color: #333333 !important; }
     .stat-item strong { color: #0A0A0A !important; }
 
-    /* 14 — Result cards */
-    .parking-card       { background: #fff !important; border-color: rgba(0,0,0,.08) !important; box-shadow: 0 2px 10px rgba(0,0,0,.06), inset 0 1px 0 #fff !important; }
-    .parking-card:hover { background: #fff !important; border-color: rgba(0,98,255,.22) !important; box-shadow: 0 8px 28px rgba(0,0,0,.09), inset 0 1px 0 #fff !important; }
+    /* 14 — Result cards: frosted glass */
+    .parking-card {
+      background: rgba(255,255,255,.84) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      box-shadow: 0 2px 14px rgba(0,0,0,.07), inset 0 1px 0 rgba(255,255,255,.90) !important;
+      backdrop-filter: blur(20px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+    }
+    .parking-card:hover {
+      background: rgba(255,255,255,.94) !important;
+      border-color: rgba(0,98,255,.20) !important;
+      box-shadow: 0 10px 32px rgba(0,0,0,.10), inset 0 1px 0 rgba(255,255,255,.95) !important;
+    }
     .spot-number  { color: rgba(0,0,0,.22) !important; }
     .card-address { color: #0A0A0A !important; }
     .card-side    { color: #333333 !important; }
     .card-landmark{ color: #444444 !important; }
-    .detail-item  { background: #F5F5F5 !important; border-color: rgba(0,0,0,.08) !important; color: #333333 !important; }
-    .card-report  { border-color: rgba(0,0,0,.08) !important; }
-    .report-btn   { background: #F5F5F5 !important; border-color: rgba(0,0,0,.08) !important; color: #333333 !important; }
-    .gmaps-btn    { background: #F5F5F5 !important; border-color: rgba(0,0,0,.10) !important; color: #0A0A0A !important; }
-    .gmaps-btn:hover { background: rgba(0,98,255,.07) !important; border-color: rgba(0,98,255,.22) !important; color: #0062FF !important; }
+    .detail-item  { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.07) !important; color: #333333 !important; }
+    .card-report  { border-color: rgba(0,0,0,.07) !important; }
+    .report-btn   { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.07) !important; color: #333333 !important; }
+    .gmaps-btn    { background: rgba(255,255,255,.62) !important; border-color: rgba(0,0,0,.09) !important; color: #0A0A0A !important; }
+    .gmaps-btn:hover { background: rgba(0,98,255,.08) !important; border-color: rgba(0,98,255,.22) !important; color: #0062FF !important; }
 
     /* 15 — Tabs */
-    .tabs-bar      { background: rgba(255,255,255,.92) !important; border-color: rgba(0,0,0,.08) !important; box-shadow: 0 2px 8px rgba(0,0,0,.04) !important; }
+    .tabs-bar {
+      background: rgba(255,255,255,.76) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,.05) !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
     .tab-btn       { color: #444444 !important; }
     .tab-btn.active{ background: #0A0A0A !important; color: #fff !important; box-shadow: 0 2px 12px rgba(0,0,0,.22) !important; }
     .tab-count     { background: rgba(0,0,0,.07) !important; }
     .tab-btn.active .tab-count { background: rgba(255,255,255,.20) !important; }
 
     /* 16 — Map */
-    .map-header { background: rgba(255,255,255,.94) !important; border-color: rgba(0,0,0,.07) !important; color: #333333 !important; }
+    .map-header {
+      background: rgba(247,245,240,.88) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      color: #333333 !important;
+      backdrop-filter: blur(16px) !important;
+      -webkit-backdrop-filter: blur(16px) !important;
+    }
     .map-header span { color: #0A0A0A !important; }
     .map-panel  { border-color: rgba(0,0,0,.08) !important; }
 
     /* 17 — Autocomplete */
-    .ac-dropdown  { background: rgba(255,255,255,.99) !important; border-color: rgba(0,0,0,.09) !important; box-shadow: 0 16px 48px rgba(0,0,0,.11) !important; }
-    .ac-main      { color: #0A0A0A !important; }
-    .ac-sub       { color: #444444 !important; }
-    .ac-item      { border-color: rgba(0,0,0,.06) !important; }
-    .ac-item:hover, .ac-item.focused { background: rgba(0,98,255,.05) !important; }
+    .ac-dropdown  {
+      background: rgba(247,245,240,.97) !important;
+      border-color: rgba(0,0,0,.09) !important;
+      box-shadow: 0 16px 48px rgba(0,0,0,.12) !important;
+      backdrop-filter: blur(28px) !important;
+      -webkit-backdrop-filter: blur(28px) !important;
+    }
+    .ac-main  { color: #0A0A0A !important; }
+    .ac-sub   { color: #444444 !important; }
+    .ac-item  { border-color: rgba(0,0,0,.06) !important; }
+    .ac-item:hover, .ac-item.focused { background: rgba(0,98,255,.06) !important; }
 
     /* 18 — AI insight panel */
-    .ai-insight-panel        { background: rgba(0,0,0,.03) !important; border-color: rgba(0,0,0,.08) !important; }
+    .ai-insight-panel        { background: rgba(255,255,255,.65) !important; border-color: rgba(0,0,0,.07) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
     .ai-insight-panel::before{ display: none !important; }
     .ai-insight-label        { color: #555555 !important; }
     .ai-insight-text         { color: #1A1A1A !important; }
     .ai-skel                 { background: rgba(0,0,0,.08) !important; }
 
     /* 19 — Hero preview cards */
-    .preview-card       { background: rgba(255,255,255,.92) !important; border-color: rgba(0,0,0,.09) !important; }
-    .preview-card::after{ background: linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent) !important; }
-    .preview-card:hover { background: rgba(255,255,255,1) !important; }
+    .preview-card       { background: rgba(255,255,255,.80) !important; border-color: rgba(0,0,0,.08) !important; backdrop-filter: blur(16px) !important; -webkit-backdrop-filter: blur(16px) !important; }
+    .preview-card::after{ background: linear-gradient(90deg, transparent, rgba(255,255,255,.40), transparent) !important; }
+    .preview-card:hover { background: rgba(255,255,255,.92) !important; }
     .pc-name     { color: #0A0A0A !important; }
     .pc-meta     { color: #444444 !important; }
     .hp-label    { color: #555555 !important; }
@@ -1743,7 +1790,7 @@
     .pc-map-hint { color: #555555 !important; }
 
     /* 20 — Loading meter */
-    .meter-head      { background: rgba(0,0,0,.04) !important; border-color: rgba(0,0,0,.09) !important; box-shadow: 0 2px 10px rgba(0,0,0,.10) !important; }
+    .meter-head      { background: rgba(255,255,255,.60) !important; border-color: rgba(0,0,0,.09) !important; box-shadow: 0 2px 10px rgba(0,0,0,.10) !important; }
     .meter-screen    { background: rgba(0,0,0,.07) !important; }
     .meter-p         { color: rgba(0,0,0,.70) !important; }
     .meter-pole      { background: linear-gradient(to right, rgba(0,0,0,.07), rgba(0,0,0,.04), rgba(0,0,0,.07)) !important; }
@@ -1754,32 +1801,31 @@
 
     /* 21 — Cities flight board */
     .flap-board {
-      background: rgba(255,255,255,.88) !important;
+      background: rgba(255,255,255,.76) !important;
       border-color: rgba(0,0,0,.08) !important;
       box-shadow: 0 4px 28px rgba(0,0,0,.09), 0 1px 4px rgba(0,0,0,.04) !important;
-      backdrop-filter: blur(24px) saturate(140%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(140%) !important;
+      backdrop-filter: blur(28px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(160%) !important;
     }
     .flap-header  { border-bottom-color: rgba(0,0,0,.07) !important; }
     .flap-title   { color: #444444 !important; }
     .flap-live    { color: #059669 !important; }
     .flap-live-dot{ background: #059669 !important; }
-    .flap-row:nth-child(odd) { background: rgba(0,0,0,.030) !important; }
+    .flap-row:nth-child(odd) { background: rgba(0,0,0,.028) !important; }
     .flap-num     { color: #888888 !important; }
     .flap-city    { color: #0A0A0A !important; }
-    /* Flipping character: electric blue accent */
     .flap-char.flipping { color: #0062FF !important; }
 
     /* 22 — Attribution + footer */
     .attribution-toggle   { color: #444444 !important; border-color: rgba(0,0,0,.09) !important; }
     .attribution-toggle:hover { color: #0A0A0A !important; }
-    .attr-card            { background: rgba(0,0,0,.02) !important; border-color: rgba(0,0,0,.08) !important; }
+    .attr-card            { background: rgba(255,255,255,.58) !important; border-color: rgba(0,0,0,.07) !important; }
     .attr-card-title      { color: #333333 !important; }
     .attr-card li         { color: #333333 !important; }
     .attr-card a          { color: #333333 !important; border-bottom-color: rgba(0,0,0,.12) !important; }
     .attr-card a:hover    { color: #0062FF !important; border-bottom-color: rgba(0,98,255,.30) !important; }
     .attribution-note     { color: #555555 !important; }
-    footer                { border-color: rgba(0,0,0,.08) !important; color: #555555 !important; }
+    footer                { border-color: rgba(0,0,0,.08) !important; color: #555555 !important; background: rgba(247,245,240,.80) !important; }
     footer strong         { color: #333333 !important; }
 
   </style>
@@ -2163,7 +2209,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=85"></script>
+  <script src="app.js?v=86"></script>
 
 </div><!-- /.page-wrap -->
 
