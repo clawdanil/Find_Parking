@@ -288,6 +288,8 @@
       transition: background .2s, transform .2s;
       animation: fadeUp .55s ease both;
       animation-delay: var(--d, 0s);
+      cursor: pointer;
+      text-decoration: none;
     }
     /* shimmer sweep on each card */
     .preview-card::after {
@@ -300,6 +302,14 @@
       pointer-events: none;
     }
     .preview-card:hover { background: rgba(255,255,255,.11); transform: translateX(-3px); }
+    .preview-card:hover .pc-map-hint { opacity: 1; }
+    .pc-map-hint {
+      position: absolute; top: 7px; right: 9px;
+      font-size: .55rem; font-weight: 700; letter-spacing: .5px;
+      color: rgba(235,240,255,.38);
+      opacity: 0; transition: opacity .2s;
+      pointer-events: none; z-index: 2;
+    }
     .preview-card.refreshing { animation: cardSlideIn .4s ease both; }
     .pc-icon {
       width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
@@ -1636,6 +1646,7 @@
       <div class="hp-label"><span class="hp-dot"></span>Live near you</div>
 
       <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
+        <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🍺</div>
         <div class="pc-body">
           <div class="pc-name">The Rooftop Bar</div>
@@ -1645,6 +1656,7 @@
       </div>
 
       <div class="preview-card" style="--d:.58s;--pc-accent:#4ADE80;--pc-bg:rgba(74,222,128,.10)">
+        <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🅿️</div>
         <div class="pc-body">
           <div class="pc-name">Central Parking</div>
@@ -1654,6 +1666,7 @@
       </div>
 
       <div class="preview-card" style="--d:.71s;--pc-accent:#C084FC;--pc-bg:rgba(192,132,252,.10)">
+        <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🎶</div>
         <div class="pc-body">
           <div class="pc-name">Jazz Night · Blue Note</div>
@@ -1663,6 +1676,7 @@
       </div>
 
       <div class="preview-card" style="--d:.84s;--pc-accent:#67E8F9;--pc-bg:rgba(103,232,249,.09)">
+        <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">☕</div>
         <div class="pc-body">
           <div class="pc-name">Blue Bottle Coffee</div>
@@ -1672,6 +1686,7 @@
       </div>
 
       <div class="preview-card" style="--d:.97s;--pc-accent:#FB7185;--pc-bg:rgba(251,113,133,.10)">
+        <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🍽️</div>
         <div class="pc-body">
           <div class="pc-name">O'Hara's Bar &amp; Grill</div>
@@ -1922,7 +1937,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=76"></script>
+  <script src="app.js?v=77"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -2049,6 +2064,14 @@
       const cards = document.querySelectorAll('.preview-card');
       if (!cards.length) return;
       let venueIdx = VENUES.length; // start after initial 5
+
+      // Open Google Maps for whichever venue name is currently shown
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          const name = card.querySelector('.pc-name').textContent;
+          window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name), '_blank', 'noopener');
+        });
+      });
 
       function refreshCard(card, venue) {
         card.style.setProperty('--pc-accent', venue.accent);
