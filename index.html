@@ -83,17 +83,21 @@
       /* mute the photos so they blend with the white-wash overlay */
       filter: saturate(0.55) brightness(1.08) contrast(0.90);
       animation: bgSlide 36s infinite ease-in-out;
+      animation-fill-mode: backwards;
       will-change: opacity;
     }
 
-    /* Crossfade keyframes — 6 slides × 6s each = 36s cycle
-       Each slide: 1s fade-in · 4s hold · 1s fade-out · 30s invisible */
+    /* Crossfade keyframes — 6 slides × 6s stagger = 36s cycle
+       Guarantee: next slide reaches opacity:1 BEFORE current starts fading out.
+       Slide n+1 is fully opaque at delay+1s = 7s.
+       Slide n holds until 7s, then fades out over 1s (7s→8s).
+       → At least one slide is always at opacity:1. No white gap. */
     @keyframes bgSlide {
       0%      { opacity: 0; }
-      2.78%   { opacity: 1; }   /* fade in complete  (1s / 36s) */
-      13.89%  { opacity: 1; }   /* hold ends         (5s / 36s) */
-      16.67%  { opacity: 0; }   /* fade out complete (6s / 36s) */
-      100%    { opacity: 0; }   /* invisible until next cycle   */
+      2.78%   { opacity: 1; }   /* 1s  — fade-in done                        */
+      19.44%  { opacity: 1; }   /* 7s  — hold; next slide already fully opaque */
+      22.22%  { opacity: 0; }   /* 8s  — fade-out done, safely covered        */
+      100%    { opacity: 0; }   /* invisible for remaining 28s                */
     }
 
     /* Staggered delays — each slide starts 6s after the previous */
@@ -2159,7 +2163,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=84"></script>
+  <script src="app.js?v=85"></script>
 
 </div><!-- /.page-wrap -->
 
