@@ -335,8 +335,8 @@
     .pc-open { background: rgba(22,163,74,.20); color: #4ADE80;
                animation: badgePulse 2.8s ease-in-out infinite; }
     .pc-busy { background: rgba(234,179,8,.18); color: #FCD34D; }
-    /* Hide on small screens — hero text needs full width */
-    @media (max-width: 1060px) { .hero-preview { display: none; } }
+    /* Hide on touch/mobile devices and small screens */
+    @media (max-width: 1060px), (hover: none) { .hero-preview { display: none !important; } }
 
     /* ── Hero eyebrow ──────────────────────────────────────────────────── */
     .hero-eyebrow {
@@ -1937,7 +1937,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=78"></script>
+  <script src="app.js?v=79"></script>
 
 </div><!-- /.page-wrap -->
 
