@@ -1744,7 +1744,25 @@
     .loading-msg { color: #6B7280 !important; }
     .msg         { color: #6B7280 !important; }
 
-    /* 22 — Attribution + footer */
+    /* 22 — Cities flight board: frosted glass to match search card */
+    .flap-board {
+      background: rgba(255,255,255,.82) !important;
+      border-color: rgba(0,0,0,.07) !important;
+      box-shadow: 0 4px 28px rgba(0,0,0,.08), 0 1px 4px rgba(0,0,0,.04) !important;
+      backdrop-filter: blur(24px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    }
+    .flap-header     { border-bottom-color: rgba(0,0,0,.06) !important; }
+    .flap-title      { color: rgba(0,0,0,.32) !important; }
+    .flap-live       { color: #10B981 !important; }
+    .flap-live-dot   { background: #10B981 !important; }
+    .flap-row:nth-child(odd) { background: rgba(0,0,0,.028) !important; }
+    .flap-num        { color: rgba(0,0,0,.22) !important; }
+    .flap-city       { color: rgba(0,0,0,.82) !important; letter-spacing: 1.2px; }
+    /* Flipping character: indigo accent instead of yellow */
+    .flap-char.flipping { color: #5B4CF6 !important; }
+
+    /* 24 — Attribution + footer */
     .attribution-toggle    { color: rgba(0,0,0,.35) !important; border-color: rgba(0,0,0,.08) !important; }
     .attribution-toggle:hover { color: rgba(0,0,0,.60) !important; }
     .attr-card             { background: rgba(0,0,0,.02) !important; border-color: rgba(0,0,0,.07) !important; }
@@ -2140,7 +2158,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=81"></script>
+  <script src="app.js?v=82"></script>
 
 </div><!-- /.page-wrap -->
 
