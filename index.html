@@ -1557,15 +1557,26 @@
        BRIGHT REDESIGN — clean, minimal, fun
     ═══════════════════════════════════════════════════════════════ */
 
-    /* 1 — Kill the dark photo collage */
-    .bg-scene { display: none !important; }
+    /* 1 — Restore photo collage with a light wash overlay */
+    /* bg-scene stays visible — overlay tint changed below */
 
-    /* 2 — Page background: pure white with a soft lavender-violet glow at top */
+    /* 2 — Page background: clean white (collage provides depth) */
     body {
-      background:
-        radial-gradient(ellipse 110% 48% at 12% -4%, rgba(99,102,241,.13) 0%, transparent 58%),
-        radial-gradient(ellipse  80% 40% at 88% -4%, rgba(139,92,246,.09) 0%, transparent 52%),
-        #FFFFFF;
+      background: #FFFFFF;
+    }
+
+    /* 2a — Photo collage: desaturate + mute so images feel like a watermark */
+    .bc-cell {
+      filter: saturate(0.40) brightness(1.10) contrast(0.90) !important;
+    }
+    /* White wash overlay — replaces the dark overlay.
+       80% white lets 20% of the muted photos show through: subtle but alive */
+    .bg-overlay {
+      background: rgba(255,255,255,.80) !important;
+    }
+    /* Dot grid: invert to subtle dark dots on the light surface */
+    .bg-dots {
+      background-image: radial-gradient(circle, rgba(0,0,0,.032) 1px, transparent 1px) !important;
     }
 
     /* 3 — Nav: crisp white */
@@ -2129,7 +2140,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=80"></script>
+  <script src="app.js?v=81"></script>
 
 </div><!-- /.page-wrap -->
 
