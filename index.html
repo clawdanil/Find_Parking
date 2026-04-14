@@ -1690,7 +1690,7 @@
       <div class="search-row">
         <div class="input-group ac-wrap">
           <label for="street-input" class="ai-label"><span class="ai-spark">✦</span> Ask Orbi</label>
-          <input id="street-input" class="input-field" type="text" placeholder="Rooftop bars open near me right now..." autocomplete="off" />
+          <input id="street-input" class="input-field" type="text" placeholder="Enter a city or address…" autocomplete="off" />
           <div class="ac-dropdown" id="ac-dropdown" hidden></div>
         </div>
         <button id="search-btn" class="search-btn">Search →</button>
@@ -1922,7 +1922,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=75"></script>
+  <script src="app.js?v=76"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -2071,28 +2071,6 @@
       }, 3800);
     })();
 
-    // ── Rotating search placeholder ──────────────────────────────────────
-    (function() {
-      const hints = [
-        'Rooftop bars open near me right now…',
-        'Cheapest parking downtown tonight…',
-        'Coffee shops open after 9pm near me…',
-        'Live music venues nearby this weekend…',
-        'Happy hour spots within walking distance…',
-        'Parking under $12 near the stadium…',
-        'Brunch spots open right now near me…',
-        'Gyms open late near downtown…',
-      ];
-      let i = 0;
-      const el = document.getElementById('street-input');
-      if (!el) return;
-      function rotatePlaceholder() {
-        i = (i + 1) % hints.length;
-        el.setAttribute('placeholder', hints[i]);
-      }
-      // Only rotate when input is not focused
-      setInterval(() => { if (document.activeElement !== el) rotatePlaceholder(); }, 3200);
-    })();
 
     // Service Worker
     if ('serviceWorker' in navigator) {
