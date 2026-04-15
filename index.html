@@ -161,12 +161,12 @@
       position: absolute; left: 50%; transform: translateX(-50%);
     }
     .nav-icon {
-      width: 30px; height: 30px; border-radius: 50%;
+      width: 34px; height: 34px; border-radius: 50%;
       background: #09090F; border: 1px solid rgba(255,255,255,.18);
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 10px rgba(0,0,0,.55); flex-shrink: 0;
     }
-    .nav-icon svg { width: 18px; height: 18px; display: block; }
+    .nav-icon svg { width: 20px; height: 20px; display: block; }
     @keyframes dangle {
       0%   { transform: rotate(0deg);    }
       15%  { transform: rotate(4deg);    }
@@ -186,6 +186,29 @@
       animation: dangle 4.2s cubic-bezier(.4,0,.2,1) infinite;
       animation-delay: 1s;
     }
+    /* ── OrbiNear O·N letter highlight ──────────────────────────── */
+    @keyframes onGlow {
+      0%, 100% {
+        color: #7AB3FF;
+        -webkit-text-fill-color: #7AB3FF;
+        text-shadow: 0 0 18px rgba(120,180,255,.65), 0 0 36px rgba(120,180,255,.30);
+        transform: scale(1);
+      }
+      50% {
+        color: #B8D8FF;
+        -webkit-text-fill-color: #B8D8FF;
+        text-shadow: 0 0 28px rgba(160,210,255,.90), 0 0 56px rgba(120,180,255,.50);
+        transform: scale(1.10);
+      }
+    }
+    .on-letter {
+      display: inline-block;
+      color: #7AB3FF;
+      -webkit-text-fill-color: #7AB3FF;
+      animation: onGlow 2.6s ease-in-out infinite;
+    }
+    .on-n { animation-delay: 1.3s; } /* offset so O and N pulse alternately */
+
     .nav-spacer { flex: 1; }
     .nav-tag {
       font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
@@ -195,8 +218,10 @@
     @media (min-width: 540px) { .nav-tag { display: block; } }
     /* Mobile: stack icon above wordmark so it never crowds the CTA */
     @media (max-width: 539px) {
-      .nav-brand { flex-direction: column; gap: 1px; }
-      .nav-wordmark { font-size: .62rem; letter-spacing: .5px; font-weight: 700; }
+      .nav-brand { flex-direction: column; align-items: center; gap: 2px; }
+      .nav-icon  { width: 42px; height: 42px; }
+      .nav-icon svg { width: 26px; height: 26px; }
+      .nav-wordmark { font-size: .78rem; letter-spacing: .5px; font-weight: 700; }
     }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 4px;
@@ -1684,6 +1709,8 @@
     /* 4 — HEADLINE */
     .hero-headline            { color: #ffffff !important; }
     .hero-headline .accent-word { background: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; }
+    /* O/N letters inside accent-word must keep their own glow color */
+    .hero-headline .accent-word .on-letter { -webkit-text-fill-color: #7AB3FF !important; color: #7AB3FF !important; }
 
     /* 5 — HERO SUB + PROOF ROW */
     .hero-sub { color: rgba(255,255,255,.78) !important; }
@@ -2074,8 +2101,8 @@
     </div>
 
     <h1 class="hero-headline">
-      <span class="hero-line-1">Your Local</span>
-      <span class="hero-line-2 accent-word">Universe.</span>
+      <span class="hero-line-1">Y<span class="on-letter on-o">O</span>ur Local</span>
+      <span class="hero-line-2 accent-word">U<span class="on-letter on-n">N</span>iverse.</span>
     </h1>
     <p class="hero-sub">Bars, food, parking &amp; more — hours, ratings &amp; locations in one search.</p>
 
@@ -2408,7 +2435,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=91"></script>
+  <script src="app.js?v=92"></script>
 
 </div><!-- /.page-wrap -->
 
