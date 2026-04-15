@@ -186,30 +186,7 @@
       animation: dangle 4.2s cubic-bezier(.4,0,.2,1) infinite;
       animation-delay: 1s;
     }
-    /* ── OrbiNear O·N letter highlight ──────────────────────────── */
-    @keyframes onGlow {
-      0%, 100% {
-        color: #7AB3FF;
-        -webkit-text-fill-color: #7AB3FF;
-        text-shadow: 0 0 18px rgba(120,180,255,.65), 0 0 36px rgba(120,180,255,.30);
-        transform: scale(1);
-      }
-      50% {
-        color: #B8D8FF;
-        -webkit-text-fill-color: #B8D8FF;
-        text-shadow: 0 0 28px rgba(160,210,255,.90), 0 0 56px rgba(120,180,255,.50);
-        transform: scale(1.10);
-      }
-    }
-    .on-letter {
-      display: inline-block;
-      color: #7AB3FF;
-      -webkit-text-fill-color: #7AB3FF;
-      animation: onGlow 2.6s ease-in-out infinite;
-    }
-    .on-n { animation-delay: 1.3s; } /* offset so O and N pulse alternately */
-
-    .nav-spacer { flex: 1; }
+.nav-spacer { flex: 1; }
     .nav-tag {
       font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
       text-transform: uppercase; color: rgba(235,240,255,.24);
@@ -1709,8 +1686,6 @@
     /* 4 — HEADLINE */
     .hero-headline            { color: #ffffff !important; }
     .hero-headline .accent-word { background: none !important; -webkit-text-fill-color: #ffffff !important; color: #ffffff !important; }
-    /* O/N letters inside accent-word must keep their own glow color */
-    .hero-headline .accent-word .on-letter { -webkit-text-fill-color: #7AB3FF !important; color: #7AB3FF !important; }
 
     /* 5 — HERO SUB + PROOF ROW */
     .hero-sub { color: rgba(255,255,255,.78) !important; }
@@ -2101,8 +2076,8 @@
     </div>
 
     <h1 class="hero-headline">
-      <span class="hero-line-1">Y<span class="on-letter on-o">O</span>ur Local</span>
-      <span class="hero-line-2 accent-word">U<span class="on-letter on-n">N</span>iverse.</span>
+      <span class="hero-line-1">Your Local</span>
+      <span class="hero-line-2 accent-word">Universe.</span>
     </h1>
     <p class="hero-sub">Bars, food, parking &amp; more — hours, ratings &amp; locations in one search.</p>
 
@@ -2435,7 +2410,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=92"></script>
+  <script src="app.js?v=93"></script>
 
 </div><!-- /.page-wrap -->
 
