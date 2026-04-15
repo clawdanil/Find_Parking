@@ -187,27 +187,6 @@
       animation-delay: 1s;
     }
 .nav-spacer { flex: 1; }
-
-    /* ── Radar button — all screen sizes ───────────────────────────── */
-    .nav-radar {
-      display: flex; align-items: center; justify-content: center;
-      width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0;
-      background: rgba(180,210,255,.08);
-      border: 1px solid rgba(255,255,255,.20);
-      backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.16);
-      color: rgba(255,255,255,.80);
-      cursor: pointer;
-      animation: radarPing 2.8s ease-in-out infinite;
-    }
-    .nav-radar svg { width: 20px; height: 20px; }
-    .nav-radar:hover { background: rgba(180,210,255,.16); border-color: rgba(255,255,255,.32); }
-    .nav-radar:active { background: rgba(120,180,255,.22); transform: scale(.94); }
-    @keyframes radarPing {
-      0%,100% { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 0 0 rgba(120,180,255,0); }
-      45%     { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 0 8px rgba(120,180,255,.18); }
-      70%     { box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 0 0 14px rgba(120,180,255,0); }
-    }
     .nav-tag {
       font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
       text-transform: uppercase; color: rgba(235,240,255,.24);
@@ -2068,22 +2047,7 @@
         </div>
         <span class="nav-wordmark">Orbi</span>
       </div>
-      <!-- Radar / near-me button — visible only on mobile, fills left gap -->
-      <button class="nav-radar" aria-label="Find near me"
-        onclick="document.querySelector('.location-btn')?.click();document.getElementById('street-input')?.scrollIntoView({behavior:'smooth',block:'center'})">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- crosshair lines -->
-          <line x1="12" y1="2"  x2="12" y2="5.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="12" y1="18.5" x2="12" y2="22" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="2"  y1="12" x2="5.5" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <line x1="18.5" y1="12" x2="22" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
-          <!-- outer ring -->
-          <circle cx="12" cy="12" r="7" stroke="currentColor" stroke-width="1.4" opacity=".45"/>
-          <!-- centre dot -->
-          <circle cx="12" cy="12" r="2.4" fill="currentColor"/>
-        </svg>
-      </button>
-      <div class="nav-spacer"></div>
+<div class="nav-spacer"></div>
       <span class="nav-tag">Navigate Your World</span>
       <button class="nav-cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
     </div>
@@ -2446,7 +2410,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=97"></script>
+  <script src="app.js?v=98"></script>
 
 </div><!-- /.page-wrap -->
 
