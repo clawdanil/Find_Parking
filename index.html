@@ -2029,6 +2029,106 @@
     }
     footer strong { color: rgba(255,255,255,.78) !important; }
 
+    /* 22 — LANGUAGE PICKER */
+    .search-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .lang-picker {
+      position: relative;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      font-size: 1.25rem;
+      line-height: 1;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.22);
+      background: rgba(180,210,255,.10);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 16px rgba(0,0,0,.18);
+      cursor: pointer;
+      transition: background .18s, box-shadow .18s, transform .12s;
+      color: #fff;
+    }
+    .lang-btn:hover {
+      background: rgba(180,210,255,.18);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 6px 24px rgba(0,0,0,.24);
+      transform: translateY(-1px);
+    }
+    .lang-dropdown {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      width: 190px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(14,16,32,.82);
+      backdrop-filter: blur(44px) saturate(200%);
+      -webkit-backdrop-filter: blur(44px) saturate(200%);
+      box-shadow: 0 16px 48px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.16);
+      padding: 6px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px) scale(.97);
+      pointer-events: none;
+      transition: opacity .18s ease, transform .18s ease, visibility 0s .18s;
+    }
+    .lang-dropdown--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      transition: opacity .18s ease, transform .18s ease, visibility 0s 0s;
+    }
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 9px 12px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255,255,255,.80);
+      font-size: .875rem;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      transition: background .14s, color .14s;
+    }
+    .lang-option:hover {
+      background: rgba(120,180,255,.18);
+      color: #ffffff;
+    }
+    .lang-option--active {
+      background: rgba(91,155,255,.22);
+      color: #ffffff;
+    }
+    /* Mobile: drop dropdown upward if near bottom */
+    @media (max-width: 539px) {
+      .lang-dropdown {
+        right: 0;
+        width: 175px;
+      }
+      .lang-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -2048,8 +2148,8 @@
         <span class="nav-wordmark">Orbi</span>
       </div>
 <div class="nav-spacer"></div>
-      <span class="nav-tag">Navigate Your World</span>
-      <button class="nav-cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+      <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
+      <button class="nav-cta" data-i18n="nav_cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
     </div>
   </nav>
 
@@ -2072,22 +2172,22 @@
 
     <div class="hero-eyebrow">
       <span class="eyebrow-pulse"></span>
-      One search &nbsp;·&nbsp; 9 categories &nbsp;·&nbsp; 50+ cities
+      <span data-i18n="hero_eyebrow">One search · 9 categories · 50+ cities</span>
     </div>
 
     <h1 class="hero-headline">
-      <span class="hero-line-1">Your Local</span>
-      <span class="hero-line-2 accent-word">Universe.</span>
+      <span class="hero-line-1" data-i18n="hero_line1">Your Local</span>
+      <span class="hero-line-2 accent-word" data-i18n="hero_line2">Universe.</span>
     </h1>
-    <p class="hero-sub">Bars, food, parking &amp; more — hours, ratings &amp; locations in one search.</p>
+    <p class="hero-sub" data-i18n="hero_sub">Bars, food, parking & more — hours, ratings & locations in one search.</p>
 
     <!-- Why Orbi proof row -->
     <div class="hero-why">
-      <span class="hw-item"><span class="hw-check">✓</span> Real-time availability</span>
+      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why1">Real-time availability</span></span>
       <span class="hw-sep">·</span>
-      <span class="hw-item"><span class="hw-check">✓</span> 9 categories, 1 search</span>
+      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why2">9 categories, 1 search</span></span>
       <span class="hw-sep">·</span>
-      <span class="hw-item"><span class="hw-check">✓</span> No cached results</span>
+      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why3">No cached results</span></span>
     </div>
 
     <!-- Weather pill -->
@@ -2116,7 +2216,7 @@
 
     <!-- Live preview cards — right side fill -->
     <div class="hero-preview" aria-hidden="true">
-      <div class="hp-label"><span class="hp-dot"></span>Live near you</div>
+      <div class="hp-label"><span class="hp-dot"></span><span data-i18n="live_near">Live near you</span></div>
 
       <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
         <span class="pc-map-hint">↗ Maps</span>
@@ -2177,15 +2277,21 @@
     <div class="search-card glass-panel">
       <div class="search-row">
         <div class="input-group ac-wrap">
-          <label for="street-input" class="ai-label"><span class="ai-spark">✦</span> Ask Orbi</label>
-          <input id="street-input" class="input-field" type="text" placeholder="Enter a city or address…" autocomplete="off" />
+          <label for="street-input" class="ai-label"><span class="ai-spark">✦</span> <span data-i18n="ask_orbi">Ask Orbi</span></label>
+          <input id="street-input" class="input-field" type="text" placeholder="Enter a city or address…" data-i18n-ph="search_ph" autocomplete="off" />
           <div class="ac-dropdown" id="ac-dropdown" hidden></div>
         </div>
-        <button id="search-btn" class="search-btn">Search →</button>
+        <div class="search-actions">
+          <button id="search-btn" class="search-btn" data-i18n="search_btn">Search →</button>
+          <div class="lang-picker" id="lang-picker">
+            <button class="lang-btn" id="lang-btn" aria-label="Select language" aria-expanded="false">🌐</button>
+            <div class="lang-dropdown" id="lang-dropdown"></div>
+          </div>
+        </div>
       </div>
-      <button id="location-btn" class="location-btn">📍 Use My Current Location</button>
+      <button id="location-btn" class="location-btn">📍 <span data-i18n="location_btn">Use My Current Location</span></button>
       <div class="chips">
-        <span class="chips-label">Popular cities</span>
+        <span class="chips-label" data-i18n="chips_label">Popular cities</span>
         <button class="chip" data-city="Jersey City, NJ">Jersey City, NJ</button>
         <button class="chip" data-city="New York, NY">New York, NY</button>
         <button class="chip" data-city="Chicago, IL">Chicago, IL</button>
@@ -2198,39 +2304,39 @@
         <div class="tiles-row">
           <button class="feature-tile" data-feature="food">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3v7"/></svg>
-            <span class="tile-label">Food</span>
+            <span class="tile-label" data-i18n="tile_food">Food</span>
           </button>
           <button class="feature-tile" data-feature="bars">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22V11.5M16 22V11.5M2 8l2-6h16l2 6H2zm0 0h20"/><line x1="12" y1="8" x2="12" y2="22"/></svg>
-            <span class="tile-label">Bars</span>
+            <span class="tile-label" data-i18n="tile_bars">Bars</span>
           </button>
           <button class="feature-tile" data-feature="coffee">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 010 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg>
-            <span class="tile-label">Coffee</span>
+            <span class="tile-label" data-i18n="tile_coffee">Coffee</span>
           </button>
           <button class="feature-tile" data-feature="gym">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 9v6M21 9v6M6.5 9v6M17.5 9v6"/></svg>
-            <span class="tile-label">Gym</span>
+            <span class="tile-label" data-i18n="tile_gym">Gym</span>
           </button>
           <button class="feature-tile" data-feature="shopping">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-            <span class="tile-label">Shopping</span>
+            <span class="tile-label" data-i18n="tile_shopping">Shopping</span>
           </button>
           <button class="feature-tile" data-feature="entertainment">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-            <span class="tile-label">Cinema</span>
+            <span class="tile-label" data-i18n="tile_cinema">Cinema</span>
           </button>
           <button class="feature-tile" data-feature="events">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            <span class="tile-label">Events</span>
+            <span class="tile-label" data-i18n="tile_events">Events</span>
           </button>
           <button class="feature-tile" data-feature="transit">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M4 10h16M8 6h.01M16 6h.01M8 16l-2 4M16 16l2 4"/></svg>
-            <span class="tile-label">Transit</span>
+            <span class="tile-label" data-i18n="tile_transit">Transit</span>
           </button>
           <button class="feature-tile" data-feature="parking">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg>
-            <span class="tile-label">Parking</span>
+            <span class="tile-label" data-i18n="tile_parking">Parking</span>
           </button>
         </div>
       </div>
@@ -2241,8 +2347,8 @@
    <div class="flap-col">
      <div class="flap-board">
        <div class="flap-header">
-         <span class="flap-title">Cities · Worldwide</span>
-         <span class="flap-live"><span class="flap-live-dot"></span>Live</span>
+         <span class="flap-title" data-i18n="flap_title">Cities · Worldwide</span>
+         <span class="flap-live"><span class="flap-live-dot"></span><span data-i18n="flap_live">Live</span></span>
        </div>
        <div class="flap-rows" id="flap-rows">
          <div class="flap-row"><span class="flap-num">01</span><span class="flap-city">NEW YORK</span></div>
@@ -2276,7 +2382,7 @@
           <circle cx="15" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
         </svg>
         <div class="metric-value">1M+</div>
-        <div class="metric-label">Local Places Indexed</div>
+        <div class="metric-label" data-i18n="metric_places">Local Places Indexed</div>
       </div>
 
       <div class="metric-item">
@@ -2286,7 +2392,7 @@
           <path d="M3 15h24M15 3c-3 4-5 7.5-5 12s2 8 5 12M15 3c3 4 5 7.5 5 12s-2 8-5 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
         <div class="metric-value">50+</div>
-        <div class="metric-label">Cities Covered</div>
+        <div class="metric-label" data-i18n="metric_cities">Cities Covered</div>
       </div>
 
       <div class="metric-item">
@@ -2298,7 +2404,7 @@
           <rect x="17" y="17" width="10" height="10" rx="2" stroke="currentColor" stroke-width="2"/>
         </svg>
         <div class="metric-value">9</div>
-        <div class="metric-label">Explore Categories</div>
+        <div class="metric-label" data-i18n="metric_cats">Explore Categories</div>
       </div>
 
       <div class="metric-item">
@@ -2307,7 +2413,7 @@
           <path d="M17 3L6 17h8l-1 10 11-14h-8L17 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="metric-value">&lt;2s</div>
-        <div class="metric-label">Live Search Speed</div>
+        <div class="metric-label" data-i18n="metric_speed">Live Search Speed</div>
       </div>
 
     </div>
@@ -2406,11 +2512,12 @@
 
   <!-- Footer -->
   <footer>
-    <strong>Orbinear</strong> &ensp;·&ensp; © 2026 &ensp;·&ensp; Always verify posted signs before parking
+    <strong>Orbinear</strong> &ensp;·&ensp; © 2026 &ensp;·&ensp; <span data-i18n="footer_verify">Always verify posted signs before parking</span>
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=98"></script>
+  <script src="app.js?v=99"></script>
+  <script src="i18n.js?v=1"></script>
 
 </div><!-- /.page-wrap -->
 
