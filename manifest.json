@@ -1,11 +1,11 @@
 {
-  "name": "ParkMe - Find Free Parking",
-  "short_name": "ParkMe",
-  "description": "Find free street parking anywhere, instantly",
+  "name": "Orbi – Find Parking, Transit & More",
+  "short_name": "Orbi",
+  "description": "Bars, food, parking & more — hours, ratings & locations in one search.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0f4fa",
-  "theme_color": "#34C759",
+  "background_color": "#09090F",
+  "theme_color": "#09090F",
   "orientation": "portrait",
   "icons": [
     {

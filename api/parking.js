@@ -221,7 +221,7 @@ async function enrichAddresses(spots, googleKey) {
     setTimeout(() => ctrl.abort(), 3000);
     const r = await fetch(
       `https://nominatim.openstreetmap.org/lookup?osm_ids=${encodeURIComponent(ids)}&format=json&addressdetails=1`,
-      { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
+      { headers: { 'User-Agent': 'Orbi/1.0 (orbinear.com)' }, signal: ctrl.signal }
     );
     if (r.ok) {
       const data = await r.json();
@@ -248,7 +248,7 @@ async function enrichAddresses(spots, googleKey) {
       setTimeout(() => ctrl.abort(), 2500);
       const r = await fetch(
         `https://nominatim.openstreetmap.org/reverse?lat=${spot.lat}&lon=${spot.lng}&format=json&zoom=17&addressdetails=1`,
-        { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' }, signal: ctrl.signal }
+        { headers: { 'User-Agent': 'Orbi/1.0 (orbinear.com)' }, signal: ctrl.signal }
       );
       if (!r.ok) return;
       const data    = await r.json();
@@ -314,7 +314,7 @@ async function geocodeAddress(street, city) {
   const q = encodeURIComponent(`${street}, ${city}`);
   const r = await fetch(
     `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
-    { headers: { 'User-Agent': 'ParkMe/1.0 (parkme.fun)' } }
+    { headers: { 'User-Agent': 'Orbi/1.0 (orbinear.com)' } }
   );
   const data = await r.json();
   if (!data.length) throw new Error('Could not geocode address');

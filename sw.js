@@ -1,4 +1,4 @@
-const CACHE_NAME = 'parkme-v3';
+const CACHE_NAME = 'orbi-v1';
 const SHELL = ['/app.js'];
 
 // Install: pre-cache JS only (not HTML — HTML must always be fresh)
