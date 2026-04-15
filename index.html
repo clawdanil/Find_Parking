@@ -152,13 +152,16 @@
     }
     .nav-inner {
       max-width: 1180px; margin: 0 auto; width: 100%;
-      display: flex; align-items: center; gap: 16px;
-      position: relative;
+      display: flex; align-items: center; gap: 8px;
     }
+    .nav-left { flex: 1; min-width: 0; }
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
       text-decoration: none; flex-shrink: 0; cursor: default;
-      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-right {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
     }
     .nav-icon {
       width: 34px; height: 34px; border-radius: 50%;
@@ -186,19 +189,21 @@
       animation: dangle 4.2s cubic-bezier(.4,0,.2,1) infinite;
       animation-delay: 1s;
     }
-.nav-spacer { flex: 1; }
     .nav-tag {
       font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
       text-transform: uppercase; color: rgba(235,240,255,.24);
       display: none;
     }
     @media (min-width: 540px) { .nav-tag { display: block; } }
-    /* Mobile: stack icon above wordmark so it never crowds the CTA */
+    /* Mobile: stack icon above wordmark, reduce CTA so it never crowds the brand */
     @media (max-width: 539px) {
-      .nav-brand { flex-direction: column; align-items: center; gap: 2px; }
-      .nav-icon  { width: 42px; height: 42px; }
-      .nav-icon svg { width: 26px; height: 26px; }
-      .nav-wordmark { font-size: .78rem; letter-spacing: .5px; font-weight: 700; }
+      .nav-inner  { gap: 4px; }
+      .nav-brand  { flex-direction: column; align-items: center; gap: 2px; }
+      .nav-icon   { width: 38px; height: 38px; }
+      .nav-icon svg { width: 22px; height: 22px; }
+      .nav-wordmark { font-size: .75rem; letter-spacing: .5px; font-weight: 700; }
+      .nav-cta    { font-size: .72rem; padding: 7px 11px; white-space: nowrap; }
+      .nav-right  { gap: 6px; }
     }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 4px;
@@ -2136,6 +2141,7 @@
 
   <nav class="site-nav" id="site-nav">
     <div class="nav-inner">
+      <div class="nav-left"></div>
       <div class="nav-brand">
         <div class="nav-icon">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -2147,9 +2153,10 @@
         </div>
         <span class="nav-wordmark">Orbi</span>
       </div>
-<div class="nav-spacer"></div>
-      <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
-      <button class="nav-cta" data-i18n="nav_cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+      <div class="nav-right">
+        <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
+        <button class="nav-cta" data-i18n="nav_cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+      </div>
     </div>
   </nav>
 
