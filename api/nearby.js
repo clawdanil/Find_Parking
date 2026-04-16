@@ -196,12 +196,12 @@ async function queryOverpass(overpassQuery) {
   const encoded = 'data=' + encodeURIComponent(body);
   const tryMirror = async url => {
     const ctrl = new AbortController();
-    const t    = setTimeout(() => ctrl.abort(), 15000);
+    const t    = setTimeout(() => ctrl.abort(), 12000); // covers connect + body read
     try {
       const res  = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: encoded, signal: ctrl.signal });
-      clearTimeout(t);
       if (!res.ok) throw new Error('bad status');
-      const data = await res.json();
+      const data = await res.json(); // abort signal still active during body read
+      clearTimeout(t);
       const els  = data.elements || [];
       if (els.length === 0) throw new Error('empty');
       return els;
