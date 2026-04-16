@@ -600,6 +600,8 @@ streetInput.addEventListener('keydown', e => { if (e.key === 'Enter') { acDropdo
 document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
     selectedCity = chip.dataset.city;
+    selectedLat  = chip.dataset.lat  ? parseFloat(chip.dataset.lat)  : null;
+    selectedLon  = chip.dataset.lng  ? parseFloat(chip.dataset.lng)  : null;
     streetInput.value = '';
     streetInput.placeholder = `${t('addr_in','Address in')} ${chip.dataset.city}…`;
     streetInput.focus();

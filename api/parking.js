@@ -311,14 +311,22 @@ out center tags;`;
 
 // ── Geocode an address via Nominatim (fallback when no lat/lng sent) ──────────
 async function geocodeAddress(street, city) {
-  const q = encodeURIComponent(`${street}, ${city}`);
-  const r = await fetch(
-    `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
-    { headers: { 'User-Agent': 'Orbi/1.0 (orbinear.com)' } }
-  );
-  const data = await r.json();
-  if (!data.length) throw new Error('Could not geocode address');
-  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  const q    = encodeURIComponent(`${street}, ${city}`);
+  const ctrl = new AbortController();
+  const t    = setTimeout(() => ctrl.abort(), 5000);
+  try {
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${q}&format=json&limit=1`,
+      { headers: { 'User-Agent': 'Orbi/1.0 (orbinear.com)' }, signal: ctrl.signal }
+    );
+    clearTimeout(t);
+    const data = await r.json();
+    if (!data.length) throw new Error('Could not geocode address');
+    return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+  } catch (e) {
+    clearTimeout(t);
+    throw new Error(e.name === 'AbortError' ? 'Geocoding timed out — please try again' : e.message);
+  }
 }
 
 // ── Google Places Parking — Layer 2 (accurate addresses, open status, ratings) ─
