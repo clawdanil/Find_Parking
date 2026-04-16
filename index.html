@@ -398,9 +398,23 @@
         animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
       }
     }
-    /* Reserve right-side space for the absolutely positioned preview panel */
+    /* CSS Grid layout at wide screens — text column is hard-bounded, can never
+       overflow into the preview column regardless of language text length */
     @media (min-width: 1061px) {
-      .hero { padding-right: 320px; }
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 278px;
+        column-gap: 40px;
+        padding-right: 20px;
+        align-items: start;
+      }
+      .hero > *:not(.hero-preview) { grid-column: 1; }
+      .hero-preview {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        position: static;
+        width: 278px;
+      }
     }
 
     /* ── Hero eyebrow ──────────────────────────────────────────────────── */
@@ -2521,7 +2535,7 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js?v=100"></script>
-  <script src="i18n.js?v=2"></script>
+  <script src="i18n.js?v=3"></script>
 
 </div><!-- /.page-wrap -->
 
