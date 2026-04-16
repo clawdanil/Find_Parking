@@ -403,22 +403,24 @@
         animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
       }
     }
-    /* CSS Grid layout at wide screens — text column is hard-bounded, can never
-       overflow into the preview column regardless of language text length */
+    /* Two-column flex at wide screens — text column is hard-bounded */
     @media (min-width: 1061px) {
       .hero {
-        display: grid;
-        grid-template-columns: 1fr 278px;
-        column-gap: 40px;
+        display: flex;
+        align-items: flex-start;
+        gap: 40px;
         padding-right: 20px;
-        align-items: start;
       }
-      .hero > *:not(.hero-preview) { grid-column: 1; }
+      .hero-content {
+        flex: 1 1 0;
+        min-width: 0;
+      }
       .hero-preview {
-        grid-column: 2;
-        grid-row: 1 / -1;
-        position: static;
+        flex: 0 0 278px;
         width: 278px;
+        position: static;
+        top: auto;
+        right: auto;
       }
     }
 
@@ -2194,6 +2196,7 @@
 
   <!-- Hero -->
   <header class="hero">
+    <div class="hero-content">
 
     <div class="hero-eyebrow">
       <span class="eyebrow-pulse"></span>
@@ -2238,6 +2241,8 @@
         <span class="w-extra" id="w-humidity">💧 --%</span>
       </div>
     </div>
+
+    </div><!-- /.hero-content -->
 
     <!-- Live preview cards — right side fill -->
     <div class="hero-preview" aria-hidden="true">
