@@ -506,6 +506,12 @@ export default async function handler(req) {
   let   { lat, lng } = body;
   if (!city || !street) return json({ error: 'Missing city or street' }, 400);
 
+  // Hard deadline: always respond within 20s so the client never hits its 25s timeout
+  const deadline = Date.now() + 20000;
+  const timeLeft  = () => Math.max(0, deadline - Date.now());
+  const cap       = (p, fallback) =>
+    Promise.race([p, new Promise(r => setTimeout(() => r(fallback), timeLeft()))]);
+
   try {
     // 1. Get coordinates if not provided by client
     if (!lat || !lng) {
@@ -514,19 +520,23 @@ export default async function handler(req) {
       lng = geo.lon;
     }
 
-    const hereKey   = process.env.HERE_API_KEY      || '';
+    const hereKey   = process.env.HERE_API_KEY       || '';
     const googleKey = process.env.GOOGLE_MAPS_API_KEY || '';
 
-    // Fire all three data sources in parallel to stay within Vercel's 30s limit
-    const [hereSpots, googleSpots, els250, els600] = await Promise.all([
-      // Layer 1: HERE — real-time availability for lots/garages
-      hereKey   ? queryHereParking(lat, lng, 600, hereKey).then(r => r.sort((a,b) => a._distMi - b._distMi))   : Promise.resolve([]),
-      // Layer 2: Google Places — accurate addresses, open/closed, ratings
-      googleKey ? queryGoogleParking(lat, lng, 800, googleKey).then(r => r.sort((a,b) => a._distMi - b._distMi)) : Promise.resolve([]),
-      // Layer 3: OSM — fills in street parking not covered above
-      queryOverpass(lat, lng, 250),
-      queryOverpass(lat, lng, 600),
+    // Fire all three data sources in parallel, each capped at remaining deadline
+    const [hereResult, googleResult, els250, els600] = await Promise.allSettled([
+      cap(hereKey   ? queryHereParking(lat, lng, 600, hereKey)     : Promise.resolve([]), []),
+      cap(googleKey ? queryGoogleParking(lat, lng, 800, googleKey) : Promise.resolve([]), []),
+      cap(queryOverpass(lat, lng, 250), null),
+      cap(queryOverpass(lat, lng, 600), null),
     ]);
+
+    const hereSpots   = (hereResult.status   === 'fulfilled' ? hereResult.value   : [])
+      .sort((a,b) => a._distMi - b._distMi);
+    const googleSpots = (googleResult.status === 'fulfilled' ? googleResult.value : [])
+      .sort((a,b) => a._distMi - b._distMi);
+    const rawEls250   = els250.status  === 'fulfilled' ? els250.value  : null;
+    const rawEls600   = els600.status  === 'fulfilled' ? els600.value  : null;
 
     // Process OSM elements
     const processElements = (els) => (els || [])
@@ -534,8 +544,8 @@ export default async function handler(req) {
       .filter(Boolean)
       .sort((a, b) => a._distMi - b._distMi);
 
-    const spots250 = processElements(els250);
-    const spots600 = processElements(els600);
+    const spots250 = processElements(rawEls250);
+    const spots600 = processElements(rawEls600);
     let osmSpots, radiusBlocks, radiusExpanded;
     if (spots250.length >= 5) {
       osmSpots = spots250; radiusBlocks = 2; radiusExpanded = false;
@@ -544,7 +554,6 @@ export default async function handler(req) {
     }
 
     // Merge layers: HERE → Google → OSM (each layer deduped against higher-priority layers)
-    // 40m distance threshold OR matching street address = same physical location
     const deduped = (candidates, existing) =>
       candidates.filter(c => {
         const ca = normAddr(c);
@@ -569,7 +578,6 @@ export default async function handler(req) {
       source = 'osm';
     }
 
-    // Sort merged results by distance — closest first regardless of source
     spots.sort((a, b) => (a._distMi ?? 99) - (b._distMi ?? 99));
 
     // Final dedup: same-address OR within 15m
@@ -585,11 +593,11 @@ export default async function handler(req) {
       return true;
     });
 
-    // Enrich OSM spots that are missing real addresses
-    // Google Geocoding (primary) → Nominatim (fallback)
-    if (spots.length > 0) await enrichAddresses(spots, googleKey);
+    // Enrich addresses only if we still have time budget
+    if (spots.length > 0 && timeLeft() > 2000) {
+      await cap(enrichAddresses(spots, googleKey), undefined);
+    }
 
-    // Re-index IDs and strip temp fields
     spots.forEach((s, i) => {
       s.id = i + 1;
       delete s._distMi;
@@ -598,12 +606,12 @@ export default async function handler(req) {
       delete s._osmId;
     });
 
-    // Debug counts — visible in browser Network tab to diagnose source failures
     const _debug = {
       here:   hereSpots.length,
       google: googleSpots.length,
       osm:    osmSpots.length,
       merged: spots.length,
+      msLeft: timeLeft(),
     };
 
     return json({ street, neighborhood: city, spots, general_tips: [], radiusBlocks, radiusExpanded, source, searchLat: lat, searchLng: lng, _debug });
