@@ -398,6 +398,10 @@
         animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
       }
     }
+    /* Reserve right-side space for the absolutely positioned preview panel */
+    @media (min-width: 1061px) and (hover: hover) {
+      .hero { padding-right: 320px; }
+    }
 
     /* ── Hero eyebrow ──────────────────────────────────────────────────── */
     .hero-eyebrow {
@@ -2643,7 +2647,7 @@
       ];
       const cards = document.querySelectorAll('.preview-card');
       if (!cards.length) return;
-      let venueIdx = VENUES.length; // start after initial 5
+      let venueIdx = 5; // start after initial 5 static cards
 
       // Open Google Maps for whichever venue name is currently shown
       cards.forEach(card => {
