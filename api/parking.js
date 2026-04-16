@@ -147,13 +147,14 @@ function osmElementToSpot(el, searchLat, searchLon, idx) {
 async function googleReverseGeocode(lat, lng, key) {
   try {
     const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 4000);
-    const res = await fetch(
+    const t    = setTimeout(() => ctrl.abort(), 4000);
+    const res  = await fetch(
       `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${key}`,
       { signal: ctrl.signal }
     );
-    if (!res.ok) return null;
+    if (!res.ok) { clearTimeout(t); return null; }
     const data = await res.json();
+    clearTimeout(t);
     if (data.status !== 'OK' || !data.results?.length) return null;
 
     const get = (result, type) =>
@@ -283,7 +284,7 @@ out center tags;`;
 
   const tryMirror = async (url) => {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 7000); // 7s per mirror
+    const t = setTimeout(() => ctrl.abort(), 7000); // covers both connect + body read
     try {
       const r = await fetch(url, {
         method: 'POST',
@@ -291,9 +292,9 @@ out center tags;`;
         body,
         signal: ctrl.signal,
       });
-      clearTimeout(t);
       if (!r.ok) throw new Error(`${r.status}`);
-      const data = await r.json();
+      const data = await r.json(); // abort signal still active during body read
+      clearTimeout(t);
       return data.elements || [];
     } catch (e) {
       clearTimeout(t);
@@ -333,14 +334,15 @@ async function geocodeAddress(street, city) {
 async function queryGoogleParking(lat, lng, radiusM, apiKey) {
   try {
     const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 8000);
+    const t    = setTimeout(() => ctrl.abort(), 8000);
 
     const url = `https://maps.googleapis.com/maps/api/place/nearbysearch/json` +
       `?location=${lat},${lng}&radius=${radiusM}&type=parking&key=${apiKey}`;
 
     const res = await fetch(url, { signal: ctrl.signal });
-    if (!res.ok) return [];
+    if (!res.ok) { clearTimeout(t); return []; }
     const data = await res.json();
+    clearTimeout(t);
     if (!['OK', 'ZERO_RESULTS'].includes(data.status)) return [];
     if (!data.results?.length) return [];
 
@@ -412,7 +414,7 @@ async function queryGoogleParking(lat, lng, radiusM, apiKey) {
 async function queryHereParking(lat, lng, radiusM, apiKey) {
   try {
     const ctrl = new AbortController();
-    setTimeout(() => ctrl.abort(), 8000);
+    const t    = setTimeout(() => ctrl.abort(), 8000);
 
     const url = `https://browse.search.hereapi.com/v1/browse` +
       `?at=${lat},${lng}` +
@@ -423,10 +425,12 @@ async function queryHereParking(lat, lng, radiusM, apiKey) {
 
     const res = await fetch(url, { signal: ctrl.signal });
     if (!res.ok) {
+      clearTimeout(t);
       console.error('HERE browse status:', res.status, await res.text().catch(() => ''));
       return [];
     }
     const data = await res.json();
+    clearTimeout(t);
     const items = data?.items;
     if (!Array.isArray(items) || items.length === 0) return [];
 
