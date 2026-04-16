@@ -115,10 +115,10 @@ const TAB_TYPES = {
 };
 
 const TYPE_META = {
-  FREE_STREET:  { label: 'Free Street',  color: '#30D158', icon: '🅿️' },
-  PAID_STREET:  { label: 'Paid Street',  color: '#FF9F0A', icon: '🪙' },
-  PAID_LOT:     { label: 'Paid Lot',     color: '#FF6B00', icon: '🅿️' },
-  GARAGE:       { label: 'Garage',       color: '#0A84FF', icon: '🏢' },
+  FREE_STREET:  { label: 'Free Street',  key: 'type_free_street', color: '#30D158', icon: '🅿️' },
+  PAID_STREET:  { label: 'Paid Street',  key: 'type_paid_street', color: '#FF9F0A', icon: '🪙' },
+  PAID_LOT:     { label: 'Paid Lot',     key: 'type_paid_lot',    color: '#FF6B00', icon: '🅿️' },
+  GARAGE:       { label: 'Garage',       key: 'type_garage',      color: '#0A84FF', icon: '🏢' },
 };
 
 // ── Map state ─────────────────────────────────────────────────────────────────
@@ -184,7 +184,7 @@ function updateMap(spots) {
 
     const popup = `
       <div style="padding:14px 16px;font-family:'Inter',sans-serif;min-width:200px;">
-        <div style="font-size:0.68rem;font-weight:600;color:rgba(10,10,20,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">Spot ${num}</div>
+        <div style="font-size:0.68rem;font-weight:600;color:rgba(10,10,20,.35);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;">${t('spot_label','Spot')} ${num}</div>
         <div style="font-size:0.93rem;font-weight:700;color:rgba(10,10,20,.88);line-height:1.35;margin-bottom:4px;">${escHtml(s.address)}</div>
         <div style="font-size:0.78rem;color:rgba(10,10,20,.50);margin-bottom:8px;">${escHtml(s.side)}</div>
         ${s.landmark ? `<div style="font-size:0.75rem;color:rgba(10,10,20,.35);font-style:italic;margin-bottom:8px;">📌 ${escHtml(s.landmark)}</div>` : ''}
@@ -208,23 +208,24 @@ function updateMap(spots) {
   setTimeout(() => parkingMap.invalidateSize(), 50);
 }
 
-const LOADING_MSGS = [
-  'Scanning streets…',
-  'Checking permit zones…',
-  'Finding free spots…',
-  'Almost there…',
-];
+function getLoadingMsgs() {
+  return [t('load_scanning'), t('load_permit'), t('load_free'), t('load_almost')];
+}
 
-const NEARBY_LOADING_MSGS = {
-  food:          ['Finding restaurants…', 'Checking menus…', 'Almost there…'],
-  bars:          ['Finding bars & pubs…', 'Checking nearby…', 'Almost there…'],
-  coffee:   ['Finding coffee shops…', 'Checking nearby…', 'Almost there…'],
-  gym:      ['Finding gyms…', 'Checking fitness centres…', 'Almost there…'],
-  shopping:      ['Finding shops…', 'Checking malls & stores…', 'Almost there…'],
-  transit:       ['Finding transit stops…', 'Checking live departures…', 'Almost there…'],
-  entertainment: ['Finding entertainment…', 'Checking theatres & venues…', 'Almost there…'],
-  events:        ['Searching upcoming events…', 'Checking Ticketmaster…', 'Almost there…'],
-};
+function getNearbyLoadingMsgs(feature) {
+  const almost = t('load_almost');
+  const nearby = t('load_nearby');
+  return ({
+    food:          [t('load_restaurants'), t('load_menus'), almost],
+    bars:          [t('load_bars'), nearby, almost],
+    coffee:        [t('load_coffee'), nearby, almost],
+    gym:           [t('load_gyms'), t('load_fitness'), almost],
+    shopping:      [t('load_shops'), t('load_malls'), almost],
+    transit:       [t('load_transit_s'), t('load_departures'), almost],
+    entertainment: [t('load_entertain'), t('load_theatres'), almost],
+    events:        [t('load_events_s'), t('load_ticketm'), almost],
+  })[feature];
+}
 
 let loadingTimer = null;
 let statusPollInterval = null;
@@ -234,7 +235,7 @@ function showSkeletons(feature) {
   if (metricsSection) metricsSection.hidden = true;
   clearInterval(loadingTimer);
   let idx = 0;
-  const msgs = (feature && NEARBY_LOADING_MSGS[feature]) || LOADING_MSGS;
+  const msgs = (feature && getNearbyLoadingMsgs(feature)) || getLoadingMsgs();
   resultsDiv.innerHTML = `
     <div class="loading-state">
       <div class="meter-light"></div>
@@ -274,7 +275,7 @@ function renderTabs(spots) {
   const tabsEl = document.getElementById('results-tabs');
   tabsEl.innerHTML = ['all','free','paid','garage'].map(t => `
     <button class="tab-btn ${activeTab === t ? 'active' : ''}" data-tab="${t}">
-      ${{ all:'All', free:'Free', paid:'Paid', garage:'Garages' }[t]}
+      ${{ all: t('tab_all','All'), free: t('tab_free','Free'), paid: t('tab_paid','Paid'), garage: t('tab_garages','Garages') }[tab]}
       <span class="tab-count">${counts[t]}</span>
     </button>`).join('');
 
@@ -292,7 +293,7 @@ function renderCards(spots) {
   const visible = types ? spots.filter(s => types.includes(s.type)) : spots;
 
   if (visible.length === 0) {
-    resultsDiv.innerHTML = `<div class="msg"><div class="msg-icon">ℹ️</div><p>No ${activeTab === 'all' ? '' : activeTab + ' '}parking found in this area.</p></div>`;
+    resultsDiv.innerHTML = `<div class="msg"><div class="msg-icon">ℹ️</div><p>${t('err_no_parking','No parking spots found within 4 blocks. Try a different address.')}</p></div>`;
     updateMap(spots); // keep full map
     return;
   }
@@ -311,11 +312,11 @@ function renderCards(spots) {
               <h3 class="card-address">${escHtml(s.address)}${s.side ? ` <span class="card-side">(${escHtml(s.side)})</span>` : ''}</h3>
               ${s.landmark ? `<p class="card-landmark">🏢 ${escHtml(s.landmark)}</p>` : ''}
             </div>
-            <span class="status-badge" style="background:${color}22;color:${color}">${meta.icon} ${escHtml(meta.label)}</span>
+            <span class="status-badge" style="background:${color}22;color:${color}">${meta.icon} ${escHtml(t(meta.key, meta.label))}</span>
           </div>
           <div class="card-type-banner" style="background:${color}0d;border-color:${color}22">
             <span class="ctb-icon">${meta.icon}</span>
-            <span class="ctb-label">${escHtml(meta.label)}</span>
+            <span class="ctb-label">${escHtml(t(meta.key, meta.label))}</span>
             ${s.here_avail ? `<span class="ctb-realtime ${s.here_avail_count === 0 ? 'ctb-full' : s.here_avail_count <= 10 ? 'ctb-low' : 'ctb-open'}">${s.here_avail_count === 0 ? '🔴' : s.here_avail_count <= 10 ? '🟡' : '🟢'} ${escHtml(s.here_avail)}</span>` : s.avg_cost && isPaid ? `<span class="ctb-cost">💰 ${escHtml(s.avg_cost)}</span>` : ''}
           </div>
           <div class="card-details">
@@ -330,13 +331,13 @@ function renderCards(spots) {
           <div class="card-report" data-spot-id="${escHtml(s.address)}">
             <div class="report-status"></div>
             <div class="report-actions">
-              <button class="report-btn report-free"  data-status="FREE">✅ Still Free</button>
-              <button class="report-btn report-taken" data-status="TAKEN">❌ It's Taken</button>
+              <button class="report-btn report-free"  data-status="FREE">${t('still_free','✅ Still Free')}</button>
+              <button class="report-btn report-taken" data-status="TAKEN">${t('its_taken',"❌ It's Taken")}</button>
             </div>
           </div>` : ''}
           <a class="gmaps-btn" href="${googleMapsUrl(s.lat, s.lng, s.address)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            Open in Google Maps
+            ${t('open_gmaps','Open in Google Maps')}
           </a>
         </div>
       </div>`;
@@ -383,7 +384,7 @@ function renderResults(parsed, street) {
 
   const spots = parsed.spots;
   if (!Array.isArray(spots) || spots.length === 0) {
-    showMessage('No parking spots found within 4 blocks. Try a different address.');
+    showMessage(t('err_no_parking','No parking spots found within 4 blocks. Try a different address.'));
     return;
   }
 
@@ -419,13 +420,13 @@ function renderResults(parsed, street) {
       display:flex;align-items:center;gap:10px;padding:10px 18px;
       background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.22);
       border-radius:14px;font-size:.78rem;font-weight:600;color:#FBBF24;
-    ">⚠️ Fewer than 3 spots within 2 blocks — expanded search to 4 blocks.${srcBadge}</div>`;
+    ">⚠️ ${t('radius_exp_msg','Fewer than 3 spots within 2 blocks — expanded search to 4 blocks.')}${srcBadge}</div>`;
   } else {
     radiusBanner.innerHTML = `<div style="
       display:flex;align-items:center;gap:10px;padding:10px 18px;
       background:rgba(52,211,153,.06);border:1px solid rgba(52,211,153,.18);
       border-radius:14px;font-size:.78rem;font-weight:600;color:#34D399;
-    ">✅ Showing parking within 2 blocks.${srcBadge}</div>`;
+    ">✅ ${t('radius_norm_msg','Showing parking within 2 blocks.')}${srcBadge}</div>`;
   }
 
   // Show tabs and render
@@ -447,10 +448,10 @@ function renderStatusBadge(statusEl, status, minutesAgo, freeVotes = 0, takenVot
   const isFree  = status === 'FREE';
   const color   = isFree ? '#30D158' : '#FF453A';
   const icon    = isFree ? '✅' : '❌';
-  const timeStr = minutesAgo < 1 ? 'just now' : `${minutesAgo} min ago`;
+  const timeStr = minutesAgo < 1 ? t('just_now','just now') : `${minutesAgo} ${t('min_ago','min ago')}`;
   const parts   = [];
-  if (freeVotes  > 0) parts.push(`${freeVotes} say Free`);
-  if (takenVotes > 0) parts.push(`${takenVotes} say Taken`);
+  if (freeVotes  > 0) parts.push(`${freeVotes} ${t('say_free','say Free')}`);
+  if (takenVotes > 0) parts.push(`${takenVotes} ${t('say_taken','say Taken')}`);
   const voteStr = parts.length ? parts.join(' · ') + ' · ' : '';
   statusEl.innerHTML = `
     <span class="report-status-badge" style="color:${color};background:${color}12;border-color:${color}40">
@@ -583,9 +584,9 @@ async function searchParking() {
   } catch (err) {
     console.error('Full error:', err);
     if (err.message === 'TIMEOUT') {
-      showMessage('The search is taking too long. Please try again.', true);
+      showMessage(t('err_timeout','The search is taking too long. Please try again.'), true);
     } else {
-      showMessage(err.message || 'Something went wrong. Please try again.', true);
+      showMessage(err.message || t('err_generic','Something went wrong. Please try again.'), true);
     }
   } finally {
     searchBtn.disabled = false;
@@ -600,7 +601,7 @@ document.querySelectorAll('.chip').forEach(chip => {
   chip.addEventListener('click', () => {
     selectedCity = chip.dataset.city;
     streetInput.value = '';
-    streetInput.placeholder = `Address in ${chip.dataset.city}…`;
+    streetInput.placeholder = `${t('addr_in','Address in')} ${chip.dataset.city}…`;
     streetInput.focus();
   });
 });
@@ -610,12 +611,12 @@ const locationBtn = document.getElementById('location-btn');
 
 locationBtn.addEventListener('click', () => {
   if (!navigator.geolocation) {
-    showMessage('Geolocation is not supported by your browser.', true);
+    showMessage(t('err_no_geo','Geolocation is not supported by your browser.'), true);
     return;
   }
 
   locationBtn.disabled = true;
-  locationBtn.textContent = '⏳ Locating…';
+  locationBtn.textContent = t('locating_text','⏳ Locating…');
 
   navigator.geolocation.getCurrentPosition(
     async ({ coords }) => {
@@ -655,20 +656,20 @@ locationBtn.addEventListener('click', () => {
         streetInput.value = [street, city].filter(Boolean).join(', ');
         if (typeof fetchWeather === 'function') fetchWeather(lat, lng, city);
       } catch {
-        showMessage('Could not find your address. Please type it manually.', true);
-        locationBtn.textContent = '📍 Use My Current Location';
+        showMessage(t('err_location','Could not find your address. Please type it manually.'), true);
+        locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
         locationBtn.disabled = false;
         return;
       }
 
-      locationBtn.textContent = '📍 My Location ✓';
+      locationBtn.textContent = t('loc_success','📍 My Location ✓');
       locationBtn.disabled = false;
       // Do NOT auto-search — user must click Search explicitly
     },
     () => {
-      locationBtn.textContent = '📍 Use My Current Location';
+      locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
       locationBtn.disabled = false;
-      showMessage('Location access denied. Please enter your address manually.', true);
+      showMessage(t('err_loc_denied','Location access denied. Please enter your address manually.'), true);
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
@@ -738,11 +739,11 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
     })
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist)
-    .filter((item, i, arr) => i === 0 || !(item.name === arr[i-1].name && Math.abs(item.dist - arr[i-1].dist) < 0.01))
+    .filter((item, i, arr) => !arr.slice(0, i).some(prev => prev.name === item.name && Math.abs(prev.dist - item.dist) < 0.1))
     .slice(0, 15);
 
   if (items.length === 0) {
-    showMessage(`No ${cfg.label} found nearby. OSM data may be incomplete for this area — try a different address.`);
+    showMessage(`No ${t(`tile_${feature}`, cfg.label)} ${t('no_nearby_suffix','found nearby. OSM data may be incomplete for this area — try a different address.')}`);
     return;
   }
 
@@ -752,7 +753,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
   countEl.textContent = items.length;
   // Temporarily patch the " spots found" label text
   const statCountParent = countEl.parentElement;
-  if (statCountParent) statCountParent.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${items.length}</strong>&nbsp;${cfg.label.toLowerCase()} found`;
+  if (statCountParent) statCountParent.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${items.length}</strong>&nbsp;${t(`tile_${feature}`, cfg.label).toLowerCase()} ${t('found_label','found')}`;
   document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
   document.getElementById('stat-city').textContent   = selectedCity || '–';
   document.getElementById('stat-time').textContent   = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -769,7 +770,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
     }
     rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
-      🔍 No results nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+      🔍 ${t('no_results_exp','No results nearby — expanded search to')} <strong style="margin:0 3px">${meta.radiusLabel}</strong> · ${t('nearest_first','Nearest shown first')}
     </div>`;
   }
 
@@ -787,7 +788,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       : '';
 
     const hoursHtml = item.todayHours
-      ? `<span class="detail-item">🕐 Today: ${escHtml(item.todayHours)}</span>`
+      ? `<span class="detail-item">🕐 ${t('today_label','Today:')} ${escHtml(item.todayHours)}</span>`
       : '';
 
     const ratingHtml = item.rating
@@ -817,7 +818,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
           </div>
           <a class="gmaps-btn" href="${googleMapsUrl(item.lat, item.lon, item.addr || item.name)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            Open in Google Maps
+            ${t('open_gmaps','Open in Google Maps')}
           </a>
         </div>
       </div>`;
@@ -831,14 +832,14 @@ function renderTransitResults(elements, meta = {}) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
     const r = meta.radiusLabel || 'the search area';
-    showMessage(`No transit stops found within ${r}. Try a different address.`);
+    showMessage(`${t('no_transit_msg','No transit stops found within')} ${r}.`);
     return;
   }
 
   statsBar.hidden = false;
   const countEl = document.getElementById('stat-count');
   if (countEl?.parentElement) {
-    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;transit stops nearby`;
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;${t('stops_nearby','transit stops nearby')}`;
   }
   document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
   document.getElementById('stat-city').textContent   = selectedCity || '–';
@@ -855,7 +856,7 @@ function renderTransitResults(elements, meta = {}) {
       document.getElementById('results-tabs-outer').insertAdjacentElement('afterend', rb);
     }
     rb.innerHTML = `<div style="display:flex;align-items:center;gap:10px;padding:10px 18px;background:rgba(37,99,235,.06);border:1px solid rgba(37,99,235,.18);border-radius:14px;font-size:.78rem;font-weight:600;color:#2563EB;">
-      🔍 No stops nearby — expanded search to <strong style="margin:0 3px">${meta.radiusLabel}</strong> · Nearest shown first
+      🔍 ${t('no_stops_exp','No stops nearby — expanded search to')} <strong style="margin:0 3px">${meta.radiusLabel}</strong> · ${t('nearest_first','Nearest shown first')}
     </div>`;
   }
 
@@ -882,7 +883,7 @@ function renderTransitResults(elements, meta = {}) {
             </div>`).join('')}
          </div>`
       : isBusStop ? '' // bus stops use routeHtml instead
-      : `<p class="transit-no-rt">ℹ️ Live departures unavailable</p>`;
+      : `<p class="transit-no-rt">${t('live_unavail','ℹ️ Live departures unavailable')}</p>`;
 
     // Bus stop info: prefer Google Directions schedules (has times), fall back to OSM routes
     const hasSchedules = isBusStop && el.schedules && el.schedules.length > 0;
@@ -905,7 +906,7 @@ function renderTransitResults(elements, meta = {}) {
                     ${r.to ? `<span class="bus-route-dest">→ ${escHtml(r.to)}</span>` : ''}
                   </div>`).join('')}
                </div>`
-            : `<p class="transit-no-rt">🚌 Tap "View Schedules" for live arrivals</p>`)
+            : `<p class="transit-no-rt">${t('tap_schedules','🚌 Tap "View Schedules" for live arrivals')}</p>`)
       : '';
 
     // For bus stops: link to Google Maps in transit mode so schedules load automatically
@@ -930,7 +931,7 @@ function renderTransitResults(elements, meta = {}) {
           ${departureHtml}${routeHtml}
           <a class="gmaps-btn" href="${escHtml(directionsHref)}" target="_blank" rel="noopener">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-            ${isBusStop ? 'View Schedules' : 'Directions'}
+            ${isBusStop ? t('gmaps_transit','View Schedules') : t('gmaps_dir','Directions')}
           </a>
         </div>
       </div>`;
@@ -948,7 +949,7 @@ function renderTransitResults(elements, meta = {}) {
 function renderEventsResults(elements) {
   clearInterval(loadingTimer);
   if (!elements || elements.length === 0) {
-    showMessage('No public events found within 3 miles in the next 7 days.');
+    showMessage(t('no_events_msg','No public events found within 3 miles in the next 7 days.'));
     return;
   }
 
@@ -961,7 +962,7 @@ function renderEventsResults(elements) {
   statsBar.hidden = false;
   const countEl = document.getElementById('stat-count');
   if (countEl?.parentElement) {
-    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;events this week`;
+    countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${elements.length}</strong>&nbsp;${t('events_week','events this week')}`;
   }
   document.getElementById('stat-street').textContent = streetInput.value.split(',')[0] || '–';
   document.getElementById('stat-city').textContent   = selectedCity || '–';
@@ -970,39 +971,39 @@ function renderEventsResults(elements) {
   hideRadiusBanner();
 
   resultsDiv.innerHTML = elements.map((el, i) => {
-    const t   = el.tags || {};
+    const tags = el.tags || {};
     const num = String(i + 1).padStart(2, '0');
-    const isFree  = t.is_free;
-    const hasTicket = !!t.ticket_url;
+    const isFree  = tags.is_free;
+    const hasTicket = !!tags.ticket_url;
 
     const priceBadge = isFree
-      ? `<span class="event-badge event-free">🎟️ Free</span>`
-      : t.is_unknown
-        ? `<span class="event-badge event-unknown">🎫 Check Price</span>`
-        : t.price_label
-          ? `<span class="event-badge event-paid">🎫 ${escHtml(t.price_label)}</span>`
-          : `<span class="event-badge event-paid">🎫 Paid</span>`;
+      ? `<span class="event-badge event-free">${t('event_free_b','🎟️ Free')}</span>`
+      : tags.is_unknown
+        ? `<span class="event-badge event-unknown">${t('event_check_p','🎫 Check Price')}</span>`
+        : tags.price_label
+          ? `<span class="event-badge event-paid">🎫 ${escHtml(tags.price_label)}</span>`
+          : `<span class="event-badge event-paid">${t('event_paid_b','🎫 Paid')}</span>`;
 
-    const categoryHtml  = t.category
-      ? `<span class="detail-item">🎭 ${escHtml(t.category)}</span>` : '';
-    const dateHtml = t.date_label
-      ? `<span class="detail-item">📅 ${escHtml(t.date_label)}</span>` : '';
-    const showtimesHtml = t.showtimes
-      ? `<span class="detail-item" style="color:#7C3AED;font-weight:600">🔁 ${escHtml(t.showtimes)}</span>` : '';
-    const distHtml = t.dist_label
-      ? `<span class="detail-item">🗺️ ${escHtml(t.dist_label)} away</span>` : '';
-    const venueHtml = t.venue_name
-      ? `<span class="detail-item">📍 ${escHtml(t.venue_name)}${t['addr:full'] ? ' — ' + escHtml(t['addr:full']) : ''}</span>` : '';
+    const categoryHtml  = tags.category
+      ? `<span class="detail-item">🎭 ${escHtml(tags.category)}</span>` : '';
+    const dateHtml = tags.date_label
+      ? `<span class="detail-item">📅 ${escHtml(tags.date_label)}</span>` : '';
+    const showtimesHtml = tags.showtimes
+      ? `<span class="detail-item" style="color:#7C3AED;font-weight:600">🔁 ${escHtml(tags.showtimes)}</span>` : '';
+    const distHtml = tags.dist_label
+      ? `<span class="detail-item">🗺️ ${escHtml(tags.dist_label)} away</span>` : '';
+    const venueHtml = tags.venue_name
+      ? `<span class="detail-item">📍 ${escHtml(tags.venue_name)}${tags['addr:full'] ? ' — ' + escHtml(tags['addr:full']) : ''}</span>` : '';
 
     const ticketBtn = hasTicket
-      ? `<a class="gmaps-btn event-ticket-btn" href="${escHtml(t.ticket_url)}" target="_blank" rel="noopener">
+      ? `<a class="gmaps-btn event-ticket-btn" href="${escHtml(tags.ticket_url)}" target="_blank" rel="noopener">
            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a2 2 0 0 1 0 4v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a2 2 0 0 1 0-4V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v2z"/></svg>
-           ${isFree ? 'Register / RSVP' : t.is_unknown ? 'View Event & Pricing' : 'Get Tickets'}
+           ${isFree ? t('event_register','Register / RSVP') : tags.is_unknown ? t('event_view','View Event & Pricing') : t('event_tickets','Get Tickets')}
          </a>` : '';
 
-    const mapsBtn = `<a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, t['addr:full'] || t.venue_name)}" target="_blank" rel="noopener">
+    const mapsBtn = `<a class="gmaps-btn" href="${googleMapsUrl(el.lat, el.lon, tags['addr:full'] || tags.venue_name)}" target="_blank" rel="noopener">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/><circle cx="12" cy="9" r="2.5"/></svg>
-      Open in Google Maps
+      ${t('open_gmaps','Open in Google Maps')}
     </a>`;
 
     return `
@@ -1011,7 +1012,7 @@ function renderEventsResults(elements) {
         <div class="card-body">
           <div class="card-header-row">
             <div style="flex:1;min-width:0">
-              <h3 class="card-address">${escHtml(t.name)}</h3>
+              <h3 class="card-address">${escHtml(tags.name)}</h3>
             </div>
             ${priceBadge}
           </div>
@@ -1047,7 +1048,7 @@ async function fetchAiInsight(feature, items) {
   panel.innerHTML = `
     <div class="ai-insight-icon">✦</div>
     <div class="ai-insight-body">
-      <div class="ai-insight-label">Orbi Intelligence</div>
+      <div class="ai-insight-label">${t('orbi_intel','Orbi Intelligence')}</div>
       <div class="ai-insight-text loading" id="ai-insight-text">
         <span class="ai-skel"></span><span class="ai-skel"></span><span class="ai-skel ai-skel-sm"></span>
       </div>
@@ -1082,6 +1083,7 @@ async function fetchAiInsight(feature, items) {
         location: selectedCity || streetInput.value.split(',')[0] || '',
         timeStr,
         weather,
+        lang: (typeof localStorage !== 'undefined' ? localStorage.getItem('orbi-lang') : null) || 'en',
       }),
     });
 
@@ -1101,7 +1103,7 @@ async function fetchAiInsight(feature, items) {
 
 async function loadFeature(feature) {
   if (!selectedLat || !selectedLon) {
-    showMessage('Enter an address and click Search first, then choose a category.', true);
+    showMessage(t('search_first_err','Enter an address and click Search first, then choose a category.'), true);
     return;
   }
 
@@ -1120,7 +1122,7 @@ async function loadFeature(feature) {
       // restore parking stat label
       const countEl = document.getElementById('stat-count');
       if (countEl?.parentElement) {
-        countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${allSpots.length}</strong>&nbsp;spots found`;
+        countEl.parentElement.innerHTML = `<span class="stat-dot"></span><strong id="stat-count">${allSpots.length}</strong>&nbsp;${t('spots_found','spots found')}`;
       }
     } else {
       searchParking();
@@ -1154,7 +1156,7 @@ async function loadFeature(feature) {
     }
   } catch (err) {
     clearInterval(loadingTimer);
-    showMessage(`Could not load ${FEATURE_CONFIG[feature].label} data. Please try again.`, true);
+    showMessage(t('err_generic','Something went wrong. Please try again.'), true);
   }
 }
 
