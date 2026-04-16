@@ -403,6 +403,24 @@
         animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
       }
     }
+    /* CSS Grid layout at wide screens — text column is hard-bounded, can never
+       overflow into the preview column regardless of language text length */
+    @media (min-width: 1061px) {
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 278px;
+        column-gap: 40px;
+        padding-right: 20px;
+        align-items: start;
+      }
+      .hero > *:not(.hero-preview) { grid-column: 1; }
+      .hero-preview {
+        grid-column: 2;
+        grid-row: 1 / -1;
+        position: static;
+        width: 278px;
+      }
+    }
 
     /* ── Hero eyebrow ──────────────────────────────────────────────────── */
     .hero-eyebrow {
@@ -430,12 +448,12 @@
     /* ── Hero headline ─────────────────────────────────────────────────── */
     .hero-headline {
       font-family: 'Cabinet Grotesk', 'Inter', sans-serif;
-      font-size: clamp(3.8rem, 13.5vw, 155px);
+      font-size: clamp(2.4rem, 5.2vw, 68px);
       font-weight: 900;
-      letter-spacing: -0.04em;
-      line-height: .90;
+      letter-spacing: -0.03em;
+      line-height: 1.05;
       color: var(--text);
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       font-optical-sizing: auto;
       font-feature-settings: "kern" 1, "calt" 1, "ss01" 1;
     }
@@ -2183,8 +2201,8 @@
     </div>
 
     <h1 class="hero-headline">
-      <span class="hero-line-1" data-i18n="hero_line1">Your Local</span>
-      <span class="hero-line-2 accent-word" data-i18n="hero_line2">Universe.</span>
+      <span class="hero-line-1" data-i18n="hero_line1">Find anything.</span>
+      <span class="hero-line-2 accent-word" data-i18n="hero_line2">Instantly.</span>
     </h1>
     <p class="hero-sub" data-i18n="hero_sub">Bars, food, parking & more — hours, ratings & locations in one search.</p>
 
@@ -2523,8 +2541,8 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=99"></script>
-  <script src="i18n.js?v=1"></script>
+  <script src="app.js?v=100"></script>
+  <script src="i18n.js?v=3"></script>
 
 </div><!-- /.page-wrap -->
 
@@ -2650,7 +2668,7 @@
       ];
       const cards = document.querySelectorAll('.preview-card');
       if (!cards.length) return;
-      let venueIdx = VENUES.length; // start after initial 5
+      let venueIdx = 5; // start after initial 5 static cards
 
       // Open Google Maps for whichever venue name is currently shown
       cards.forEach(card => {
