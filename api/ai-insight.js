@@ -12,16 +12,26 @@ const FEATURE_LABEL = {
   shopping:      'shopping stores and retail venues',
 };
 
+const LANG_NAMES = {
+  en: 'English', es: 'Spanish', fr: 'French', de: 'German',
+  zh: 'Simplified Chinese', ja: 'Japanese', pt: 'Brazilian Portuguese',
+  ar: 'Arabic', hi: 'Hindi', ko: 'Korean',
+};
+
 export default async function handler(req) {
   if (req.method !== 'POST') return new Response('Method not allowed', { status: 405 });
 
   try {
-    const { feature, items, location, timeStr, weather } = await req.json();
+    const { feature, items, location, timeStr, weather, lang } = await req.json();
 
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) return new Response(JSON.stringify({ error: 'No API key configured' }), { status: 500 });
 
     const label = FEATURE_LABEL[feature] || feature;
+    const langName = LANG_NAMES[lang] || 'English';
+    const langInstruction = lang && lang !== 'en'
+      ? `\nIMPORTANT: You MUST write your entire response in ${langName}. Do not use English.`
+      : '';
 
     // Build a compact but rich summary of the results
     const itemsList = (items || []).slice(0, 8).map((r, i) => {
@@ -47,7 +57,7 @@ ${itemsList}
 
 Current time: ${timeStr}${weather ? `\nWeather: ${weather}` : ''}
 
-Give 2–3 crisp, useful insights that a savvy local would share — not generic advice. Reference specific places by name where relevant. Consider: which is the standout pick and why, any timing or crowd tip, or a practical fact about this area right now. Under 65 words. No bullet points. Write like you're texting a friend who asked for a recommendation.`;
+Give 2–3 crisp, useful insights that a savvy local would share — not generic advice. Reference specific places by name where relevant. Consider: which is the standout pick and why, any timing or crowd tip, or a practical fact about this area right now. Under 65 words. No bullet points. Write like you're texting a friend who asked for a recommendation.${langInstruction}`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -68,7 +78,7 @@ Give 2–3 crisp, useful insights that a savvy local would share — not generic
       throw new Error(`Anthropic ${res.status}: ${err}`);
     }
 
-    const data   = await res.json();
+    const data    = await res.json();
     const insight = data.content?.[0]?.text?.trim() || '';
 
     return new Response(JSON.stringify({ insight }), {
