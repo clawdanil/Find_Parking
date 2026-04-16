@@ -2645,51 +2645,146 @@
       setTimeout(kick, ROWS * 160 + 900);
     })();
 
-    // ── Live preview card rotation ───────────────────────────────────────
-    (function() {
-      const VENUES = [
-        { icon:'🍺', name:'The Rooftop Bar',      meta:'0.3 mi · ★ 4.7', status:'Open',    sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-        { icon:'🅿️', name:'Central Parking',       meta:'142 ft · $8 / hr', status:'42 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'0.8 mi · Tonight 8 PM', status:'On now', sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
-        { icon:'☕', name:'Blue Bottle Coffee',     meta:'0.5 mi · ★ 4.6', status:'Busy',    sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'0.1 mi · ★ 4.4', status:'Open',    sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-        { icon:'🏋️', name:'Crunch Fitness',         meta:'0.6 mi · Open 24h', status:'Open', sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
-        { icon:'🎬', name:'AMC Theatres',            meta:'0.4 mi · 8:30 PM show', status:'On now',sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-        { icon:'🛍️', name:'Westfield Mall',          meta:'0.9 mi · Closes 9 PM', status:'Open',sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-        { icon:'🅿️', name:'QuickPark Garage',        meta:'0.2 mi · $6 / hr', status:'18 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'0.3 mi · ★ 4.5', status:'Busy',   sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
-      ];
-      const cards = document.querySelectorAll('.preview-card');
+    // ── Live preview: real local venues via IP geolocation ──────────────
+    (function () {
+      const cards = Array.from(document.querySelectorAll('.preview-card'));
       if (!cards.length) return;
-      let venueIdx = 5; // start after initial 5 static cards
 
-      // Open Google Maps for whichever venue name is currently shown
+      // Decorative fallback shown until real data arrives
+      const FALLBACK = [
+        { icon:'🍺', name:'The Rooftop Bar',      meta:'0.3 mi · ★ 4.7', status:'Open',     sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+        { icon:'🅿️', name:'Central Parking',       meta:'142 ft · $8 / hr',status:'42 spots', sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'0.8 mi · Tonight', status:'On now',  sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
+        { icon:'☕', name:'Blue Bottle Coffee',     meta:'0.5 mi · ★ 4.6', status:'Busy',     sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'0.1 mi · ★ 4.4', status:'Open',     sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+        { icon:'🏋️', name:'Crunch Fitness',         meta:'0.6 mi · Open 24h',status:'Open',   sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
+        { icon:'🎬', name:'AMC Theatres',            meta:'0.4 mi · 8:30 PM',status:'On now',  sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+        { icon:'🛍️', name:'Westfield Mall',          meta:'0.9 mi · Open',   status:'Open',    sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+        { icon:'🅿️', name:'QuickPark Garage',        meta:'0.2 mi · $6 / hr',status:'18 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'0.3 mi · ★ 4.5', status:'Busy',    sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
+      ];
+
+      let pool = [...FALLBACK];
+      let poolIdx = 5;
+
+      function applyVenue(card, v, animate) {
+        card.style.setProperty('--pc-accent', v.accent);
+        card.style.setProperty('--pc-bg', v.bg);
+        card.querySelector('.pc-icon').textContent = v.icon;
+        card.querySelector('.pc-name').textContent = v.name;
+        card.querySelector('.pc-meta').textContent = v.meta;
+        const st = card.querySelector('.pc-status');
+        st.textContent = v.status;
+        st.className = 'pc-status ' + v.sc;
+        if (animate) { card.classList.remove('refreshing'); void card.offsetWidth; card.classList.add('refreshing'); }
+      }
+
+      // Click → Google Maps
       cards.forEach(card => {
         card.addEventListener('click', () => {
-          const name = card.querySelector('.pc-name').textContent;
-          window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name), '_blank', 'noopener');
+          const n = card.querySelector('.pc-name').textContent;
+          window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(n), '_blank', 'noopener');
         });
       });
 
-      function refreshCard(card, venue) {
-        card.style.setProperty('--pc-accent', venue.accent);
-        card.style.setProperty('--pc-bg', venue.bg);
-        card.querySelector('.pc-icon').textContent = venue.icon;
-        card.querySelector('.pc-name').textContent = venue.name;
-        card.querySelector('.pc-meta').textContent = venue.meta;
-        const st = card.querySelector('.pc-status');
-        st.textContent = venue.status;
-        st.className = 'pc-status ' + venue.sc;
-        card.classList.remove('refreshing');
-        void card.offsetWidth; // reflow
-        card.classList.add('refreshing');
-      }
-
+      // Rotation interval (uses whatever is in pool)
       setInterval(() => {
         const card = cards[Math.floor(Math.random() * cards.length)];
-        refreshCard(card, VENUES[venueIdx % VENUES.length]);
-        venueIdx++;
+        applyVenue(card, pool[poolIdx % pool.length], true);
+        poolIdx++;
       }, 3800);
+
+      // ── Async: fetch real venues for the visitor's actual location ──────
+      async function loadLocal() {
+        let lat, lng, city;
+
+        // 1. Already-granted precise geolocation — no prompt shown
+        try {
+          const perm = await navigator.permissions?.query({ name: 'geolocation' });
+          if (perm?.state === 'granted') {
+            await new Promise(resolve =>
+              navigator.geolocation.getCurrentPosition(
+                p => { lat = p.coords.latitude; lng = p.coords.longitude; resolve(); },
+                resolve, { timeout: 4000, maximumAge: 600000 }
+              )
+            );
+          }
+        } catch {}
+
+        // 2. IP geolocation fallback (no permission needed)
+        if (!lat) {
+          const r = await fetch('https://ipapi.co/json/');
+          const d = await r.json();
+          if (!d.latitude) return;
+          lat = d.latitude; lng = d.longitude; city = d.city;
+        }
+
+        // 3. Fetch real nearby places from OSM
+        const res = await fetch('/api/nearby', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ lat, lng, feature: 'food', units: 'imperial' }),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+
+        const elements = (data.elements || []).filter(el => el.tags?.name || el.tags?.brand);
+        if (elements.length < 2) return;
+
+        const ICONS  = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️'];
+        const STYLES = [
+          { accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+          { accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+          { accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+          { accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+          { accent:'#4ADE80', bg:'rgba(74,222,128,.10)'  },
+          { accent:'#FB923C', bg:'rgba(251,146,60,.10)'  },
+          { accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+          { accent:'#34D399', bg:'rgba(52,211,153,.10)'  },
+        ];
+
+        function haversine(la1, lo1, la2, lo2) {
+          const R = d => d * Math.PI / 180;
+          const dLa = R(la2-la1), dLo = R(lo2-lo1);
+          const a = Math.sin(dLa/2)**2 + Math.cos(R(la1)) * Math.cos(R(la2)) * Math.sin(dLo/2)**2;
+          return 3958.8 * 2 * Math.asin(Math.sqrt(a));
+        }
+
+        const realVenues = elements.slice(0, 10).map((el, i) => {
+          const tags = el.tags;
+          const name = tags.name || tags.brand;
+          const eLat = el.lat ?? el.center?.lat, eLon = el.lon ?? el.center?.lon;
+          const mi   = (eLat && eLon) ? haversine(lat, lng, eLat, eLon) : null;
+          const dist = mi === null ? '' : mi < 0.1 ? `${Math.round(mi*5280)} ft` : `${mi.toFixed(1)} mi`;
+          const rat  = tags.rating ? `★ ${tags.rating}` : '';
+          const isOpen   = tags.open_status === 'Open now';
+          const isClosed = tags.open_status === 'Closed now';
+          const s = STYLES[i % STYLES.length];
+          return {
+            icon:   ICONS[i % ICONS.length],
+            name,
+            meta:   [dist, rat].filter(Boolean).join(' · '),
+            status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
+            sc:     isClosed ? 'pc-busy' : 'pc-open',
+            ...s,
+          };
+        });
+
+        // Update visible cards with real local data
+        realVenues.slice(0, 5).forEach((v, i) => { if (cards[i]) applyVenue(cards[i], v, true); });
+
+        // Update city label if we have a city name
+        if (city) {
+          const lbl = document.querySelector('.hp-label [data-i18n="live_near"]');
+          if (lbl) lbl.textContent = `Live near ${city}`;
+        }
+
+        // Replace rotation pool with real venues
+        pool = realVenues;
+        poolIdx = 5;
+      }
+
+      loadLocal().catch(() => {}); // silent fail — fallback stays
     })();
 
 
