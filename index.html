@@ -2246,7 +2246,7 @@
 
     <!-- Live preview cards — right side fill -->
     <div class="hero-preview" aria-hidden="true">
-      <div class="hp-label"><span class="hp-dot"></span><span data-i18n="live_near">What's nearby</span></div>
+      <div class="hp-label"><span class="hp-dot"></span><span id="hp-label-text" data-i18n="live_near">Live near you</span></div>
 
       <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
         <span class="pc-map-hint">↗ Maps</span>
@@ -2657,51 +2657,109 @@
       setTimeout(kick, ROWS * 160 + 900);
     })();
 
-    // ── Live preview card rotation ───────────────────────────────────────
-    (function() {
-      const VENUES = [
-        { icon:'🍺', name:'The Rooftop Bar',      meta:'Rooftop bar · ★ 4.7',   status:'Open',     sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-        { icon:'🅿️', name:'Central Parking',       meta:'Garage · $8 / hr',       status:'Available',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'Live music · Tonight',   status:'On now',   sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
-        { icon:'☕', name:'Blue Bottle Coffee',     meta:'Café · ★ 4.6',           status:'Busy',     sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'Bar & Grill · ★ 4.4',   status:'Open',     sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-        { icon:'🏋️', name:'Crunch Fitness',         meta:'Gym · Open 24h',         status:'Open',     sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
-        { icon:'🎬', name:'AMC Theatres',            meta:'Cinema · 8:30 PM show', status:'On now',   sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-        { icon:'🛍️', name:'Westfield Mall',          meta:'Shopping · Open',        status:'Open',     sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-        { icon:'🅿️', name:'QuickPark Garage',        meta:'Garage · $6 / hr',       status:'Available',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'Pizzeria · ★ 4.5',      status:'Busy',     sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
-      ];
-      const cards = document.querySelectorAll('.preview-card');
+    // ── Live preview: real local venues via GPS ──────────────────────────
+    (function () {
+      const cards = Array.from(document.querySelectorAll('.preview-card'));
       if (!cards.length) return;
-      let venueIdx = 5; // start after initial 5 static cards
 
-      // Open Google Maps for whichever venue name is currently shown
+      const STYLES = [
+        { accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+        { accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+        { accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+        { accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+        { accent:'#4ADE80', bg:'rgba(74,222,128,.10)'  },
+        { accent:'#FB923C', bg:'rgba(251,146,60,.10)'  },
+        { accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+        { accent:'#34D399', bg:'rgba(52,211,153,.10)'  },
+        { accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
+      ];
+      const ICONS = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️','🎬','🎶'];
+
+      function haversineMi(la1,lo1,la2,lo2){const R=d=>d*Math.PI/180,dLa=R(la2-la1),dLo=R(lo2-lo1),a=Math.sin(dLa/2)**2+Math.cos(R(la1))*Math.cos(R(la2))*Math.sin(dLo/2)**2;return 3958.8*2*Math.asin(Math.sqrt(a));}
+
+      function applyVenue(card, v, animate) {
+        card.style.setProperty('--pc-accent', v.accent);
+        card.style.setProperty('--pc-bg', v.bg);
+        card.querySelector('.pc-icon').textContent = v.icon;
+        card.querySelector('.pc-name').textContent = v.name;
+        card.querySelector('.pc-meta').textContent = v.meta;
+        const st = card.querySelector('.pc-status');
+        st.textContent = v.status; st.className = 'pc-status ' + v.sc;
+        if (animate) { card.classList.remove('refreshing'); void card.offsetWidth; card.classList.add('refreshing'); }
+      }
+
       cards.forEach(card => {
         card.addEventListener('click', () => {
-          const name = card.querySelector('.pc-name').textContent;
-          window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(name), '_blank', 'noopener');
+          const n = card.querySelector('.pc-name').textContent;
+          window.open('https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(n), '_blank', 'noopener');
         });
       });
 
-      function refreshCard(card, venue) {
-        card.style.setProperty('--pc-accent', venue.accent);
-        card.style.setProperty('--pc-bg', venue.bg);
-        card.querySelector('.pc-icon').textContent = venue.icon;
-        card.querySelector('.pc-name').textContent = venue.name;
-        card.querySelector('.pc-meta').textContent = venue.meta;
-        const st = card.querySelector('.pc-status');
-        st.textContent = venue.status;
-        st.className = 'pc-status ' + venue.sc;
-        card.classList.remove('refreshing');
-        void card.offsetWidth; // reflow
-        card.classList.add('refreshing');
-      }
-
+      // Rotation from pool (starts with decorative fallback, replaced by real data)
+      let pool = null; // null until GPS loads — no rotation until then
+      let poolIdx = 5;
       setInterval(() => {
+        if (!pool) return;
         const card = cards[Math.floor(Math.random() * cards.length)];
-        refreshCard(card, VENUES[venueIdx % VENUES.length]);
-        venueIdx++;
+        applyVenue(card, pool[poolIdx % pool.length], true);
+        poolIdx++;
       }, 3800);
+
+      // ── GPS → real venues ────────────────────────────────────────────────
+      if (!navigator.geolocation) return;
+
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+
+        // Reverse-geocode city name for the label
+        try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const d = await r.json();
+          const city = d.address?.city || d.address?.town || d.address?.village || d.address?.suburb;
+          if (city) {
+            const lbl = document.getElementById('hp-label-text');
+            if (lbl) lbl.textContent = `Live near ${city}`;
+          }
+        } catch {}
+
+        // Fetch real nearby places
+        try {
+          const res = await fetch('/api/nearby', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ lat, lng, feature: 'food', units: 'imperial' }),
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          const elements = (data.elements || []).filter(el => el.tags?.name);
+          if (elements.length < 2) return;
+
+          const realVenues = elements.slice(0, 10).map((el, i) => {
+            const tags = el.tags;
+            const name = tags.name;
+            const eLat = el.lat ?? el.center?.lat, eLon = el.lon ?? el.center?.lon;
+            const mi   = (eLat && eLon) ? haversineMi(lat, lng, eLat, eLon) : null;
+            const dist = mi === null ? '' : mi < 0.1 ? `${Math.round(mi*5280)} ft` : `${mi.toFixed(1)} mi`;
+            const rat  = tags.rating ? `★ ${tags.rating}` : '';
+            const isOpen = tags.open_status === 'Open now';
+            const isClosed = tags.open_status === 'Closed now';
+            const s = STYLES[i % STYLES.length];
+            return {
+              icon: ICONS[i % ICONS.length], name,
+              meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
+              status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
+              sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
+            };
+          });
+
+          // Replace visible cards with real local data
+          realVenues.slice(0, cards.length).forEach((v, i) => applyVenue(cards[i], v, true));
+          pool = realVenues;
+          poolIdx = cards.length;
+        } catch {}
+
+      }, () => { /* permission denied — cards stay decorative */ },
+        { timeout: 8000, maximumAge: 300000 });
     })();
 
 
