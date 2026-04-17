@@ -2657,6 +2657,23 @@
       setTimeout(kick, ROWS * 160 + 900);
     })();
 
+    // ── Shared location promise: ONE GPS request reused by weather + hero cards ──
+    window._locationPromise = new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('no geolocation')); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, fromGPS: true }),
+        async () => {
+          // GPS denied — use IP geo for weather coords only (city label NOT shown)
+          try {
+            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+            if (d.latitude && d.longitude) resolve({ lat: d.latitude, lng: d.longitude, fromGPS: false });
+            else reject(new Error('no ip geo'));
+          } catch { reject(new Error('location failed')); }
+        },
+        { timeout: 8000, maximumAge: 300000 }
+      );
+    });
+
     // ── Live preview: real local venues via GPS ──────────────────────────
     (function () {
       const cards = Array.from(document.querySelectorAll('.preview-card'));
@@ -2901,23 +2918,6 @@
       const r = data.results[0];
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
-
-    // ── Shared location promise: ONE GPS request reused by weather + hero cards ──
-    window._locationPromise = new Promise((resolve, reject) => {
-      if (!navigator.geolocation) { reject(new Error('no geolocation')); return; }
-      navigator.geolocation.getCurrentPosition(
-        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, fromGPS: true }),
-        async () => {
-          // GPS denied — use IP geo for weather coords only (city label NOT shown)
-          try {
-            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-            if (d.latitude && d.longitude) resolve({ lat: d.latitude, lng: d.longitude, fromGPS: false });
-            else reject(new Error('no ip geo'));
-          } catch { reject(new Error('location failed')); }
-        },
-        { timeout: 8000, maximumAge: 300000 }
-      );
-    });
 
     // ── Load weather from shared location ────────────────────────────────
     (async () => {
