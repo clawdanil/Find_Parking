@@ -2705,11 +2705,9 @@
         poolIdx++;
       }, 3800);
 
-      // ── GPS → real venues ────────────────────────────────────────────────
-      if (!navigator.geolocation) return;
-
-      navigator.geolocation.getCurrentPosition(async pos => {
-        const { latitude: lat, longitude: lng } = pos.coords;
+      // ── GPS → real venues (reuses shared location promise) ──────────────
+      window._locationPromise.then(async ({ lat, lng, fromGPS }) => {
+        if (!fromGPS) return; // don't fetch venues from IP-geolocated coords
 
         // Reverse-geocode city name for the label
         try {
@@ -2752,14 +2750,11 @@
             };
           });
 
-          // Replace visible cards with real local data
           realVenues.slice(0, cards.length).forEach((v, i) => applyVenue(cards[i], v, true));
           pool = realVenues;
           poolIdx = cards.length;
         } catch {}
-
-      }, () => { /* permission denied — cards stay decorative */ },
-        { timeout: 8000, maximumAge: 300000 });
+      }).catch(() => { /* location denied — cards stay decorative */ });
     })();
 
 
@@ -2907,48 +2902,63 @@
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
 
-    // ── Load weather: GPS first, then weather without city label ─────
-    (async () => {
-      let weatherResolved = false;
-
-      // Hard fallback: if GPS is denied and IP geo fails, show weather
-      // for approximate location without claiming a specific (likely wrong) city
-      setTimeout(() => {
-        if (!weatherResolved) {
-          weatherResolved = true;
-          document.getElementById('w-city').textContent = '';
-          document.getElementById('w-desc').textContent = 'Location unavailable';
-          document.getElementById('weather-card').classList.remove('loading');
-        }
-      }, 6000);
-
-      // 1. Try GPS — most accurate, only use if permission already granted
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async pos => {
-          if (weatherResolved) return;
-          weatherResolved = true;
-          const { latitude: lat, longitude: lon } = pos.coords;
+    // ── Shared location promise: ONE GPS request reused by weather + hero cards ──
+    window._locationPromise = new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('no geolocation')); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, fromGPS: true }),
+        async () => {
+          // GPS denied — use IP geo for weather coords only (city label NOT shown)
           try {
-            let lbl = 'Your Location';
+            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+            if (d.latitude && d.longitude) resolve({ lat: d.latitude, lng: d.longitude, fromGPS: false });
+            else reject(new Error('no ip geo'));
+          } catch { reject(new Error('location failed')); }
+        },
+        { timeout: 8000, maximumAge: 300000 }
+      );
+    });
+
+    // ── Load weather from shared location ────────────────────────────────
+    (async () => {
+      const fallbackTimer = setTimeout(() => {
+        document.getElementById('w-city').textContent = '';
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+        document.getElementById('weather-card').classList.remove('loading');
+      }, 12000);
+
+      try {
+        const { lat, lng, fromGPS } = await window._locationPromise;
+        clearTimeout(fallbackTimer);
+        let cityLabel = '';
+        if (fromGPS) {
+          cityLabel = 'Your Location';
+          try {
             if (window._gmapsReady && window._geocoder) {
               await new Promise(resolve => {
-                window._geocoder.geocode({ location: { lat, lng: lon } }, (results, status) => {
+                window._geocoder.geocode({ location: { lat, lng } }, (results, status) => {
                   if (status === 'OK' && results?.[0]) {
                     const get = type => results[0].address_components.find(c => c.types.includes(type));
-                    lbl = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ') || lbl;
+                    cityLabel = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ') || cityLabel;
                   }
                   resolve();
                 });
               });
             } else {
-              const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+              const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
               const d = await r.json();
-              lbl = d.address?.city || d.address?.town || d.address?.village || lbl;
+              cityLabel = d.address?.city || d.address?.town || d.address?.village || cityLabel;
             }
-            fetchWeather(lat, lon, lbl);
-          } catch { fetchWeather(lat, lon, 'Your Location'); }
-        }, () => { /* GPS denied — do nothing, fallback timer handles it */ }, { timeout: 5000, maximumAge: 60000 });
+          } catch {}
+        }
+        fetchWeather(lat, lng, cityLabel);
+      } catch {
+        clearTimeout(fallbackTimer);
+        document.getElementById('w-city').textContent = '';
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+        document.getElementById('weather-card').classList.remove('loading');
       }
+    })();
 
     // Update weather when a city chip is clicked
     document.querySelectorAll('.chip[data-city]').forEach(btn => {
