@@ -2246,14 +2246,14 @@
 
     <!-- Live preview cards — right side fill -->
     <div class="hero-preview" aria-hidden="true">
-      <div class="hp-label"><span class="hp-dot"></span><span data-i18n="live_near">Live near you</span></div>
+      <div class="hp-label"><span class="hp-dot"></span><span data-i18n="live_near">What's nearby</span></div>
 
       <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
         <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🍺</div>
         <div class="pc-body">
           <div class="pc-name">The Rooftop Bar</div>
-          <div class="pc-meta">0.3 mi &nbsp;·&nbsp; ★ 4.7</div>
+          <div class="pc-meta">★ 4.7 &nbsp;·&nbsp; Rooftop</div>
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
@@ -2263,9 +2263,9 @@
         <div class="pc-icon">🅿️</div>
         <div class="pc-body">
           <div class="pc-name">Central Parking</div>
-          <div class="pc-meta">142 ft &nbsp;·&nbsp; $8 / hr</div>
+          <div class="pc-meta">Garage &nbsp;·&nbsp; $8 / hr</div>
         </div>
-        <span class="pc-status pc-open">42 spots</span>
+        <span class="pc-status pc-open">Available</span>
       </div>
 
       <div class="preview-card" style="--d:.71s;--pc-accent:#C084FC;--pc-bg:rgba(192,132,252,.10)">
@@ -2273,7 +2273,7 @@
         <div class="pc-icon">🎶</div>
         <div class="pc-body">
           <div class="pc-name">Jazz Night · Blue Note</div>
-          <div class="pc-meta">0.8 mi &nbsp;·&nbsp; Tonight 8 PM</div>
+          <div class="pc-meta">Live music &nbsp;·&nbsp; Tonight</div>
         </div>
         <span class="pc-status pc-open">On now</span>
       </div>
@@ -2283,7 +2283,7 @@
         <div class="pc-icon">☕</div>
         <div class="pc-body">
           <div class="pc-name">Blue Bottle Coffee</div>
-          <div class="pc-meta">0.5 mi &nbsp;·&nbsp; ★ 4.6</div>
+          <div class="pc-meta">Café &nbsp;·&nbsp; ★ 4.6</div>
         </div>
         <span class="pc-status pc-busy">Busy</span>
       </div>
@@ -2293,7 +2293,7 @@
         <div class="pc-icon">🍽️</div>
         <div class="pc-body">
           <div class="pc-name">O'Hara's Bar &amp; Grill</div>
-          <div class="pc-meta">0.1 mi &nbsp;·&nbsp; ★ 4.4</div>
+          <div class="pc-meta">Bar &amp; Grill &nbsp;·&nbsp; ★ 4.4</div>
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
@@ -2660,16 +2660,16 @@
     // ── Live preview card rotation ───────────────────────────────────────
     (function() {
       const VENUES = [
-        { icon:'🍺', name:'The Rooftop Bar',      meta:'0.3 mi · ★ 4.7', status:'Open',    sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-        { icon:'🅿️', name:'Central Parking',       meta:'142 ft · $8 / hr', status:'42 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'0.8 mi · Tonight 8 PM', status:'On now', sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
-        { icon:'☕', name:'Blue Bottle Coffee',     meta:'0.5 mi · ★ 4.6', status:'Busy',    sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'0.1 mi · ★ 4.4', status:'Open',    sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-        { icon:'🏋️', name:'Crunch Fitness',         meta:'0.6 mi · Open 24h', status:'Open', sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
-        { icon:'🎬', name:'AMC Theatres',            meta:'0.4 mi · 8:30 PM show', status:'On now',sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-        { icon:'🛍️', name:'Westfield Mall',          meta:'0.9 mi · Closes 9 PM', status:'Open',sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-        { icon:'🅿️', name:'QuickPark Garage',        meta:'0.2 mi · $6 / hr', status:'18 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'0.3 mi · ★ 4.5', status:'Busy',   sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
+        { icon:'🍺', name:'The Rooftop Bar',      meta:'Rooftop bar · ★ 4.7',   status:'Open',     sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+        { icon:'🅿️', name:'Central Parking',       meta:'Garage · $8 / hr',       status:'Available',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'Live music · Tonight',   status:'On now',   sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
+        { icon:'☕', name:'Blue Bottle Coffee',     meta:'Café · ★ 4.6',           status:'Busy',     sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'Bar & Grill · ★ 4.4',   status:'Open',     sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+        { icon:'🏋️', name:'Crunch Fitness',         meta:'Gym · Open 24h',         status:'Open',     sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
+        { icon:'🎬', name:'AMC Theatres',            meta:'Cinema · 8:30 PM show', status:'On now',   sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+        { icon:'🛍️', name:'Westfield Mall',          meta:'Shopping · Open',        status:'Open',     sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+        { icon:'🅿️', name:'QuickPark Garage',        meta:'Garage · $6 / hr',       status:'Available',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
+        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'Pizzeria · ★ 4.5',      status:'Busy',     sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
       ];
       const cards = document.querySelectorAll('.preview-card');
       if (!cards.length) return;
@@ -2849,16 +2849,22 @@
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
 
-    // ── Load weather: GPS first, IP chain fallback, hard 4s default ─────
+    // ── Load weather: GPS first, then weather without city label ─────
     (async () => {
       let weatherResolved = false;
 
-      // Hard fallback: if nothing loads in 4s, show New York so it's never stuck
+      // Hard fallback: if GPS is denied and IP geo fails, show weather
+      // for approximate location without claiming a specific (likely wrong) city
       setTimeout(() => {
-        if (!weatherResolved) fetchWeather(40.7128, -74.0060, 'New York, NY');
-      }, 4000);
+        if (!weatherResolved) {
+          weatherResolved = true;
+          document.getElementById('w-city').textContent = '';
+          document.getElementById('w-desc').textContent = 'Location unavailable';
+          document.getElementById('weather-card').classList.remove('loading');
+        }
+      }, 6000);
 
-      // 1. Try GPS — most accurate
+      // 1. Try GPS — most accurate, only use if permission already granted
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(async pos => {
           if (weatherResolved) return;
@@ -2883,38 +2889,8 @@
             }
             fetchWeather(lat, lon, lbl);
           } catch { fetchWeather(lat, lon, 'Your Location'); }
-        }, () => { /* GPS denied */ }, { timeout: 8000, maximumAge: 60000 });
+        }, () => { /* GPS denied — do nothing, fallback timer handles it */ }, { timeout: 5000, maximumAge: 60000 });
       }
-
-      // 2. IP geolocation chain — runs in parallel, tries two services
-      setTimeout(async () => {
-        if (weatherResolved) return;
-        const ipSources = [
-          async () => {
-            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-            if (!d.latitude || !d.longitude) throw new Error('no coords');
-            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region_code].filter(Boolean).join(', ') };
-          },
-          async () => {
-            const d = await fetch('https://ipwho.is/').then(r => r.json());
-            if (!d.latitude || !d.longitude) throw new Error('no coords');
-            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region].filter(Boolean).join(', ') };
-          },
-        ];
-        for (const src of ipSources) {
-          if (weatherResolved) return;
-          try {
-            const { lat, lon, label } = await src();
-            if (!weatherResolved) {
-              weatherResolved = true;
-              fetchWeather(lat, lon, label || 'Nearby');
-              return;
-            }
-          } catch { /* try next */ }
-        }
-        // All IP sources failed — hard fallback timer fires at 4s
-      }, 300);
-    })();
 
     // Update weather when a city chip is clicked
     document.querySelectorAll('.chip[data-city]').forEach(btn => {
