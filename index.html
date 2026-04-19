@@ -628,72 +628,101 @@
       .flap-city { font-size: .78rem; letter-spacing: 1px; }
     }
 
-    /* ── Flight board ───────────────────────────────────────────────────── */
+    /* ── Cities · Worldwide board ──────────────────────────────────────── */
     .flap-board {
-      background: rgba(6,6,14,.92);
-      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(6,6,14,.90);
+      border: 1px solid rgba(255,255,255,.08);
       border-radius: 20px;
       padding: 18px 16px 14px;
       overflow: hidden;
+      position: relative;
+    }
+    /* Subtle ambient glow at top — live intelligence feel */
+    .flap-board::before {
+      content: '';
+      position: absolute;
+      top: -40px; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 80px;
+      background: radial-gradient(ellipse, rgba(74,222,128,.06) 0%, transparent 70%);
+      pointer-events: none;
     }
     .flap-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 11px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid rgba(255,255,255,.07);
+      padding-bottom: 12px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.055);
     }
     .flap-title {
-      font-size: .56rem;
+      font-size: .50rem;
       font-weight: 700;
-      letter-spacing: 2.5px;
+      letter-spacing: 3.5px;
       text-transform: uppercase;
-      color: rgba(235,240,255,.32);
+      color: rgba(235,240,255,.22);
     }
     .flap-live {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      font-size: .52rem;
+      gap: 6px;
+      font-size: .48rem;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 1.8px;
       text-transform: uppercase;
-      color: #4ADE80;
+      color: rgba(74,222,128,.80);
+      padding: 4px 10px 4px 7px;
+      border-radius: 100px;
+      background: rgba(74,222,128,.07);
+      border: 1px solid rgba(74,222,128,.16);
     }
     .flap-live-dot {
       width: 5px; height: 5px; border-radius: 50%;
       background: #4ADE80;
-      animation: eyebrowPulse 2.4s ease-in-out infinite;
+      box-shadow: 0 0 6px rgba(74,222,128,.50);
+      flex-shrink: 0;
+      animation: liveRing 2.4s ease-in-out infinite;
     }
-    .flap-rows { display: flex; flex-direction: column; gap: 2px; }
+    .flap-rows { display: flex; flex-direction: column; gap: 1px; }
     .flap-row {
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 5px 8px;
-      border-radius: 6px;
+      gap: 12px;
+      padding: 7px 10px;
+      border-radius: 9px;
+      border: 1px solid transparent;
+      transition: background .18s ease, border-color .18s ease;
     }
-    .flap-row:nth-child(odd) { background: rgba(255,255,255,.022); }
+    /* Remove alternating fill — too mechanical */
+    .flap-row:nth-child(odd) { background: transparent; }
+    /* Featured first row — subtle blue-glass tint */
+    .flap-row:first-child {
+      background: rgba(120,175,255,.06);
+      border-color: rgba(120,175,255,.10);
+    }
+    .flap-row:hover { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08); }
     .flap-num {
-      font-size: .58rem;
+      font-size: .54rem;
       font-weight: 600;
-      color: rgba(235,240,255,.18);
-      width: 18px;
+      color: rgba(235,240,255,.14);
+      width: 16px;
       flex-shrink: 0;
       font-variant-numeric: tabular-nums;
+      font-family: 'Inter', sans-serif;
     }
     .flap-city {
-      font-family: 'Courier New', 'Courier', monospace;
-      font-size: .82rem;
+      font-family: 'Inter', sans-serif;
+      font-size: .78rem;
       font-weight: 700;
-      color: rgba(235,240,255,.88);
-      letter-spacing: 1.5px;
+      color: rgba(235,240,255,.84);
+      letter-spacing: 1.4px;
       flex: 1;
       line-height: 1;
+      text-transform: uppercase;
     }
+    /* Featured city — slightly brighter */
+    .flap-row:first-child .flap-city { color: rgba(220,235,255,.95); }
     .flap-char { display: inline-block; }
-    .flap-char.flipping { color: #FFD60A; }
+    .flap-char.flipping { color: rgba(140,190,255,.92); }
 
     .search-card {
       border-radius: 32px;
@@ -2059,20 +2088,30 @@
 
     /* 20 — CITIES FLIGHT BOARD */
     .flap-board {
-      background: rgba(180,210,255,.08) !important;
-      border: 1px solid rgba(255,255,255,.20) !important;
-      backdrop-filter: blur(40px) saturate(210%) !important;
-      -webkit-backdrop-filter: blur(40px) saturate(210%) !important;
-      box-shadow: 0 8px 40px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.20) !important;
+      background: linear-gradient(155deg, rgba(195,215,255,.10) 0%, rgba(165,195,255,.062) 100%) !important;
+      border: 1px solid rgba(255,255,255,.12) !important;
+      backdrop-filter: blur(52px) saturate(220%) !important;
+      -webkit-backdrop-filter: blur(52px) saturate(220%) !important;
+      box-shadow: 0 10px 48px rgba(0,0,0,.28), inset 0 1.5px 0 rgba(255,255,255,.20) !important;
     }
-    .flap-header  { border-bottom-color: rgba(255,255,255,.12) !important; }
-    .flap-title   { color: rgba(255,255,255,.58) !important; }
-    .flap-live    { color: #4FFFB0 !important; }
-    .flap-live-dot{ background: #4FFFB0 !important; }
-    .flap-row:nth-child(odd) { background: rgba(255,255,255,.03) !important; }
-    .flap-num     { color: rgba(255,255,255,.30) !important; }
-    .flap-city    { color: #ffffff !important; font-weight: 600 !important; }
-    .flap-char.flipping { color: #7AB3FF !important; }
+    .flap-header  { border-bottom-color: rgba(255,255,255,.07) !important; }
+    .flap-title   { color: rgba(215,228,255,.24) !important; }
+    .flap-live    {
+      background: rgba(74,222,128,.08) !important;
+      border-color: rgba(74,222,128,.20) !important;
+      color: rgba(74,222,128,.80) !important;
+    }
+    .flap-live-dot { background: #4ADE80 !important; box-shadow: 0 0 7px rgba(74,222,128,.58) !important; }
+    .flap-row:nth-child(odd) { background: transparent !important; }
+    .flap-row:first-child {
+      background: linear-gradient(135deg, rgba(120,180,255,.09) 0%, rgba(100,160,255,.055) 100%) !important;
+      border-color: rgba(120,180,255,.14) !important;
+    }
+    .flap-row:first-child .flap-city { color: rgba(225,238,255,.97) !important; }
+    .flap-num  { color: rgba(215,228,255,.16) !important; font-family: 'Inter', sans-serif !important; }
+    .flap-city { color: rgba(225,238,255,.86) !important; font-weight: 700 !important;
+                 letter-spacing: 1.4px !important; font-family: 'Inter', sans-serif !important; }
+    .flap-char.flipping { color: rgba(145,198,255,.94) !important; }
 
     /* 21 — ATTRIBUTION + FOOTER */
     .attribution-toggle { color: rgba(255,255,255,.55) !important; border-color: rgba(255,255,255,.16) !important; }
@@ -2491,6 +2530,24 @@
   [data-theme="dark"] .card-type-banner {
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+  }
+
+  /* ── Cities board: premium glass intelligence panel ─────────────────── */
+  [data-theme="dark"] .flap-board {
+    background: linear-gradient(155deg, rgba(200,220,255,.10) 0%, rgba(170,200,255,.060) 100%) !important;
+    backdrop-filter: blur(56px) saturate(230%) !important;
+    -webkit-backdrop-filter: blur(56px) saturate(230%) !important;
+    border: 1px solid rgba(255,255,255,.11) !important;
+    box-shadow: 0 12px 52px rgba(0,0,0,.30), inset 0 1.5px 0 rgba(255,255,255,.18) !important;
+  }
+  [data-theme="dark"] .flap-row:first-child {
+    background: linear-gradient(135deg, rgba(120,178,255,.09) 0%, rgba(100,158,255,.052) 100%) !important;
+    border-color: rgba(120,178,255,.14) !important;
+  }
+  [data-theme="dark"] .flap-live {
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgba(74,222,128,.14);
   }
 
   /* ── Hero: cinematic refinements ─────────────────────────────────────── */
