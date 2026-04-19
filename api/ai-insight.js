@@ -57,7 +57,7 @@ ${itemsList}
 
 Current time: ${timeStr}${weather ? `\nWeather: ${weather}` : ''}
 
-Give 2–3 crisp, useful insights that a savvy local would share — not generic advice. Reference specific places by name where relevant. Consider: which is the standout pick and why, any timing or crowd tip, or a practical fact about this area right now. Under 65 words. No bullet points. Write like you're texting a friend who asked for a recommendation.${langInstruction}`;
+Give 2–3 crisp, useful insights that a savvy local would share — not generic advice. Reference specific places by name where relevant. Consider: which is the standout pick and why, any timing or crowd tip, or a practical fact about this area right now. Under 65 words. No bullet points. Write like you're texting a friend who asked for a recommendation. IMPORTANT: never invent or guess specific times — only reference the current time provided above if relevant.${langInstruction}`;
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
