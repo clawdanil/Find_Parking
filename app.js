@@ -4,23 +4,9 @@ const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
 
-// App mode: hide/show hero visual — slideshow in app-mode, preview cards on web
-const _heroPreview   = document.querySelector('.hero-preview');
-const _heroSlideshow = document.getElementById('app-hero-slideshow');
-function _appHeroEl() {
-  return (document.documentElement.classList.contains('app-mode') && _heroSlideshow)
-    ? _heroSlideshow : _heroPreview;
-}
-function appModeHideHero() {
-  if (!document.documentElement.classList.contains('app-mode')) return;
-  const el = _appHeroEl(); if (!el) return;
-  el.style.cssText = 'opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .28s cubic-bezier(.4,0,1,1),transform .28s cubic-bezier(.4,0,1,1)';
-}
-function appModeShowHero() {
-  if (!document.documentElement.classList.contains('app-mode')) return;
-  const el = _appHeroEl(); if (!el) return;
-  el.style.cssText = 'opacity:1;transform:translateY(0);pointer-events:auto;transition:opacity .44s cubic-bezier(.16,1,.3,1) .06s,transform .44s cubic-bezier(.16,1,.3,1) .06s';
-}
+// App mode: no hero visual panel — functions kept as no-ops for safety
+function appModeHideHero() {}
+function appModeShowHero()  {}
 const statsBar       = document.getElementById('stats-bar');
 const metricsSection = document.getElementById('metrics-section');
 const resultsWrapper = document.getElementById('results-wrapper');
