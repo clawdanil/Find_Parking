@@ -2608,6 +2608,91 @@
     font-weight: 700 !important;
     letter-spacing: -.01em !important;
   }
+
+  /* ── App-mode: hide Live Near You cards, show premium slideshow ──── */
+  .app-mode .hero-preview { display: none !important; }
+
+  .app-hero-slideshow { display: none; }
+  .app-mode .app-hero-slideshow {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 240px;
+    border-radius: 20px;
+    overflow: hidden;
+    margin: 18px 0 0;
+    background: #06060f;
+    box-shadow:
+      0 20px 56px rgba(0,0,0,.55),
+      0 3px 12px rgba(0,0,0,.30),
+      inset 0 1px 0 rgba(255,255,255,.07);
+    transition: opacity .44s cubic-bezier(.16,1,.3,1), transform .44s cubic-bezier(.16,1,.3,1);
+  }
+
+  /* Individual slides */
+  .ahs-slide {
+    position: absolute; inset: 0;
+    background-size: cover; background-position: center center;
+    opacity: 0;
+    transition: opacity 1.1s cubic-bezier(.4,0,.2,1);
+    will-change: opacity, transform;
+  }
+  .ahs-slide.ahs-active {
+    opacity: 1;
+    animation: ahsKenBurns 7.5s ease-in-out forwards;
+  }
+  @keyframes ahsKenBurns {
+    0%   { transform: scale(1.00) translate(0,      0     ); }
+    100% { transform: scale(1.09) translate(-1.4%, -.7%); }
+  }
+
+  /* Gradient overlays — top darkens for safe-area, bottom blends into dark UI */
+  .ahs-grad-top {
+    position: absolute; top: 0; left: 0; right: 0; height: 32%;
+    background: linear-gradient(to bottom, rgba(0,0,0,.42) 0%, transparent 100%);
+    z-index: 2; pointer-events: none;
+  }
+  .ahs-grad-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 64%;
+    background: linear-gradient(to top, rgba(0,0,0,.78) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
+    z-index: 2; pointer-events: none;
+  }
+
+  /* Category badge — frosted glass pill, bottom-left */
+  .ahs-badge {
+    position: absolute; bottom: 15px; left: 15px;
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 13px 6px 10px;
+    background: rgba(7,7,18,.54);
+    backdrop-filter: blur(24px) saturate(210%);
+    -webkit-backdrop-filter: blur(24px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 100px;
+    z-index: 4;
+    box-shadow: 0 4px 18px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.13);
+    transition: opacity .32s ease;
+  }
+  .ahs-badge-icon  { font-size: .90rem; line-height: 1; }
+  .ahs-badge-label {
+    font-family: 'Inter', sans-serif;
+    font-size: .69rem; font-weight: 600; letter-spacing: .25px;
+    color: rgba(235,242,255,.93);
+  }
+
+  /* Dot progress indicators — bottom-right */
+  .ahs-dots {
+    position: absolute; bottom: 18px; right: 15px;
+    display: flex; gap: 5px; align-items: center; z-index: 4;
+  }
+  .ahs-dot {
+    height: 5px; width: 5px; border-radius: 50%;
+    background: rgba(255,255,255,.28);
+    transition: background .35s ease, width .35s cubic-bezier(.16,1,.3,1), border-radius .35s ease;
+  }
+  .ahs-dot.ahs-dot-active {
+    background: rgba(255,255,255,.90);
+    width: 16px; border-radius: 3px;
+  }
   </style>
 </head>
 <body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
@@ -2742,6 +2827,17 @@
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
+    </div>
+
+    <!-- App-mode premium city slideshow — replaces Live Near You (app=1 only) -->
+    <div class="app-hero-slideshow" id="app-hero-slideshow" aria-hidden="true">
+      <div class="ahs-grad-top"></div>
+      <div class="ahs-grad-bottom"></div>
+      <div class="ahs-badge" id="ahs-badge">
+        <span class="ahs-badge-icon" id="ahs-badge-icon">🌆</span>
+        <span class="ahs-badge-label" id="ahs-badge-label">New York</span>
+      </div>
+      <div class="ahs-dots" id="ahs-dots"></div>
     </div>
 
   </header>
@@ -3524,6 +3620,89 @@
       document.querySelectorAll('.feature-tile').forEach(t =>
         mo.observe(t, { attributes: true, attributeFilter: ['class'] })
       );
+    })();
+
+    // ── App-mode hero slideshow ─────────────────────────────────────────
+    (function initAppSlideshow() {
+      if (!document.documentElement.classList.contains('app-mode')) return;
+      const container = document.getElementById('app-hero-slideshow');
+      if (!container) return;
+
+      const SLIDES = [
+        { url: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=900&h=560&q=82', label: 'New York',       icon: '🌆' },
+        { url: 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&h=560&q=82', label: 'Cocktail Bars',  icon: '🍸' },
+        { url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=560&q=82', label: 'Fine Dining',    icon: '🍽️' },
+        { url: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&h=560&q=82', label: 'Live Events',    icon: '🎶' },
+        { url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&h=560&q=82', label: 'Tokyo',          icon: '🌆' },
+        { url: 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&h=560&q=82', label: 'Coffee Culture', icon: '☕' },
+        { url: 'https://images.unsplash.com/photo-1551024709-8f23befc548e?auto=format&fit=crop&w=900&h=560&q=82', label: 'Rooftop Bars',   icon: '🥂' },
+        { url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&h=560&q=82', label: 'Chicago',        icon: '🌆' },
+        { url: 'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=900&h=560&q=82', label: 'Festivals',      icon: '🎉' },
+        { url: 'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&h=560&q=82', label: 'London',         icon: '🌆' },
+      ];
+
+      const badgeIcon  = document.getElementById('ahs-badge-icon');
+      const badgeLabel = document.getElementById('ahs-badge-label');
+      const dotsEl     = document.getElementById('ahs-dots');
+      const badge      = document.getElementById('ahs-badge');
+
+      // Build slide divs, inserted before the gradient overlays
+      const gradTop = container.querySelector('.ahs-grad-top');
+      const slideEls = SLIDES.map(s => {
+        const el = document.createElement('div');
+        el.className = 'ahs-slide';
+        el.style.backgroundImage = `url('${s.url}')`;
+        container.insertBefore(el, gradTop);
+        return el;
+      });
+
+      // Build dot indicators
+      const dotEls = SLIDES.map(() => {
+        const d = document.createElement('div');
+        d.className = 'ahs-dot';
+        dotsEl.appendChild(d);
+        return d;
+      });
+
+      let cur = 0, timer;
+
+      function goTo(idx) {
+        slideEls[cur].classList.remove('ahs-active');
+        dotEls[cur].classList.remove('ahs-dot-active');
+        cur = idx;
+        const slide = slideEls[cur];
+        // Force reflow to re-trigger Ken Burns animation
+        slide.style.animation = 'none';
+        void slide.offsetWidth;
+        slide.style.animation = '';
+        slide.classList.add('ahs-active');
+        dotEls[cur].classList.add('ahs-dot-active');
+        // Crossfade badge label
+        badge.style.opacity = '0';
+        setTimeout(() => {
+          badgeIcon.textContent  = SLIDES[cur].icon;
+          badgeLabel.textContent = SLIDES[cur].label;
+          badge.style.opacity    = '1';
+        }, 260);
+      }
+
+      function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => {
+          const next = (cur + 1) % SLIDES.length;
+          const preloadImg = new Image();
+          preloadImg.src = SLIDES[(next + 1) % SLIDES.length].url;
+          goTo(next);
+        }, 5200);
+      }
+
+      goTo(0);
+      [1, 2].forEach(i => { const img = new Image(); img.src = SLIDES[i].url; });
+      startTimer();
+
+      // Pause slideshow while user is touching (e.g. long-press to save)
+      container.addEventListener('touchstart', () => clearInterval(timer), { passive: true });
+      container.addEventListener('touchend',   () => startTimer(),         { passive: true });
     })();
 
     // Update weather when a city chip is clicked
