@@ -2324,6 +2324,70 @@
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
   }
+
+  /* ── Hero: cinematic refinements ─────────────────────────────────────── */
+
+  /* Richer overlay: directional gradient + radial edge vignette */
+  .bg-overlay {
+    background:
+      radial-gradient(ellipse 95% 70% at 50% 50%, transparent 18%, rgba(0,0,14,.56) 100%),
+      linear-gradient(155deg, rgba(4,4,14,.92) 0%, rgba(8,8,20,.74) 48%, rgba(5,5,16,.88) 100%) !important;
+  }
+
+  /* Stronger ambient spotlight behind the headline */
+  .hero::before {
+    background: radial-gradient(ellipse, rgba(110,150,255,.072) 0%, rgba(90,130,255,.028) 48%, transparent 70%) !important;
+    width: min(900px, 90vw) !important;
+    height: 400px !important;
+  }
+
+  /* Eyebrow: frosted glass pill, more premium */
+  .hero-eyebrow {
+    background: rgba(255,255,255,.048) !important;
+    border-color: rgba(255,255,255,.13) !important;
+    backdrop-filter: blur(22px) saturate(170%);
+    -webkit-backdrop-filter: blur(22px) saturate(170%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 4px 16px rgba(0,0,0,.18);
+  }
+
+  /* Headline: tighter tracking for editorial refinement */
+  .hero-headline {
+    letter-spacing: -0.04em !important;
+    margin-bottom: 16px !important;
+  }
+
+  /* Sub: cooler, slightly muted — lets headline breathe */
+  .hero-sub {
+    color: rgba(210,225,255,.60) !important;
+    line-height: 1.65 !important;
+    max-width: 480px !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Preview panel: breathe more between cards */
+  .hero-preview { gap: 9px !important; }
+
+  /* hp-label: quieter, more editorial */
+  .hp-label {
+    font-size: .54rem !important;
+    letter-spacing: 2.8px !important;
+    color: rgba(200,215,255,.28) !important;
+    margin-bottom: 5px !important;
+  }
+
+  /* Preview card icon: slightly larger for clarity */
+  .pc-icon {
+    width: 34px !important; height: 34px !important;
+    border-radius: 11px !important;
+    font-size: 1.05rem !important;
+  }
+
+  /* Preview card name: crisper weight */
+  .pc-name {
+    font-size: .82rem !important;
+    font-weight: 700 !important;
+    letter-spacing: -.01em !important;
+  }
   </style>
 </head>
 <body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
@@ -2377,16 +2441,7 @@
       <span class="hero-line-1" data-i18n="hero_line1">Find anything.</span>
       <span class="hero-line-2 accent-word" data-i18n="hero_line2">Instantly.</span>
     </h1>
-    <p class="hero-sub" data-i18n="hero_sub">Bars, food, parking & more — hours, ratings & locations in one search.</p>
-
-    <!-- Why Orbi proof row -->
-    <div class="hero-why">
-      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why1">Real-time availability</span></span>
-      <span class="hw-sep">·</span>
-      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why2">9 categories, 1 search</span></span>
-      <span class="hw-sep">·</span>
-      <span class="hw-item"><span class="hw-check">✓</span> <span data-i18n="hero_why3">No cached results</span></span>
-    </div>
+    <p class="hero-sub" data-i18n="hero_sub">Bars, food, parking & more — live hours, ratings, and real-time availability.</p>
 
     <!-- Weather pill -->
     <div class="weather-pill" id="weather-card">
