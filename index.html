@@ -808,7 +808,7 @@
       border-top: 1px solid rgba(255,255,255,.08);
       padding-top: 16px;
     }
-    body.app-mode .feature-tiles { display: none !important; }
+    .app-mode .feature-tiles { display: none !important; }
     .tiles-row {
       display: flex;
       flex-wrap: wrap;
@@ -2159,9 +2159,8 @@
     }
 
   </style>
-  <script>if(new URLSearchParams(location.search).get('app')==='1')document.body.classList.add('app-mode');</script>
 </head>
-<body>
+<body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
 <div class="page-wrap">
 
   <nav class="site-nav" id="site-nav">
