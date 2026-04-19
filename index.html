@@ -2661,6 +2661,74 @@
     z-index: 3; pointer-events: none;
   }
 
+  /* ── App-mode: strip ALL blue — white/neutral palette only ───────────── */
+
+  /* Search button — white glass instead of blue */
+  .app-mode .search-btn {
+    background: rgba(255,255,255,.16) !important;
+    border: 1px solid rgba(255,255,255,.32) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.28), inset 0 1.5px 0 rgba(255,255,255,.24) !important;
+  }
+  .app-mode .search-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,.24) !important;
+    border-color: rgba(255,255,255,.48) !important;
+    box-shadow: 0 8px 32px rgba(0,0,0,.32), inset 0 1.5px 0 rgba(255,255,255,.28) !important;
+  }
+
+  /* Input focus ring — white glow */
+  .app-mode .input-field:focus {
+    border-color: rgba(255,255,255,.48) !important;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.08), inset 0 1px 0 rgba(255,255,255,.10) !important;
+  }
+
+  /* Spotlight radial behind search card — neutralise blue tint */
+  .app-mode .sp {
+    background: radial-gradient(circle, rgba(255,255,255,.06) 0%, transparent 70%) !important;
+  }
+
+  /* Google Maps / directions button — white neutral */
+  .app-mode .gmaps-btn {
+    background: rgba(255,255,255,.08) !important;
+    border: 1px solid rgba(255,255,255,.20) !important;
+    color: rgba(235,240,255,.78) !important;
+  }
+  .app-mode .gmaps-btn:hover {
+    background: rgba(255,255,255,.15) !important;
+    border-color: rgba(255,255,255,.34) !important;
+    color: #ffffff !important;
+  }
+
+  /* Tabs bar — neutral glass, no blue tint */
+  .app-mode .tabs-bar {
+    background: rgba(255,255,255,.06) !important;
+  }
+  .app-mode .tab-btn.active {
+    background: rgba(255,255,255,.18) !important;
+    color: #ffffff !important;
+    border-color: rgba(255,255,255,.32) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+  }
+
+  /* Bottom nav — white/neutral active, no blue */
+  .app-mode .abn-item {
+    color: rgba(255,255,255,.36) !important;
+  }
+  .app-mode .abn-item.active {
+    background: rgba(255,255,255,.13) !important;
+    color: rgba(255,255,255,.97) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.20), 0 2px 10px rgba(0,0,0,.18) !important;
+  }
+
+  /* Lang picker hover/active — neutral */
+  .app-mode .lang-option:hover   { background: rgba(255,255,255,.11) !important; }
+  .app-mode .lang-option--active { background: rgba(255,255,255,.16) !important; }
+
+  /* Attribution links — white not blue */
+  .app-mode .attr-card a:hover {
+    color: rgba(255,255,255,.90) !important;
+    border-bottom-color: rgba(255,255,255,.28) !important;
+  }
+
   </style>
 </head>
 <body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
@@ -3592,16 +3660,14 @@
       if (!container) return;
 
       const SLIDES = [
-        'https://images.unsplash.com/photo-1534430480872-3498386e7856?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1551024709-8f23befc548e?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?auto=format&fit=crop&w=900&h=560&q=82',
-        'https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?auto=format&fit=crop&w=900&h=560&q=82',
+        'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&h=560&q=82', /* concert stage — vivid lights on black */
+        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&h=560&q=82', /* neon cocktail bar — black bg */
+        'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&h=560&q=82', /* DJ / music venue — dark colour wash */
+        'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&h=560&q=82', /* bar with glowing bottles on black */
+        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&h=560&q=82', /* candlelit fine-dining — dark */
+        'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&h=560&q=82', /* latte art — dark surface */
+        'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=900&h=560&q=82', /* neon city street at night */
+        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&h=560&q=82', /* live music — stage lights on black */
       ];
 
       // Build slide divs, inserted before the gradient overlays
