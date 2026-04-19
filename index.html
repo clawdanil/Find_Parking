@@ -2118,6 +2118,15 @@
       top: auto;
       bottom: calc(100% + 10px);
       z-index: 99999;
+      transform: translateY(8px) scale(.96);
+      transition: opacity .28s cubic-bezier(.34,1.56,.64,1), transform .28s cubic-bezier(.34,1.56,.64,1), visibility 0s .28s;
+    }
+    .app-mode .lang-dropdown--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      transition: opacity .28s cubic-bezier(.34,1.56,.64,1), transform .28s cubic-bezier(.34,1.56,.64,1), visibility 0s 0s;
     }
     /* App mode: hide popular cities */
     .app-mode .chips { display: none !important; }
