@@ -329,75 +329,83 @@
                  panelFloat 5s ease-in-out 1.8s infinite;
     }
     .hp-label {
-      display: flex; align-items: center; gap: 6px;
-      font-size: .58rem; font-weight: 700; letter-spacing: 2px;
-      text-transform: uppercase; color: rgba(235,240,255,.35);
-      margin-bottom: 2px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: .50rem; font-weight: 700; letter-spacing: 3.2px;
+      text-transform: uppercase; color: rgba(235,240,255,.26);
+      margin-bottom: 7px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255,255,255,.055);
     }
     .hp-dot {
-      width: 5px; height: 5px; border-radius: 50%; background: #4ADE80;
-      animation: eyebrowPulse 2.4s ease-in-out infinite;
+      width: 6px; height: 6px; border-radius: 50%; background: #4ADE80;
+      flex-shrink: 0;
+      box-shadow: 0 0 6px rgba(74,222,128,.55);
+      animation: liveRing 2.4s ease-in-out infinite;
+    }
+    @keyframes liveRing {
+      0%,100% { box-shadow: 0 0 0 0 rgba(74,222,128,.42), 0 0 6px rgba(74,222,128,.40); }
+      60%     { box-shadow: 0 0 0 5px rgba(74,222,128,.0), 0 0 6px rgba(74,222,128,.15); }
     }
     .preview-card {
-      display: flex; align-items: center; gap: 11px;
-      padding: 10px 13px;
-      background: rgba(255,255,255,.065);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      border: 1px solid rgba(255,255,255,.12);
-      border-left: 2.5px solid var(--pc-accent, rgba(255,255,255,.15));
-      border-radius: 13px;
+      display: flex; align-items: center; gap: 12px;
+      padding: 11px 14px;
+      background: linear-gradient(135deg, var(--pc-bg, rgba(255,255,255,.07)) 0%, rgba(255,255,255,.04) 100%);
+      backdrop-filter: blur(24px) saturate(180%);
+      -webkit-backdrop-filter: blur(24px) saturate(180%);
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 15px;
       position: relative; overflow: hidden;
-      transition: background .2s, transform .2s;
+      box-shadow: 0 4px 20px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.11);
+      transition: transform .26s cubic-bezier(.16,1,.3,1), box-shadow .26s ease, border-color .2s ease;
       animation: fadeUp .55s ease both;
       animation-delay: var(--d, 0s);
       cursor: pointer;
-      text-decoration: none;
     }
-    /* shimmer sweep on each card */
-    .preview-card::after {
-      content: '';
-      position: absolute; top: 0; left: 0;
-      width: 50%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,.055), transparent);
-      animation: shimmerSweep 3.5s ease-in-out infinite;
-      animation-delay: var(--d, 0s);
-      pointer-events: none;
+    .preview-card:hover {
+      transform: translateX(-4px);
+      border-color: rgba(255,255,255,.17);
+      box-shadow: 0 10px 36px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.18);
     }
-    .preview-card:hover { background: rgba(255,255,255,.11); transform: translateX(-3px); }
     .preview-card:hover .pc-map-hint { opacity: 1; }
     .pc-map-hint {
       position: absolute; top: 7px; right: 9px;
-      font-size: .55rem; font-weight: 700; letter-spacing: .5px;
-      color: rgba(235,240,255,.38);
+      font-size: .54rem; font-weight: 700; letter-spacing: .4px;
+      color: rgba(235,240,255,.32);
       opacity: 0; transition: opacity .2s;
       pointer-events: none; z-index: 2;
     }
     .preview-card.refreshing { animation: cardSlideIn .4s ease both; }
     .pc-icon {
-      width: 32px; height: 32px; border-radius: 10px; flex-shrink: 0;
+      width: 36px; height: 36px; border-radius: 12px; flex-shrink: 0;
       background: var(--pc-bg, rgba(255,255,255,.08));
       display: flex; align-items: center; justify-content: center;
-      font-size: 1rem; line-height: 1; z-index: 1;
+      font-size: 1.1rem; line-height: 1; z-index: 1;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 2px 8px rgba(0,0,0,.20);
     }
     .pc-body { flex: 1; min-width: 0; z-index: 1; }
     .pc-name {
-      font-size: .8rem; font-weight: 700;
-      color: rgba(235,240,255,.92);
+      font-size: .82rem; font-weight: 700; letter-spacing: -.01em;
+      color: rgba(235,240,255,.94);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
     .pc-meta {
-      font-size: .66rem; font-weight: 500;
-      color: rgba(235,240,255,.40); margin-top: 2px;
+      font-size: .63rem; font-weight: 500; letter-spacing: .05px;
+      color: rgba(235,240,255,.34); margin-top: 2px;
     }
     .pc-status {
-      font-size: .6rem; font-weight: 800;
-      padding: 2px 8px; border-radius: 100px;
+      font-size: .58rem; font-weight: 700; letter-spacing: .2px;
+      padding: 3px 9px; border-radius: 100px;
       white-space: nowrap; flex-shrink: 0; z-index: 1;
+      border: 1px solid;
     }
-    .pc-open { background: rgba(22,163,74,.20); color: #4ADE80;
-               animation: badgePulse 2.8s ease-in-out infinite; }
-    .pc-busy { background: rgba(234,179,8,.18); color: #FCD34D; }
+    .pc-open {
+      background: rgba(74,222,128,.07); color: rgba(74,222,128,.82);
+      border-color: rgba(74,222,128,.20);
+    }
+    .pc-busy {
+      background: rgba(248,113,113,.07); color: rgba(248,113,113,.68);
+      border-color: rgba(248,113,113,.18);
+    }
     /* On touch/small screens: pull out of absolute flow, stack below hero content */
     @media (max-width: 1060px), (hover: none) {
       .hero-preview {
@@ -2014,22 +2022,24 @@
 
     /* 18 — HERO PREVIEW CARDS */
     .preview-card {
-      background: rgba(180,210,255,.09) !important;
-      border: 1px solid rgba(255,255,255,.20) !important;
-      backdrop-filter: blur(28px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-      box-shadow: 0 4px 20px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.18) !important;
+      background: linear-gradient(135deg, var(--pc-bg, rgba(190,215,255,.085)) 0%, rgba(255,255,255,.038) 100%) !important;
+      border: 1px solid rgba(255,255,255,.13) !important;
+      backdrop-filter: blur(36px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(36px) saturate(200%) !important;
+      box-shadow: 0 6px 26px rgba(0,0,0,.24), inset 0 1.5px 0 rgba(255,255,255,.18) !important;
     }
-    .preview-card::after { background: linear-gradient(90deg, transparent, rgba(255,255,255,.07), transparent) !important; }
     .preview-card:hover  {
-      background: rgba(180,210,255,.16) !important;
-      border-color: rgba(255,255,255,.32) !important;
+      border-color: rgba(255,255,255,.22) !important;
+      box-shadow: 0 12px 40px rgba(0,0,0,.32), inset 0 1.5px 0 rgba(255,255,255,.24) !important;
     }
-    .pc-name     { color: #ffffff !important; font-weight: 600 !important; }
-    .pc-meta     { color: rgba(255,255,255,.58) !important; }
-    .hp-label    { color: rgba(255,255,255,.55) !important; }
-    .hp-dot      { background: #4FFFB0 !important; }
-    .pc-map-hint { color: rgba(255,255,255,.50) !important; }
+    .pc-icon     { box-shadow: inset 0 1.5px 0 rgba(255,255,255,.28), 0 2px 10px rgba(0,0,0,.24) !important; }
+    .pc-name     { color: rgba(240,246,255,.96) !important; font-weight: 700 !important; letter-spacing: -.01em !important; }
+    .pc-meta     { color: rgba(215,228,255,.38) !important; }
+    .pc-open     { background: rgba(74,222,128,.08) !important; color: rgba(74,222,128,.80) !important; border-color: rgba(74,222,128,.22) !important; }
+    .pc-busy     { background: rgba(248,113,113,.08) !important; color: rgba(248,113,113,.68) !important; border-color: rgba(248,113,113,.20) !important; }
+    .hp-label    { color: rgba(215,228,255,.28) !important; border-bottom-color: rgba(255,255,255,.06) !important; }
+    .hp-dot      { background: #4ADE80 !important; box-shadow: 0 0 7px rgba(74,222,128,.60) !important; }
+    .pc-map-hint { color: rgba(215,228,255,.38) !important; }
 
     /* 19 — LOADING METER */
     .meter-head {
@@ -2269,31 +2279,36 @@
     box-shadow: 0 4px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
   }
 
-  /* Preview cards: richer glass, smoother hover */
+  /* Live Near You: premium glass cards */
   [data-theme="dark"] .preview-card {
-    backdrop-filter: blur(28px) saturate(190%);
-    -webkit-backdrop-filter: blur(28px) saturate(190%);
-    border: 1px solid rgba(255,255,255,.09);
-    box-shadow: 0 6px 28px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.13);
-    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .2s ease;
+    background: linear-gradient(135deg, var(--pc-bg, rgba(195,218,255,.088)) 0%, rgba(255,255,255,.036) 100%) !important;
+    backdrop-filter: blur(44px) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(44px) saturate(210%) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 6px 28px rgba(0,0,0,.26), inset 0 1.5px 0 rgba(255,255,255,.16) !important;
+    transition: transform .26s cubic-bezier(.16,1,.3,1), box-shadow .26s ease, border-color .2s ease !important;
   }
   [data-theme="dark"] .preview-card:hover {
-    transform: translateX(-4px);
-    border-color: rgba(255,255,255,.18);
-    box-shadow: 0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.20);
+    transform: translateX(-5px) !important;
+    border-color: rgba(255,255,255,.20) !important;
+    box-shadow: 0 16px 44px rgba(0,0,0,.34), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
   }
-
-  /* Status badges: subtle borders, better contrast */
+  [data-theme="dark"] .pc-icon {
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.28), 0 3px 10px rgba(0,0,0,.26) !important;
+  }
   [data-theme="dark"] .pc-status.pc-open {
-    background: rgba(22,163,74,.14);
-    color: #4ADE80;
-    border: 1px solid rgba(74,222,128,.18);
-    box-shadow: inset 0 1px 0 rgba(74,222,128,.12);
+    background: rgba(74,222,128,.07) !important;
+    color: rgba(74,222,128,.82) !important;
+    border-color: rgba(74,222,128,.20) !important;
   }
   [data-theme="dark"] .pc-status.pc-busy {
-    background: rgba(220,38,38,.13);
-    color: #F87171;
-    border: 1px solid rgba(248,113,113,.18);
+    background: rgba(248,113,113,.07) !important;
+    color: rgba(248,113,113,.68) !important;
+    border-color: rgba(248,113,113,.18) !important;
+  }
+  [data-theme="dark"] .hp-label {
+    color: rgba(210,225,255,.26) !important;
+    border-bottom-color: rgba(255,255,255,.055) !important;
   }
 
   /* ── App-mode bottom navigation ─────────────────────────────────────── */
@@ -3098,39 +3113,64 @@
       if (!cards.length) return;
 
       const STYLES = [
-        { accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-        { accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-        { accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-        { accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-        { accent:'#4ADE80', bg:'rgba(74,222,128,.10)'  },
-        { accent:'#FB923C', bg:'rgba(251,146,60,.10)'  },
-        { accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-        { accent:'#34D399', bg:'rgba(52,211,153,.10)'  },
-        { accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
+        { accent:'#F59E0B', bg:'rgba(245,158,11,.10)' },
+        { accent:'#67E8F9', bg:'rgba(103,232,249,.08)' },
+        { accent:'#FB7185', bg:'rgba(251,113,133,.09)' },
+        { accent:'#F472B6', bg:'rgba(244,114,182,.09)' },
+        { accent:'#4ADE80', bg:'rgba(74,222,128,.09)'  },
+        { accent:'#FB923C', bg:'rgba(251,146,60,.09)'  },
+        { accent:'#A78BFA', bg:'rgba(167,139,250,.09)' },
+        { accent:'#34D399', bg:'rgba(52,211,153,.09)'  },
+        { accent:'#C084FC', bg:'rgba(192,132,252,.09)' },
       ];
-      const ICONS = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️','🎬','🎶'];
-      const TAG_ICON = {
-        // food
-        restaurant:'🍽️', fast_food:'🍔', food_court:'🍽️',
-        diner:'🍽️', bistro:'🍽️', canteen:'🍽️',
-        // drinks
-        cafe:'☕', bar:'🍺', pub:'🍺', biergarten:'🍺',
-        nightclub:'🎶', lounge:'🍸', brewery:'🍺', tavern:'🍺',
-        // shopping
-        mall:'🛍️', department_store:'🛍️', supermarket:'🛒',
-        clothing:'👗', electronics:'📱', convenience:'🛒',
-        shopping_centre:'🛍️',
-        // fitness
-        fitness_centre:'🏋️', sports_centre:'🏋️', gym:'🏋️',
-        // entertainment
-        cinema:'🎬', theatre:'🎭', bowling_alley:'🎳',
-        amusement_arcade:'🕹️', escape_game:'🔐',
-        miniature_golf:'⛳', playground:'🎠',
-        // other
-        park:'🌳', parking:'🅿️', fuel:'⛽',
-        hotel:'🏨', hostel:'🏨', pharmacy:'💊', hospital:'🏥',
-        bank:'🏦', atm:'🏧', library:'📚', school:'🏫',
-      };
+
+      // Deterministic icon resolver — name keywords take priority over generic OSM tags
+      // because many bars/breweries/grills are incorrectly tagged as amenity=restaurant in OSM
+      function resolveIcon(tags, name, _feature) {
+        const n = (name || '').toLowerCase();
+        const am = tags.amenity || '', le = tags.leisure || '', sh = tags.shop || '';
+
+        // 1. Unambiguous specific OSM amenity types
+        const SPECIFIC_AM = { bar:'🍺', pub:'🍺', biergarten:'🍺', brewery:'🍺', tavern:'🍺',
+          nightclub:'🎶', lounge:'🍸', cafe:'☕', fitness_centre:'🏋️', cinema:'🎬',
+          theatre:'🎭', bowling_alley:'🎳', parking:'🅿️', fuel:'⛽', park:'🌳' };
+        if (SPECIFIC_AM[am]) return SPECIFIC_AM[am];
+        if (le === 'fitness_centre' || le === 'sports_centre') return '🏋️';
+        const SPECIFIC_SH = { mall:'🛍️', department_store:'🛍️', supermarket:'🛒',
+          clothing:'👗', electronics:'📱', convenience:'🛒', shopping_centre:'🛍️' };
+        if (SPECIFIC_SH[sh]) return SPECIFIC_SH[sh];
+
+        // 2. Name-based: bar/drinks keywords (many bars tagged amenity=restaurant in OSM)
+        if (n.match(/\b(bar|pub|tavern|brewery|taproom|tap\s*house|beer\s*hall|beer\s*garden|ale\s*house|cocktail|speakeasy|saloon|biergarten)\b/) ||
+            n.match(/bar\s*[&+]\s*(grill|kitchen)|grill\s*[&+]\s*bar/)) return '🍺';
+
+        // 3. Name-based: coffee
+        if (n.match(/coffee|starbucks|dunkin|espresso|latte|cappuccino|\bcafe\b|\bcaffe\b/)) return '☕';
+
+        // 4. Name-based: gym/fitness
+        if (n.match(/\bgym\b|fitness|crossfit|equinox|planet\s*fitness|soulcycle|solidcore/)) return '🏋️';
+
+        // 5. Name-based: cinema/entertainment
+        if (n.match(/cinema|theater|theatre|\bamc\b|\bregal\b|\bimax\b/)) return '🎬';
+
+        // 6. Name-based: shopping
+        if (n.match(/\bshop\b|\bmall\b|\bmarket\b|boutique|retail/)) return '🛍️';
+
+        // 7. Trust the API feature source for bars (fetched specifically from OSM bars query)
+        if (_feature === 'bars') return '🍺';
+        if (_feature === 'coffee') return '☕';
+
+        // 8. Generic food tags
+        if (['restaurant','fast_food','food_court','diner','bistro','canteen'].includes(am)) return '🍽️';
+
+        // 9. Name-based: food as last resort
+        if (n.match(/pizza|sushi|burger|taco|bbq|steakhouse|\bgrill\b|kitchen|eatery|diner|brasserie/)) return '🍽️';
+
+        // 10. Feature fallback then neutral
+        const F = { food:'🍽️', bars:'🍺', coffee:'☕', gym:'🏋️', shopping:'🛍️',
+                    entertainment:'🎭', events:'🎟️', transit:'🚇', parking:'🅿️' };
+        return F[_feature] || '📍';
+      }
 
       function haversineMi(la1,lo1,la2,lo2){const R=d=>d*Math.PI/180,dLa=R(la2-la1),dLo=R(lo2-lo1),a=Math.sin(dLa/2)**2+Math.cos(R(la1))*Math.cos(R(la2))*Math.sin(dLo/2)**2;return 3958.8*2*Math.asin(Math.sqrt(a));}
 
@@ -3203,16 +3243,8 @@
             const isOpen = tags.open_status === 'Open now';
             const isClosed = tags.open_status === 'Closed now';
             const s = STYLES[i % STYLES.length];
-            const nameLow = name.toLowerCase();
-            const nameIcon = nameLow.match(/coffee|starbucks|cafe|brew|espresso|latte/) ? '☕'
-              : nameLow.match(/bar|pub|tavern|grill|lounge|brewery|tap|ale|beer/) ? '🍺'
-              : nameLow.match(/pizza|sushi|burger|taco|bbq|steakhouse|diner/) ? '🍽️'
-              : nameLow.match(/gym|fitness|crossfit|equinox|planet fitness/) ? '🏋️'
-              : nameLow.match(/cinema|theater|theatre|amc|regal/) ? '🎬'
-              : nameLow.match(/shop|store|mall|market/) ? '🛍️'
-              : null;
             return {
-              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || nameIcon || featureIcon[el._feature] || '🍽️', name,
+              icon: resolveIcon(tags, name, el._feature), name,
               meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
               status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
               sc: isClosed ? 'pc-busy' : 'pc-open', ...s,

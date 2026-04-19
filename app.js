@@ -4,15 +4,15 @@ const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
 
-// App mode: hide/show hero preview on search
+// App mode: hide/show hero preview — hide during active search, show at idle
 const _heroPreview = document.querySelector('.hero-preview');
 function appModeHideHero() {
-  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
-    _heroPreview.style.cssText = 'opacity:0;pointer-events:none;transition:opacity .3s ease';
+  if (!document.documentElement.classList.contains('app-mode') || !_heroPreview) return;
+  _heroPreview.style.cssText = 'opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .28s cubic-bezier(.4,0,1,1),transform .28s cubic-bezier(.4,0,1,1)';
 }
 function appModeShowHero() {
-  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
-    _heroPreview.style.cssText = 'opacity:1;pointer-events:auto;transition:opacity .3s ease';
+  if (!document.documentElement.classList.contains('app-mode') || !_heroPreview) return;
+  _heroPreview.style.cssText = 'opacity:1;transform:translateY(0);pointer-events:auto;transition:opacity .44s cubic-bezier(.16,1,.3,1) .06s,transform .44s cubic-bezier(.16,1,.3,1) .06s';
 }
 const statsBar       = document.getElementById('stats-bar');
 const metricsSection = document.getElementById('metrics-section');
@@ -113,12 +113,12 @@ async function selectAC(s) {
 streetInput.addEventListener('input', () => {
   clearTimeout(acTimer);
   const q = streetInput.value.trim();
-  if (q.length < 2) { acDropdown.hidden = true; return; }
+  if (q.length < 2) { acDropdown.hidden = true; if (q.length === 0) appModeShowHero(); return; }
   acTimer = setTimeout(async () => renderACDropdown(await fetchACSuggestions(q)), 100);
 });
 
 streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
-streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); appModeShowHero(); });
+streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
 let allSpots     = [];
