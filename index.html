@@ -2757,21 +2757,18 @@
           }
         } catch {}
 
-        // Fetch real nearby places — mix multiple features for variety
+        // Fetch real nearby places — food + bars + coffee for variety
         try {
-          const features = ['food', 'bars', 'coffee', 'gym', 'shopping', 'entertainment'];
           const results = await Promise.allSettled(
-            features.map(f => fetch('/api/nearby', {
+            ['food', 'bars', 'coffee'].map(f => fetch('/api/nearby', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ lat, lng, feature: f, units: 'imperial' }),
             }).then(r => r.ok ? r.json() : null))
           );
-          const combined = results.flatMap(r => r.status === 'fulfilled' && r.value ? (r.value.elements || []) : [])
+          const elements = results
+            .flatMap(r => r.status === 'fulfilled' && r.value ? (r.value.elements || []) : [])
             .filter(el => el.tags?.name);
-          const res = { ok: combined.length > 0 };
-          if (!res.ok) return;
-          const elements = combined;
           if (elements.length < 2) return;
 
           const realVenues = elements.slice(0, 10).map((el, i) => {
