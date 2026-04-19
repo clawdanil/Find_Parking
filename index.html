@@ -2296,6 +2296,88 @@
     border: 1px solid rgba(248,113,113,.18);
   }
 
+  /* ── App-mode bottom navigation ─────────────────────────────────────── */
+  .app-bottom-nav { display: none; }
+
+  .app-mode .app-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 1000;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+    padding: 8px 6px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 16px));
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-snap-type: x mandatory;
+    /* Glass bar — gradient ground + frosted material */
+    background: linear-gradient(180deg,
+      rgba(5,5,15,.02)  0%,
+      rgba(6,6,16,.88) 18%,
+      rgba(6,6,16,.97) 100%);
+    backdrop-filter: blur(56px) saturate(240%);
+    -webkit-backdrop-filter: blur(56px) saturate(240%);
+    border-top: 1px solid rgba(255,255,255,.10);
+    box-shadow:
+      0 -1px 0 rgba(255,255,255,.06),
+      inset 0 1px 0 rgba(255,255,255,.13),
+      0 -16px 48px rgba(0,0,0,.30);
+  }
+  .app-mode .app-bottom-nav::-webkit-scrollbar { display: none; }
+
+  /* Push page content above the fixed bar */
+  .app-mode .page-wrap { padding-bottom: 88px; }
+
+  .abn-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px 11px 6px;
+    min-width: 60px;
+    flex-shrink: 0;
+    border: none;
+    border-radius: 13px;
+    background: transparent;
+    cursor: pointer;
+    color: rgba(195,215,255,.42);
+    -webkit-tap-highlight-color: transparent;
+    transition: color .18s ease, background .20s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .20s ease;
+    scroll-snap-align: start;
+  }
+  .abn-item:active {
+    transform: scale(.88);
+    transition-duration: .08s;
+  }
+  .abn-item.active {
+    background: linear-gradient(145deg, rgba(100,165,255,.24) 0%, rgba(72,135,255,.15) 100%);
+    color: rgba(215,238,255,.97);
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.22), 0 3px 14px rgba(80,140,255,.20);
+  }
+  .abn-icon {
+    font-size: 1.28rem;
+    line-height: 1;
+    display: block;
+    transition: transform .22s cubic-bezier(.16,1,.3,1);
+  }
+  .abn-item.active .abn-icon { transform: scale(1.12); }
+  .abn-label {
+    font-size: .55rem;
+    font-weight: 700;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 56px;
+  }
+
   /* Weather pill: ambient glass tag — matches eyebrow pill visual language */
   [data-theme="dark"] .weather-pill {
     background: linear-gradient(135deg, rgba(200,220,255,.09) 0%, rgba(168,202,255,.056) 100%) !important;
@@ -2847,6 +2929,46 @@
 
 </div><!-- /.page-wrap -->
 
+<!-- App-mode bottom navigation (visible only when ?app=1) -->
+<nav class="app-bottom-nav" id="app-bottom-nav" aria-label="Category navigation">
+  <button class="abn-item" data-feature="food">
+    <span class="abn-icon">🍽️</span>
+    <span class="abn-label">Food</span>
+  </button>
+  <button class="abn-item" data-feature="bars">
+    <span class="abn-icon">🍺</span>
+    <span class="abn-label">Bars</span>
+  </button>
+  <button class="abn-item" data-feature="coffee">
+    <span class="abn-icon">☕</span>
+    <span class="abn-label">Coffee</span>
+  </button>
+  <button class="abn-item" data-feature="gym">
+    <span class="abn-icon">🏋️</span>
+    <span class="abn-label">Gym</span>
+  </button>
+  <button class="abn-item" data-feature="shopping">
+    <span class="abn-icon">🛍️</span>
+    <span class="abn-label">Shop</span>
+  </button>
+  <button class="abn-item" data-feature="entertainment">
+    <span class="abn-icon">🎭</span>
+    <span class="abn-label">Entertain</span>
+  </button>
+  <button class="abn-item" data-feature="events">
+    <span class="abn-icon">🎟️</span>
+    <span class="abn-label">Events</span>
+  </button>
+  <button class="abn-item" data-feature="transit">
+    <span class="abn-icon">🚇</span>
+    <span class="abn-label">Transit</span>
+  </button>
+  <button class="abn-item" data-feature="parking">
+    <span class="abn-icon">🅿️</span>
+    <span class="abn-label">Parking</span>
+  </button>
+</nav>
+
   <script>
     // ── Flight board (split-flap) — restored original working version ─────
     (function() {
@@ -3288,6 +3410,36 @@
         document.getElementById('w-desc').textContent = 'Weather unavailable';
         document.getElementById('weather-card').classList.remove('loading');
       }
+    })();
+
+    // ── App-mode bottom navigation ──────────────────────────────────────
+    (function () {
+      const nav = document.getElementById('app-bottom-nav');
+      if (!nav || !document.documentElement.classList.contains('app-mode')) return;
+
+      const items = Array.from(nav.querySelectorAll('.abn-item'));
+
+      function setActive(feat) {
+        items.forEach(i => i.classList.toggle('active', i.dataset.feature === feat));
+      }
+
+      items.forEach(item => {
+        item.addEventListener('click', () => {
+          setActive(item.dataset.feature);
+          // Delegate to the existing hidden feature tile's click handler
+          const tile = document.querySelector(`.feature-tile[data-feature="${item.dataset.feature}"]`);
+          if (tile) tile.click();
+        });
+      });
+
+      // Keep bottom nav in sync if a feature tile is activated by other means (e.g. URL params)
+      const mo = new MutationObserver(() => {
+        const active = document.querySelector('.feature-tile.active');
+        if (active) setActive(active.dataset.feature);
+      });
+      document.querySelectorAll('.feature-tile').forEach(t =>
+        mo.observe(t, { attributes: true, attributeFilter: ['class'] })
+      );
     })();
 
     // Update weather when a city chip is clicked
