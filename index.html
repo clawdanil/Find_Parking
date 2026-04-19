@@ -2691,6 +2691,16 @@
         { accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
       ];
       const ICONS = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️','🎬','🎶'];
+      const TAG_ICON = {
+        restaurant:'🍽️', cafe:'☕', bar:'🍺', pub:'🍺',
+        fast_food:'🍔', food_court:'🍽️', ice_cream:'🍦',
+        shop:'🛍️', supermarket:'🛒', convenience:'🛒',
+        gym:'🏋️', fitness_centre:'🏋️', sports_centre:'⚽',
+        cinema:'🎬', theatre:'🎭', nightclub:'🎶',
+        park:'🌳', parking:'🅿️', fuel:'⛽',
+        hotel:'🏨', hostel:'🏨', pharmacy:'💊', hospital:'🏥',
+        bank:'🏦', atm:'🏧', library:'📚', school:'🏫',
+      };
 
       function haversineMi(la1,lo1,la2,lo2){const R=d=>d*Math.PI/180,dLa=R(la2-la1),dLo=R(lo2-lo1),a=Math.sin(dLa/2)**2+Math.cos(R(la1))*Math.cos(R(la2))*Math.sin(dLo/2)**2;return 3958.8*2*Math.asin(Math.sqrt(a));}
 
@@ -2760,7 +2770,7 @@
             const isClosed = tags.open_status === 'Closed now';
             const s = STYLES[i % STYLES.length];
             return {
-              icon: ICONS[i % ICONS.length], name,
+              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.shop] || TAG_ICON[tags.leisure] || TAG_ICON[tags.tourism] || ICONS[i % ICONS.length], name,
               meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
               status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
               sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
