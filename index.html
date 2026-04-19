@@ -2609,57 +2609,9 @@
     letter-spacing: -.01em !important;
   }
 
-  /* ── App-mode: hide Live Near You cards, show premium slideshow ──── */
+
+  /* App-mode: hide Live Near You cards (no replacement) */
   .app-mode .hero-preview { display: none !important; }
-
-  .app-hero-slideshow { display: none; }
-  .app-mode .app-hero-slideshow {
-    display: block;
-    position: relative;
-    width: 100%;
-    height: 240px;
-    border-radius: 20px;
-    overflow: hidden;
-    margin: 18px 0 0;
-    background: #06060f;
-    box-shadow:
-      0 20px 56px rgba(0,0,0,.55),
-      0 3px 12px rgba(0,0,0,.30),
-      inset 0 1px 0 rgba(255,255,255,.07);
-    transition: opacity .44s cubic-bezier(.16,1,.3,1), transform .44s cubic-bezier(.16,1,.3,1);
-  }
-
-  /* Individual slides */
-  .ahs-slide {
-    position: absolute; inset: 0;
-    background-size: cover; background-position: center center;
-    opacity: 0;
-    z-index: 1;
-    transition: opacity 1.0s ease;
-    will-change: opacity, transform;
-  }
-  /* Incoming slide sits on top — prevents blank gap during crossfade */
-  .ahs-slide.ahs-active {
-    opacity: .72;
-    z-index: 2;
-    animation: ahsKenBurns 7.5s ease-in-out;
-  }
-  @keyframes ahsKenBurns {
-    0%   { transform: scale(1.00) translate(0,     0    ); }
-    100% { transform: scale(1.08) translate(-1.2%, -.6%); }
-  }
-
-  /* Gradient overlays — stronger to tame bright city shots */
-  .ahs-grad-top {
-    position: absolute; top: 0; left: 0; right: 0; height: 40%;
-    background: linear-gradient(to bottom, rgba(0,0,0,.55) 0%, transparent 100%);
-    z-index: 3; pointer-events: none;
-  }
-  .ahs-grad-bottom {
-    position: absolute; bottom: 0; left: 0; right: 0; height: 70%;
-    background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.40) 50%, transparent 100%);
-    z-index: 3; pointer-events: none;
-  }
 
   /* ── App-mode: strip ALL blue — white/neutral palette only ───────────── */
 
@@ -2863,12 +2815,6 @@
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
-    </div>
-
-    <!-- App-mode premium city slideshow — replaces Live Near You (app=1 only) -->
-    <div class="app-hero-slideshow" id="app-hero-slideshow" aria-hidden="true">
-      <div class="ahs-grad-top"></div>
-      <div class="ahs-grad-bottom"></div>
     </div>
 
   </header>
@@ -3651,66 +3597,6 @@
       document.querySelectorAll('.feature-tile').forEach(t =>
         mo.observe(t, { attributes: true, attributeFilter: ['class'] })
       );
-    })();
-
-    // ── App-mode hero slideshow ─────────────────────────────────────────
-    (function initAppSlideshow() {
-      if (!document.documentElement.classList.contains('app-mode')) return;
-      const container = document.getElementById('app-hero-slideshow');
-      if (!container) return;
-
-      const SLIDES = [
-        'https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=900&h=560&q=82', /* concert stage — vivid lights on black */
-        'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=900&h=560&q=82', /* neon cocktail bar — black bg */
-        'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&h=560&q=82', /* DJ / music venue — dark colour wash */
-        'https://images.unsplash.com/photo-1470337458703-46ad1756a187?auto=format&fit=crop&w=900&h=560&q=82', /* bar with glowing bottles on black */
-        'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?auto=format&fit=crop&w=900&h=560&q=82', /* candlelit fine-dining — dark */
-        'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=900&h=560&q=82', /* latte art — dark surface */
-        'https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=900&h=560&q=82', /* neon city street at night */
-        'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=900&h=560&q=82', /* live music — stage lights on black */
-      ];
-
-      // Build slide divs, inserted before the gradient overlays
-      const gradTop = container.querySelector('.ahs-grad-top');
-      const slideEls = SLIDES.map(url => {
-        const el = document.createElement('div');
-        el.className = 'ahs-slide';
-        el.style.backgroundImage = `url('${url}')`;
-        container.insertBefore(el, gradTop);
-        return el;
-      });
-
-      let cur = 0, timer;
-
-      function goTo(idx) {
-        slideEls[cur].classList.remove('ahs-active');
-        cur = idx;
-        const slide = slideEls[cur];
-        slide.style.animation = 'none';
-        // Double rAF ensures browser commits the animation reset before restarting
-        requestAnimationFrame(() => requestAnimationFrame(() => {
-          slide.style.animation = '';
-          slide.classList.add('ahs-active');
-        }));
-      }
-
-      function startTimer() {
-        clearInterval(timer);
-        timer = setInterval(() => {
-          const next = (cur + 1) % SLIDES.length;
-          const preloadImg = new Image();
-          preloadImg.src = SLIDES[(next + 1) % SLIDES.length];
-          goTo(next);
-        }, 5200);
-      }
-
-      goTo(0);
-      [1, 2].forEach(i => { const img = new Image(); img.src = SLIDES[i]; });
-      startTimer();
-
-      // Pause slideshow while user is touching (e.g. long-press to save)
-      container.addEventListener('touchstart', () => clearInterval(timer), { passive: true });
-      container.addEventListener('touchend',   () => startTimer(),         { passive: true });
     })();
 
     // Update weather when a city chip is clicked
