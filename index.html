@@ -2176,6 +2176,155 @@
     }
 
   </style>
+  <style>
+  /* ── Premium Glass Refinements ──────────────────────────────────────────── */
+
+  /* Result cards: richer depth, gradient glass */
+  [data-theme="dark"] .result-card {
+    background: linear-gradient(145deg, rgba(200,220,255,.09) 0%, rgba(170,200,255,.055) 100%);
+    backdrop-filter: blur(52px) saturate(210%);
+    -webkit-backdrop-filter: blur(52px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.15);
+    box-shadow: 0 8px 36px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.14), inset 0 1.5px 0 rgba(255,255,255,.20);
+    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s cubic-bezier(.16,1,.3,1), border-color .2s ease;
+  }
+  [data-theme="dark"] .result-card:hover {
+    transform: translateY(-5px);
+    background: linear-gradient(145deg, rgba(210,228,255,.13) 0%, rgba(180,210,255,.09) 100%);
+    border-color: rgba(255,255,255,.24);
+    box-shadow: 0 24px 64px rgba(0,0,0,.38), 0 6px 20px rgba(0,0,0,.20), inset 0 1.5px 0 rgba(255,255,255,.26);
+  }
+
+  /* Search card: deeper frost, gradient tint */
+  [data-theme="dark"] .search-card {
+    background: linear-gradient(160deg, rgba(210,228,255,.10) 0%, rgba(170,200,255,.06) 100%);
+    backdrop-filter: blur(60px) saturate(230%);
+    -webkit-backdrop-filter: blur(60px) saturate(230%);
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 32px 80px rgba(0,0,0,.34), inset 0 1.5px 0 rgba(255,255,255,.22);
+  }
+
+  /* Search button: premium gradient glass */
+  [data-theme="dark"] .search-btn {
+    background: linear-gradient(135deg, rgba(130,180,255,.40) 0%, rgba(80,130,255,.28) 100%);
+    border: 1px solid rgba(160,210,255,.48);
+    box-shadow: 0 4px 28px rgba(91,155,255,.26), inset 0 1.5px 0 rgba(255,255,255,.30);
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease, border-color .18s ease;
+  }
+  [data-theme="dark"] .search-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 40px rgba(91,155,255,.36), inset 0 1.5px 0 rgba(255,255,255,.34);
+    border-color: rgba(190,225,255,.62);
+  }
+  [data-theme="dark"] .search-btn:active:not(:disabled) {
+    transform: translateY(0) scale(.99);
+  }
+
+  /* Input field: premium focus ring */
+  [data-theme="dark"] .input-field:focus {
+    background: rgba(255,255,255,.13);
+    border-color: rgba(160,210,255,.60);
+    box-shadow: 0 0 0 4px rgba(120,180,255,.14), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+
+  /* Location button: refined */
+  [data-theme="dark"] .location-btn {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: all .22s cubic-bezier(.16,1,.3,1);
+  }
+  [data-theme="dark"] .location-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,.30);
+    box-shadow: 0 4px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+
+  /* Preview cards: richer glass, smoother hover */
+  [data-theme="dark"] .preview-card {
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 6px 28px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.13);
+    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .2s ease;
+  }
+  [data-theme="dark"] .preview-card:hover {
+    transform: translateX(-4px);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.20);
+  }
+
+  /* Status badges: subtle borders, better contrast */
+  [data-theme="dark"] .pc-status.pc-open {
+    background: rgba(22,163,74,.14);
+    color: #4ADE80;
+    border: 1px solid rgba(74,222,128,.18);
+    box-shadow: inset 0 1px 0 rgba(74,222,128,.12);
+  }
+  [data-theme="dark"] .pc-status.pc-busy {
+    background: rgba(220,38,38,.13);
+    color: #F87171;
+    border: 1px solid rgba(248,113,113,.18);
+  }
+
+  /* Weather pill: more cinematic */
+  [data-theme="dark"] .weather-pill {
+    backdrop-filter: blur(44px) saturate(230%);
+    -webkit-backdrop-filter: blur(44px) saturate(230%);
+    border: 1px solid rgba(255,255,255,.20);
+    box-shadow: 0 6px 32px rgba(0,0,0,.26), inset 0 1.5px 0 rgba(255,255,255,.24);
+  }
+
+  /* Feature tile active: premium blue glass */
+  [data-theme="dark"] .feature-tile.active {
+    background: linear-gradient(135deg, rgba(120,175,255,.34) 0%, rgba(80,135,255,.22) 100%);
+    border-color: rgba(150,200,255,.48);
+    box-shadow: 0 6px 28px rgba(91,155,255,.28), inset 0 1.5px 0 rgba(255,255,255,.30);
+  }
+  [data-theme="dark"] .feature-tile {
+    transition: color .2s ease, background .2s ease, border-color .2s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
+  }
+  [data-theme="dark"] .feature-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,0,0,.22);
+  }
+
+  /* Orbi Intelligence: refined glass panel */
+  [data-theme="dark"] .ai-insight-panel {
+    background: linear-gradient(135deg, rgba(200,220,255,.08) 0%, rgba(170,200,255,.05) 100%);
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.13);
+    box-shadow: 0 8px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+
+  /* Stats bar: refined */
+  [data-theme="dark"] .stats-bar {
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.13);
+    box-shadow: 0 4px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  /* Tabs bar: deeper blur */
+  [data-theme="dark"] .results-tabs-outer {
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+  }
+
+  /* Nav bar: more cinematic blur */
+  [data-theme="dark"] .site-nav {
+    backdrop-filter: blur(52px) saturate(220%);
+    -webkit-backdrop-filter: blur(52px) saturate(220%);
+    border-bottom: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 2px 24px rgba(0,0,0,.28);
+  }
+
+  /* Card type banner: more premium */
+  [data-theme="dark"] .card-type-banner {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  </style>
 </head>
 <body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
 <div class="page-wrap">
