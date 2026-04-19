@@ -2780,7 +2780,7 @@
             const isClosed = tags.open_status === 'Closed now';
             const s = STYLES[i % STYLES.length];
             return {
-              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || ICONS[i % ICONS.length], name,
+              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || '🍽️', name,
               meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
               status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
               sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
