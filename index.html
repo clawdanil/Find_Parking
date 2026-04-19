@@ -2113,6 +2113,14 @@
       pointer-events: none;
       transition: opacity .18s ease, transform .18s ease, visibility 0s .18s;
     }
+    /* App mode: dropdown opens upward so it's not clipped */
+    .app-mode .lang-dropdown {
+      top: auto;
+      bottom: calc(100% + 10px);
+      z-index: 99999;
+    }
+    /* App mode: hide popular cities */
+    .app-mode .chips { display: none !important; }
     .lang-dropdown--open {
       opacity: 1;
       visibility: visible;
