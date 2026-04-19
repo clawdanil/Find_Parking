@@ -3,6 +3,17 @@ const TIMEOUT_MS = 25000;
 const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
+
+// App mode: hide/show hero preview on search
+const _heroPreview = document.querySelector('.hero-preview');
+function appModeHideHero() {
+  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
+    _heroPreview.style.cssText = 'opacity:0;pointer-events:none;transition:opacity .3s ease';
+}
+function appModeShowHero() {
+  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
+    _heroPreview.style.cssText = 'opacity:1;pointer-events:auto;transition:opacity .3s ease';
+}
 const statsBar       = document.getElementById('stats-bar');
 const metricsSection = document.getElementById('metrics-section');
 const resultsWrapper = document.getElementById('results-wrapper');
@@ -107,7 +118,7 @@ streetInput.addEventListener('input', () => {
 });
 
 streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
-streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
+streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); appModeShowHero(); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
 let allSpots     = [];
@@ -239,6 +250,7 @@ let statusPollInterval = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
 function showSkeletons(feature) {
+  appModeHideHero();
   if (metricsSection) metricsSection.hidden = true;
   clearInterval(loadingTimer);
   let idx = 0;
