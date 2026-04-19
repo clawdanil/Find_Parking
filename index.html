@@ -950,19 +950,24 @@
 
     /* ── Weather pill ─ compact ────────────────────────────────────────── */
     .weather-pill {
-      display: inline-flex; align-items: center; gap: 9px;
-      margin-top: 20px; padding: 7px 16px 7px 10px;
-      background: rgba(255,255,255,.042); border: 1px solid rgba(255,255,255,.07);
-      border-radius: 100px; transition: opacity .35s;
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 16px; padding: 6px 14px 6px 9px;
+      background: rgba(255,255,255,.038); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 100px;
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.10);
+      transition: opacity .35s;
+      animation: fadeUp .5s ease both .42s;
     }
-    .weather-pill.loading { opacity: .35; }
-    .w-icon-wrap { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-    .w-svg-icon  { width: 22px; height: 22px; }
-    .w-info { display: flex; align-items: center; gap: 8px; }
-    .w-top-row { display: flex; align-items: center; gap: 5px; }
-    .w-temp  { font-size: .84rem; font-weight: 700; color: rgba(235,240,255,.78); line-height: 1; }
-    .w-desc  { font-size: .76rem; font-weight: 500; color: rgba(235,240,255,.42); text-transform: capitalize; }
-    .w-city  { font-size: .68rem; font-weight: 500; color: rgba(235,240,255,.25); padding-left: 8px; border-left: 1px solid rgba(255,255,255,.08); }
+    .weather-pill.loading { opacity: .30; }
+    .w-icon-wrap { width: 20px; height: 20px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .w-svg-icon  { width: 20px; height: 20px; }
+    .w-info { display: flex; align-items: center; gap: 7px; }
+    .w-top-row { display: flex; align-items: center; gap: 4px; }
+    .w-temp  { font-size: .80rem; font-weight: 700; color: rgba(235,240,255,.82); line-height: 1; }
+    .w-desc  { font-size: .70rem; font-weight: 500; color: rgba(235,240,255,.38); text-transform: capitalize; }
+    .w-city  { font-size: .65rem; font-weight: 500; color: rgba(235,240,255,.22); padding-left: 7px; border-left: 1px solid rgba(255,255,255,.07); }
     .w-extras { display: none; }
     .w-extra  { display: none; }
 
@@ -1758,15 +1763,15 @@
 
     /* 7 — WEATHER PILL */
     .weather-pill {
-      background: rgba(180,210,255,.09) !important;
-      border: 1px solid rgba(255,255,255,.22) !important;
-      backdrop-filter: blur(28px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
-      box-shadow: 0 4px 24px rgba(0,0,0,.20), inset 0 1px 0 rgba(255,255,255,.20) !important;
+      background: linear-gradient(135deg, rgba(195,218,255,.09) 0%, rgba(165,200,255,.055) 100%) !important;
+      border: 1px solid rgba(255,255,255,.14) !important;
+      backdrop-filter: blur(36px) saturate(210%) !important;
+      -webkit-backdrop-filter: blur(36px) saturate(210%) !important;
+      box-shadow: 0 3px 18px rgba(0,0,0,.18), inset 0 1.5px 0 rgba(255,255,255,.18) !important;
     }
-    .w-temp { color: #ffffff !important; font-weight: 700 !important; }
-    .w-desc { color: rgba(255,255,255,.78) !important; }
-    .w-city { color: rgba(255,255,255,.58) !important; border-left-color: rgba(255,255,255,.18) !important; }
+    .w-temp { color: rgba(230,240,255,.94) !important; font-weight: 700 !important; }
+    .w-desc { color: rgba(210,225,255,.52) !important; }
+    .w-city { color: rgba(200,218,255,.36) !important; border-left-color: rgba(255,255,255,.12) !important; }
 
     /* 8 — SEARCH CARD (glass-panel) */
     .glass-panel {
@@ -2291,13 +2296,17 @@
     border: 1px solid rgba(248,113,113,.18);
   }
 
-  /* Weather pill: more cinematic */
+  /* Weather pill: ambient glass tag — matches eyebrow pill visual language */
   [data-theme="dark"] .weather-pill {
-    backdrop-filter: blur(44px) saturate(230%);
-    -webkit-backdrop-filter: blur(44px) saturate(230%);
-    border: 1px solid rgba(255,255,255,.20);
-    box-shadow: 0 6px 32px rgba(0,0,0,.26), inset 0 1.5px 0 rgba(255,255,255,.24);
+    background: linear-gradient(135deg, rgba(200,220,255,.09) 0%, rgba(168,202,255,.056) 100%) !important;
+    backdrop-filter: blur(48px) saturate(230%) !important;
+    -webkit-backdrop-filter: blur(48px) saturate(230%) !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+    box-shadow: 0 4px 22px rgba(0,0,0,.20), inset 0 1.5px 0 rgba(255,255,255,.20) !important;
   }
+  [data-theme="dark"] .w-temp { color: rgba(232,242,255,.95) !important; }
+  [data-theme="dark"] .w-desc { color: rgba(210,226,255,.48) !important; }
+  [data-theme="dark"] .w-city { color: rgba(200,218,255,.32) !important; border-left-color: rgba(255,255,255,.10) !important; }
 
   /* Feature tiles: deeper glass, refined active state */
   [data-theme="dark"] .feature-tile {
