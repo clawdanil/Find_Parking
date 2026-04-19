@@ -789,22 +789,26 @@
       color: var(--t30); width: 100%; padding-left: 2px;
     }
     .chip {
-      padding: 5px 13px;
-      border: 1px solid rgba(255,255,255,.10);
+      padding: 5px 14px;
+      border: 1px solid rgba(255,255,255,.09);
       border-radius: 100px;
-      background: transparent;
-      font-size: .72rem;
+      background: rgba(255,255,255,.04);
+      backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%);
+      font-size: .70rem;
       font-family: 'Inter', sans-serif;
       font-weight: 600;
-      color: rgba(235,240,255,.45);
+      color: rgba(235,240,255,.50);
       cursor: pointer;
-      transition: all .15s;
+      transition: background .18s ease, border-color .18s ease, color .18s ease, transform .22s cubic-bezier(.16,1,.3,1);
     }
     .chip:hover {
-      background: rgba(255,255,255,.08);
+      background: rgba(255,255,255,.09);
       border-color: rgba(255,255,255,.20);
-      color: rgba(235,240,255,.85);
+      color: rgba(235,240,255,.88);
+      transform: translateY(-1px);
     }
+    .chip:active { transform: scale(.97); transition-duration: .08s; }
 
     /* ── Feature tiles ─────────────────────────────────────────────────── */
     .feature-tiles {
@@ -824,39 +828,42 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 8px;
-      padding: 16px 20px 13px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,.09);
-      background: transparent;
+      gap: 6px;
+      padding: 11px 15px 9px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.04);
+      backdrop-filter: blur(20px) saturate(150%);
+      -webkit-backdrop-filter: blur(20px) saturate(150%);
       font-family: 'Inter', sans-serif;
       cursor: pointer;
       flex-shrink: 0;
-      min-width: 80px;
-      color: rgba(235,240,255,.38);
-      transition: color .15s ease, background .15s ease, border-color .15s ease, transform .15s ease;
+      min-width: 72px;
+      color: rgba(235,240,255,.42);
+      transition: color .18s ease, background .18s ease, border-color .18s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
     }
     .tile-svg { width: 20px; height: 20px; flex-shrink: 0; }
     .tile-label {
-      font-size: .6rem;
+      font-size: .57rem;
       font-weight: 700;
-      letter-spacing: .7px;
+      letter-spacing: .8px;
       text-transform: uppercase;
       white-space: nowrap;
     }
     .feature-tile:hover {
-      color: rgba(235,240,255,.85);
-      background: rgba(255,255,255,.07);
+      color: rgba(235,240,255,.88);
+      background: rgba(255,255,255,.08);
       border-color: rgba(255,255,255,.18);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
     .feature-tile.active {
-      background: #FFFFFF;
-      color: #09090F;
-      border-color: transparent;
-      box-shadow: 0 2px 20px rgba(255,255,255,.10);
+      background: rgba(100,160,255,.20);
+      color: rgba(220,235,255,.96);
+      border-color: rgba(140,195,255,.40);
+      box-shadow: 0 4px 20px rgba(80,140,255,.18), inset 0 1.5px 0 rgba(255,255,255,.24);
     }
-    .feature-tile.active:hover { transform: translateY(-1px); }
+    .feature-tile.active:hover { transform: translateY(-2px); }
+    .feature-tile:active { transform: scale(.97) translateY(0); transition-duration: .08s; }
 
     /* ── Tile icon animations ───────────────────────────────────────────── */
     /* Smooth transition base */
@@ -1814,56 +1821,57 @@
     }
 
     /* 9 — CHIPS */
-    .chips-label { color: rgba(255,255,255,.52) !important; }
+    .chips-label { color: rgba(220,232,255,.38) !important; }
     .chip {
-      background: rgba(255,255,255,.08) !important;
-      border: 1px solid rgba(255,255,255,.20) !important;
-      color: rgba(255,255,255,.80) !important;
-      backdrop-filter: blur(14px) !important;
-      -webkit-backdrop-filter: blur(14px) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
+      background: linear-gradient(160deg, rgba(200,220,255,.08) 0%, rgba(170,200,255,.05) 100%) !important;
+      border: 1px solid rgba(255,255,255,.14) !important;
+      color: rgba(220,232,255,.72) !important;
+      backdrop-filter: blur(28px) saturate(180%) !important;
+      -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
+      box-shadow: 0 2px 10px rgba(0,0,0,.12), inset 0 1px 0 rgba(255,255,255,.16) !important;
     }
     .chip:hover {
-      background: rgba(120,180,255,.18) !important;
-      border-color: rgba(150,200,255,.42) !important;
-      color: #ffffff !important;
+      background: linear-gradient(160deg, rgba(130,185,255,.18) 0%, rgba(100,165,255,.12) 100%) !important;
+      border-color: rgba(160,210,255,.36) !important;
+      color: rgba(220,238,255,.96) !important;
+      box-shadow: 0 4px 18px rgba(80,140,255,.16), inset 0 1px 0 rgba(255,255,255,.22) !important;
     }
 
     /* 10 — FEATURE TILES */
-    .feature-tiles { border-top-color: rgba(255,255,255,.10) !important; }
+    .feature-tiles { border-top-color: rgba(255,255,255,.08) !important; }
     .feature-tile {
-      background: rgba(180,210,255,.07) !important;
-      border: 1px solid rgba(255,255,255,.16) !important;
-      color: rgba(255,255,255,.75) !important;
-      backdrop-filter: blur(24px) saturate(180%) !important;
-      -webkit-backdrop-filter: blur(24px) saturate(180%) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.12) !important;
-      font-weight: 500 !important;
+      background: linear-gradient(145deg, rgba(190,215,255,.065) 0%, rgba(165,200,255,.038) 100%) !important;
+      border: 1px solid rgba(255,255,255,.11) !important;
+      color: rgba(215,230,255,.65) !important;
+      backdrop-filter: blur(32px) saturate(200%) !important;
+      -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+      box-shadow: 0 3px 14px rgba(0,0,0,.14), inset 0 1.5px 0 rgba(255,255,255,.14) !important;
+      font-weight: 600 !important;
     }
     .feature-tile:hover {
-      background: rgba(255,255,255,.14) !important;
-      border-color: rgba(255,255,255,.28) !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.20) !important;
+      background: rgba(255,255,255,.11) !important;
+      border-color: rgba(255,255,255,.22) !important;
+      color: rgba(235,245,255,.96) !important;
+      box-shadow: 0 6px 24px rgba(0,0,0,.20), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
     }
-    /* Active tile — blue glass */
+    /* Active tile — refined blue glass */
     .feature-tile.active {
-      background: rgba(91,155,255,.28) !important;
-      border: 1px solid rgba(120,180,255,.55) !important;
-      color: #ffffff !important;
+      background: linear-gradient(145deg, rgba(100,165,255,.30) 0%, rgba(70,135,255,.20) 100%) !important;
+      border: 1px solid rgba(145,200,255,.52) !important;
+      color: rgba(220,238,255,.98) !important;
       font-weight: 700 !important;
-      box-shadow: 0 4px 20px rgba(91,155,255,.22), inset 0 1px 0 rgba(255,255,255,.25) !important;
+      box-shadow: 0 6px 28px rgba(80,140,255,.26), inset 0 1.5px 0 rgba(255,255,255,.32) !important;
     }
-    /* Per-category hover tints — glass versions */
-    .feature-tile[data-feature="food"]:hover         { background: rgba(255,80,80,.15)  !important; border-color: rgba(255,120,120,.35) !important; color: #FFB0B0 !important; }
-    .feature-tile[data-feature="bars"]:hover         { background: rgba(255,170,60,.13) !important; border-color: rgba(255,190,90,.35)  !important; color: #FFCC88 !important; }
-    .feature-tile[data-feature="coffee"]:hover       { background: rgba(200,140,80,.12) !important; border-color: rgba(220,160,100,.32) !important; color: #E0B888 !important; }
-    .feature-tile[data-feature="gym"]:hover          { background: rgba(91,155,255,.15) !important; border-color: rgba(120,180,255,.38) !important; color: #A0CAFF !important; }
-    .feature-tile[data-feature="shopping"]:hover     { background: rgba(52,211,153,.12) !important; border-color: rgba(80,230,170,.32)  !important; color: #70E8B8 !important; }
-    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(250,200,60,.12) !important; border-color: rgba(255,215,80,.32)  !important; color: #FFE080 !important; }
-    .feature-tile[data-feature="events"]:hover       { background: rgba(52,211,153,.12) !important; border-color: rgba(80,230,170,.32)  !important; color: #70E8B8 !important; }
-    .feature-tile[data-feature="transit"]:hover      { background: rgba(91,155,255,.15) !important; border-color: rgba(120,180,255,.38) !important; color: #A0CAFF !important; }
-    .feature-tile[data-feature="parking"]:hover      { background: rgba(255,140,60,.13) !important; border-color: rgba(255,165,85,.35)  !important; color: #FFB888 !important; }
+    /* Per-category hover tints — softer, more elegant */
+    .feature-tile[data-feature="food"]:hover         { background: rgba(255,90,90,.12)   !important; border-color: rgba(255,130,130,.28) !important; color: #FFC0C0 !important; }
+    .feature-tile[data-feature="bars"]:hover         { background: rgba(255,175,65,.10)  !important; border-color: rgba(255,195,95,.28)  !important; color: #FFD498 !important; }
+    .feature-tile[data-feature="coffee"]:hover       { background: rgba(205,145,85,.10)  !important; border-color: rgba(225,165,105,.26) !important; color: #E8C898 !important; }
+    .feature-tile[data-feature="gym"]:hover          { background: rgba(91,155,255,.12)  !important; border-color: rgba(130,185,255,.30) !important; color: #B0D4FF !important; }
+    .feature-tile[data-feature="shopping"]:hover     { background: rgba(52,211,153,.10)  !important; border-color: rgba(90,235,175,.26)  !important; color: #80EEC8 !important; }
+    .feature-tile[data-feature="entertainment"]:hover{ background: rgba(250,200,65,.10)  !important; border-color: rgba(255,218,88,.26)  !important; color: #FFE898 !important; }
+    .feature-tile[data-feature="events"]:hover       { background: rgba(180,100,255,.10) !important; border-color: rgba(210,140,255,.28) !important; color: #DEB0FF !important; }
+    .feature-tile[data-feature="transit"]:hover      { background: rgba(91,155,255,.12)  !important; border-color: rgba(130,185,255,.30) !important; color: #B0D4FF !important; }
+    .feature-tile[data-feature="parking"]:hover      { background: rgba(255,145,65,.10)  !important; border-color: rgba(255,170,90,.28)  !important; color: #FFC0A0 !important; }
 
     /* 11 — METRICS GRID */
     .metrics-grid {
@@ -2291,18 +2299,39 @@
     box-shadow: 0 6px 32px rgba(0,0,0,.26), inset 0 1.5px 0 rgba(255,255,255,.24);
   }
 
-  /* Feature tile active: premium blue glass */
-  [data-theme="dark"] .feature-tile.active {
-    background: linear-gradient(135deg, rgba(120,175,255,.34) 0%, rgba(80,135,255,.22) 100%);
-    border-color: rgba(150,200,255,.48);
-    box-shadow: 0 6px 28px rgba(91,155,255,.28), inset 0 1.5px 0 rgba(255,255,255,.30);
-  }
+  /* Feature tiles: deeper glass, refined active state */
   [data-theme="dark"] .feature-tile {
-    transition: color .2s ease, background .2s ease, border-color .2s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
+    background: linear-gradient(145deg, rgba(200,220,255,.07) 0%, rgba(170,200,255,.042) 100%) !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,.16), inset 0 1.5px 0 rgba(255,255,255,.15) !important;
+    backdrop-filter: blur(36px) saturate(210%) !important;
+    -webkit-backdrop-filter: blur(36px) saturate(210%) !important;
+    transition: color .18s ease, background .18s ease, border-color .18s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease !important;
   }
   [data-theme="dark"] .feature-tile:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 24px rgba(0,0,0,.22);
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 28px rgba(0,0,0,.22), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+  }
+  [data-theme="dark"] .feature-tile.active {
+    background: linear-gradient(145deg, rgba(110,170,255,.32) 0%, rgba(75,138,255,.20) 100%) !important;
+    border-color: rgba(150,205,255,.55) !important;
+    box-shadow: 0 8px 32px rgba(80,140,255,.30), inset 0 1.5px 0 rgba(255,255,255,.34) !important;
+  }
+
+  /* City chips: refined glass badge */
+  [data-theme="dark"] .chip {
+    background: linear-gradient(160deg, rgba(200,220,255,.09) 0%, rgba(170,200,255,.055) 100%) !important;
+    border: 1px solid rgba(255,255,255,.15) !important;
+    box-shadow: 0 2px 12px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.18) !important;
+    backdrop-filter: blur(32px) saturate(200%) !important;
+    -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+    color: rgba(215,230,255,.75) !important;
+  }
+  [data-theme="dark"] .chip:hover {
+    background: linear-gradient(160deg, rgba(130,185,255,.20) 0%, rgba(100,160,255,.14) 100%) !important;
+    border-color: rgba(165,215,255,.40) !important;
+    box-shadow: 0 6px 22px rgba(80,140,255,.20), inset 0 1px 0 rgba(255,255,255,.24) !important;
+    color: rgba(225,242,255,.98) !important;
   }
 
   /* Orbi Intelligence: refined glass panel */
