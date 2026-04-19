@@ -84,7 +84,7 @@
       background-position: center;
       opacity: 0;
       /* vivid, slightly darkened — night photos pop on dark overlay */
-      filter: saturate(1.25) brightness(0.80) contrast(1.05);
+      filter: grayscale(1) brightness(0.80) contrast(1.05);
       animation: bgSlide 36s infinite ease-in-out;
       animation-fill-mode: backwards;
       will-change: opacity;
@@ -116,7 +116,7 @@
     .bc-cell {
       background-size: cover;
       background-position: center;
-      filter: saturate(1.15) brightness(.95);
+      filter: grayscale(1) brightness(.95);
     }
     .bc-1 { background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=90'); }
     .bc-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=90'); }
@@ -132,7 +132,7 @@
     .bg-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(9,9,15,.84);
+      background: linear-gradient(160deg, rgba(6,6,10,.86) 0%, rgba(12,12,22,.80) 100%);
     }
 
     /* Subtle dot grid sits on top of the overlay */
