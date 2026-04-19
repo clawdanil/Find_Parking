@@ -1,8 +1,19 @@
-const TIMEOUT_MS = 28000;
+const TIMEOUT_MS = 25000;
 
 const searchBtn      = document.getElementById('search-btn');
 const streetInput    = document.getElementById('street-input');
 const resultsDiv     = document.getElementById('results');
+
+// App mode: hide/show hero preview on search
+const _heroPreview = document.querySelector('.hero-preview');
+function appModeHideHero() {
+  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
+    _heroPreview.style.cssText = 'opacity:0;pointer-events:none;transition:opacity .3s ease';
+}
+function appModeShowHero() {
+  if (document.documentElement.classList.contains('app-mode') && _heroPreview)
+    _heroPreview.style.cssText = 'opacity:1;pointer-events:auto;transition:opacity .3s ease';
+}
 const statsBar       = document.getElementById('stats-bar');
 const metricsSection = document.getElementById('metrics-section');
 const resultsWrapper = document.getElementById('results-wrapper');
@@ -70,26 +81,33 @@ async function selectAC(s) {
   streetInput.value = s.display;
   selectedCity      = s.sub || s.display;
   acDropdown.hidden = true;
+  // Reset coords until geocoder confirms them
+  selectedLat = null;
+  selectedLon = null;
 
-  // Geocode via Maps JS API (already loaded, no extra network hop)
   if (!window._gmapsReady) return;
-  try {
-    window._geocoder.geocode({ placeId: s.place_id }, (results, status) => {
-      if (status !== 'OK' || !results?.[0]) return;
-      const r    = results[0];
-      const lat  = r.geometry.location.lat();
-      const lon  = r.geometry.location.lng();
-      const get  = type => r.address_components.find(c => c.types.includes(type));
-      const city = [
-        get('locality')?.long_name || get('sublocality')?.long_name,
-        get('administrative_area_level_1')?.short_name,
-      ].filter(Boolean).join(', ');
-      selectedCity = city || selectedCity;
-      selectedLat  = lat;
-      selectedLon  = lon;
-      if (typeof fetchWeather === 'function') fetchWeather(lat, lon, selectedCity);
-    });
-  } catch { /* weather optional */ }
+  // Wrap in a Promise so searchParking can await it if needed
+  window._geocodePending = new Promise(resolve => {
+    try {
+      window._geocoder.geocode({ placeId: s.place_id }, (results, status) => {
+        if (status === 'OK' && results?.[0]) {
+          const r    = results[0];
+          const lat  = r.geometry.location.lat();
+          const lon  = r.geometry.location.lng();
+          const get  = type => r.address_components.find(c => c.types.includes(type));
+          const city = [
+            get('locality')?.long_name || get('sublocality')?.long_name,
+            get('administrative_area_level_1')?.short_name,
+          ].filter(Boolean).join(', ');
+          selectedCity = city || selectedCity;
+          selectedLat  = lat;
+          selectedLon  = lon;
+          if (typeof fetchWeather === 'function') fetchWeather(lat, lon, selectedCity);
+        }
+        resolve();
+      });
+    } catch { resolve(); }
+  });
 }
 
 streetInput.addEventListener('input', () => {
@@ -100,7 +118,7 @@ streetInput.addEventListener('input', () => {
 });
 
 streetInput.addEventListener('blur',  () => setTimeout(() => { acDropdown.hidden = true; }, 150));
-streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); });
+streetInput.addEventListener('focus', () => { if (streetInput.value.trim().length >= 3) streetInput.dispatchEvent(new Event('input')); appModeShowHero(); });
 
 // ── Tab state ─────────────────────────────────────────────────────────────────
 let allSpots     = [];
@@ -232,6 +250,7 @@ let statusPollInterval = null;
 
 // ── Loading state: animated parking meter ────────────────────────────────────
 function showSkeletons(feature) {
+  appModeHideHero();
   if (metricsSection) metricsSection.hidden = true;
   clearInterval(loadingTimer);
   let idx = 0;
@@ -526,6 +545,12 @@ async function searchParking() {
     // Strip city from display string for the street portion
     const comma = fullAddress.indexOf(',');
     if (comma > 0) street = fullAddress.slice(0, comma).trim();
+  }
+
+  // Wait for any in-flight autocomplete geocode (max 2s) before reading selectedLat/Lon
+  if (window._geocodePending) {
+    await Promise.race([window._geocodePending, new Promise(r => setTimeout(r, 2000))]);
+    window._geocodePending = null;
   }
 
   showSkeletons();

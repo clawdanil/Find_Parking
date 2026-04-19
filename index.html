@@ -8,6 +8,9 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Orbi">
+  <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+  <link rel="shortcut icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
   <title>Orbi – Find Parking, Transit &amp; More</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -81,7 +84,7 @@
       background-position: center;
       opacity: 0;
       /* vivid, slightly darkened — night photos pop on dark overlay */
-      filter: saturate(1.25) brightness(0.80) contrast(1.05);
+      filter: grayscale(1) brightness(0.80) contrast(1.05);
       animation: bgSlide 36s infinite ease-in-out;
       animation-fill-mode: backwards;
       will-change: opacity;
@@ -113,7 +116,7 @@
     .bc-cell {
       background-size: cover;
       background-position: center;
-      filter: saturate(1.15) brightness(.95);
+      filter: grayscale(1) brightness(.95);
     }
     .bc-1 { background-image: url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=90'); }
     .bc-2 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1200&q=90'); }
@@ -129,7 +132,7 @@
     .bg-overlay {
       position: absolute;
       inset: 0;
-      background: rgba(9,9,15,.84);
+      background: linear-gradient(160deg, rgba(6,6,10,.86) 0%, rgba(12,12,22,.80) 100%);
     }
 
     /* Subtle dot grid sits on top of the overlay */
@@ -152,13 +155,16 @@
     }
     .nav-inner {
       max-width: 1180px; margin: 0 auto; width: 100%;
-      display: flex; align-items: center; gap: 16px;
-      position: relative;
+      display: flex; align-items: center; gap: 8px;
     }
+    .nav-left { flex: 1; min-width: 0; }
     .nav-brand {
       display: flex; align-items: center; gap: 10px;
       text-decoration: none; flex-shrink: 0; cursor: default;
-      position: absolute; left: 50%; transform: translateX(-50%);
+    }
+    .nav-right {
+      flex: 1; min-width: 0;
+      display: flex; align-items: center; justify-content: flex-end; gap: 10px;
     }
     .nav-icon {
       width: 34px; height: 34px; border-radius: 50%;
@@ -186,19 +192,21 @@
       animation: dangle 4.2s cubic-bezier(.4,0,.2,1) infinite;
       animation-delay: 1s;
     }
-.nav-spacer { flex: 1; }
     .nav-tag {
       font-size: .68rem; font-weight: 600; letter-spacing: 1.4px;
       text-transform: uppercase; color: rgba(235,240,255,.24);
       display: none;
     }
     @media (min-width: 540px) { .nav-tag { display: block; } }
-    /* Mobile: stack icon above wordmark so it never crowds the CTA */
+    /* Mobile: stack icon above wordmark, reduce CTA so it never crowds the brand */
     @media (max-width: 539px) {
-      .nav-brand { flex-direction: column; align-items: center; gap: 2px; }
-      .nav-icon  { width: 42px; height: 42px; }
-      .nav-icon svg { width: 26px; height: 26px; }
-      .nav-wordmark { font-size: .78rem; letter-spacing: .5px; font-weight: 700; }
+      .nav-inner  { gap: 4px; }
+      .nav-brand  { flex-direction: column; align-items: center; gap: 2px; }
+      .nav-icon   { width: 38px; height: 38px; }
+      .nav-icon svg { width: 22px; height: 22px; }
+      .nav-wordmark { font-size: .75rem; letter-spacing: .5px; font-weight: 700; }
+      .nav-cta    { font-size: .72rem; padding: 7px 11px; white-space: nowrap; }
+      .nav-right  { gap: 6px; }
     }
     .nav-cta {
       display: inline-flex; align-items: center; gap: 4px;
@@ -398,22 +406,24 @@
         animation: heroReveal .8s cubic-bezier(0.22,1,0.36,1) .4s both;
       }
     }
-    /* CSS Grid layout at wide screens — text column is hard-bounded, can never
-       overflow into the preview column regardless of language text length */
+    /* Two-column flex at wide screens — text column is hard-bounded */
     @media (min-width: 1061px) {
       .hero {
-        display: grid;
-        grid-template-columns: 1fr 278px;
-        column-gap: 40px;
+        display: flex;
+        align-items: flex-start;
+        gap: 40px;
         padding-right: 20px;
-        align-items: start;
       }
-      .hero > *:not(.hero-preview) { grid-column: 1; }
+      .hero-content {
+        flex: 1 1 0;
+        min-width: 0;
+      }
       .hero-preview {
-        grid-column: 2;
-        grid-row: 1 / -1;
-        position: static;
+        flex: 0 0 278px;
         width: 278px;
+        position: static;
+        top: auto;
+        right: auto;
       }
     }
 
@@ -798,6 +808,7 @@
       border-top: 1px solid rgba(255,255,255,.08);
       padding-top: 16px;
     }
+    .app-mode .feature-tiles { display: none !important; }
     .tiles-row {
       display: flex;
       flex-wrap: wrap;
@@ -2102,6 +2113,23 @@
       pointer-events: none;
       transition: opacity .18s ease, transform .18s ease, visibility 0s .18s;
     }
+    /* App mode: dropdown opens upward so it's not clipped */
+    .app-mode .lang-dropdown {
+      top: auto;
+      bottom: calc(100% + 10px);
+      z-index: 99999;
+      transform: translateY(12px) scale(.94);
+      transition: opacity .35s cubic-bezier(.16,1,.3,1), transform .35s cubic-bezier(.16,1,.3,1), visibility 0s .35s;
+    }
+    .app-mode .lang-dropdown--open {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+      transition: opacity .35s cubic-bezier(.16,1,.3,1), transform .35s cubic-bezier(.16,1,.3,1), visibility 0s 0s;
+    }
+    /* App mode: hide popular cities */
+    .app-mode .chips { display: none !important; }
     .lang-dropdown--open {
       opacity: 1;
       visibility: visible;
@@ -2148,12 +2176,162 @@
     }
 
   </style>
+  <style>
+  /* ── Premium Glass Refinements ──────────────────────────────────────────── */
+
+  /* Result cards: richer depth, gradient glass */
+  [data-theme="dark"] .result-card {
+    background: linear-gradient(145deg, rgba(200,220,255,.09) 0%, rgba(170,200,255,.055) 100%);
+    backdrop-filter: blur(52px) saturate(210%);
+    -webkit-backdrop-filter: blur(52px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.15);
+    box-shadow: 0 8px 36px rgba(0,0,0,.30), 0 2px 8px rgba(0,0,0,.14), inset 0 1.5px 0 rgba(255,255,255,.20);
+    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s cubic-bezier(.16,1,.3,1), border-color .2s ease;
+  }
+  [data-theme="dark"] .result-card:hover {
+    transform: translateY(-5px);
+    background: linear-gradient(145deg, rgba(210,228,255,.13) 0%, rgba(180,210,255,.09) 100%);
+    border-color: rgba(255,255,255,.24);
+    box-shadow: 0 24px 64px rgba(0,0,0,.38), 0 6px 20px rgba(0,0,0,.20), inset 0 1.5px 0 rgba(255,255,255,.26);
+  }
+
+  /* Search card: deeper frost, gradient tint */
+  [data-theme="dark"] .search-card {
+    background: linear-gradient(160deg, rgba(210,228,255,.10) 0%, rgba(170,200,255,.06) 100%);
+    backdrop-filter: blur(60px) saturate(230%);
+    -webkit-backdrop-filter: blur(60px) saturate(230%);
+    border: 1px solid rgba(255,255,255,.18);
+    box-shadow: 0 32px 80px rgba(0,0,0,.34), inset 0 1.5px 0 rgba(255,255,255,.22);
+  }
+
+  /* Search button: premium gradient glass */
+  [data-theme="dark"] .search-btn {
+    background: linear-gradient(135deg, rgba(130,180,255,.40) 0%, rgba(80,130,255,.28) 100%);
+    border: 1px solid rgba(160,210,255,.48);
+    box-shadow: 0 4px 28px rgba(91,155,255,.26), inset 0 1.5px 0 rgba(255,255,255,.30);
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease, border-color .18s ease;
+  }
+  [data-theme="dark"] .search-btn:hover:not(:disabled) {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 12px 40px rgba(91,155,255,.36), inset 0 1.5px 0 rgba(255,255,255,.34);
+    border-color: rgba(190,225,255,.62);
+  }
+  [data-theme="dark"] .search-btn:active:not(:disabled) {
+    transform: translateY(0) scale(.99);
+  }
+
+  /* Input field: premium focus ring */
+  [data-theme="dark"] .input-field:focus {
+    background: rgba(255,255,255,.13);
+    border-color: rgba(160,210,255,.60);
+    box-shadow: 0 0 0 4px rgba(120,180,255,.14), inset 0 1px 0 rgba(255,255,255,.12);
+  }
+
+  /* Location button: refined */
+  [data-theme="dark"] .location-btn {
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    transition: all .22s cubic-bezier(.16,1,.3,1);
+  }
+  [data-theme="dark"] .location-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255,255,255,.30);
+    box-shadow: 0 4px 16px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+
+  /* Preview cards: richer glass, smoother hover */
+  [data-theme="dark"] .preview-card {
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 6px 28px rgba(0,0,0,.26), inset 0 1px 0 rgba(255,255,255,.13);
+    transition: transform .28s cubic-bezier(.16,1,.3,1), box-shadow .28s ease, border-color .2s ease;
+  }
+  [data-theme="dark"] .preview-card:hover {
+    transform: translateX(-4px);
+    border-color: rgba(255,255,255,.18);
+    box-shadow: 0 14px 40px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,255,255,.20);
+  }
+
+  /* Status badges: subtle borders, better contrast */
+  [data-theme="dark"] .pc-status.pc-open {
+    background: rgba(22,163,74,.14);
+    color: #4ADE80;
+    border: 1px solid rgba(74,222,128,.18);
+    box-shadow: inset 0 1px 0 rgba(74,222,128,.12);
+  }
+  [data-theme="dark"] .pc-status.pc-busy {
+    background: rgba(220,38,38,.13);
+    color: #F87171;
+    border: 1px solid rgba(248,113,113,.18);
+  }
+
+  /* Weather pill: more cinematic */
+  [data-theme="dark"] .weather-pill {
+    backdrop-filter: blur(44px) saturate(230%);
+    -webkit-backdrop-filter: blur(44px) saturate(230%);
+    border: 1px solid rgba(255,255,255,.20);
+    box-shadow: 0 6px 32px rgba(0,0,0,.26), inset 0 1.5px 0 rgba(255,255,255,.24);
+  }
+
+  /* Feature tile active: premium blue glass */
+  [data-theme="dark"] .feature-tile.active {
+    background: linear-gradient(135deg, rgba(120,175,255,.34) 0%, rgba(80,135,255,.22) 100%);
+    border-color: rgba(150,200,255,.48);
+    box-shadow: 0 6px 28px rgba(91,155,255,.28), inset 0 1.5px 0 rgba(255,255,255,.30);
+  }
+  [data-theme="dark"] .feature-tile {
+    transition: color .2s ease, background .2s ease, border-color .2s ease, transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
+  }
+  [data-theme="dark"] .feature-tile:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(0,0,0,.22);
+  }
+
+  /* Orbi Intelligence: refined glass panel */
+  [data-theme="dark"] .ai-insight-panel {
+    background: linear-gradient(135deg, rgba(200,220,255,.08) 0%, rgba(170,200,255,.05) 100%);
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.13);
+    box-shadow: 0 8px 36px rgba(0,0,0,.24), inset 0 1px 0 rgba(255,255,255,.16);
+  }
+
+  /* Stats bar: refined */
+  [data-theme="dark"] .stats-bar {
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+    border: 1px solid rgba(255,255,255,.13);
+    box-shadow: 0 4px 24px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+
+  /* Tabs bar: deeper blur */
+  [data-theme="dark"] .results-tabs-outer {
+    backdrop-filter: blur(44px) saturate(210%);
+    -webkit-backdrop-filter: blur(44px) saturate(210%);
+  }
+
+  /* Nav bar: more cinematic blur */
+  [data-theme="dark"] .site-nav {
+    backdrop-filter: blur(52px) saturate(220%);
+    -webkit-backdrop-filter: blur(52px) saturate(220%);
+    border-bottom: 1px solid rgba(255,255,255,.09);
+    box-shadow: 0 2px 24px rgba(0,0,0,.28);
+  }
+
+  /* Card type banner: more premium */
+  [data-theme="dark"] .card-type-banner {
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+  </style>
 </head>
-<body>
+<body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
 <div class="page-wrap">
 
   <nav class="site-nav" id="site-nav">
     <div class="nav-inner">
+      <div class="nav-left"></div>
       <div class="nav-brand">
         <div class="nav-icon">
           <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
@@ -2165,9 +2343,10 @@
         </div>
         <span class="nav-wordmark">Orbi</span>
       </div>
-<div class="nav-spacer"></div>
-      <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
-      <button class="nav-cta" data-i18n="nav_cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+      <div class="nav-right">
+        <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
+        <button class="nav-cta" data-i18n="nav_cta" onclick="document.getElementById('street-input').focus();document.getElementById('street-input').scrollIntoView({behavior:'smooth',block:'center'})">Find Places →</button>
+      </div>
     </div>
   </nav>
 
@@ -2187,6 +2366,7 @@
 
   <!-- Hero -->
   <header class="hero">
+    <div class="hero-content">
 
     <div class="hero-eyebrow">
       <span class="eyebrow-pulse"></span>
@@ -2232,16 +2412,18 @@
       </div>
     </div>
 
+    </div><!-- /.hero-content -->
+
     <!-- Live preview cards — right side fill -->
     <div class="hero-preview" aria-hidden="true">
-      <div class="hp-label"><span class="hp-dot"></span><span data-i18n="live_near">Live near you</span></div>
+      <div class="hp-label"><span class="hp-dot"></span><span id="hp-label-text" data-i18n="live_near">Live near you</span></div>
 
       <div class="preview-card" style="--d:.45s;--pc-accent:#F59E0B;--pc-bg:rgba(245,158,11,.12)">
         <span class="pc-map-hint">↗ Maps</span>
         <div class="pc-icon">🍺</div>
         <div class="pc-body">
           <div class="pc-name">The Rooftop Bar</div>
-          <div class="pc-meta">0.3 mi &nbsp;·&nbsp; ★ 4.7</div>
+          <div class="pc-meta">★ 4.7 &nbsp;·&nbsp; Rooftop</div>
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
@@ -2251,9 +2433,9 @@
         <div class="pc-icon">🅿️</div>
         <div class="pc-body">
           <div class="pc-name">Central Parking</div>
-          <div class="pc-meta">142 ft &nbsp;·&nbsp; $8 / hr</div>
+          <div class="pc-meta">Garage &nbsp;·&nbsp; $8 / hr</div>
         </div>
-        <span class="pc-status pc-open">42 spots</span>
+        <span class="pc-status pc-open">Available</span>
       </div>
 
       <div class="preview-card" style="--d:.71s;--pc-accent:#C084FC;--pc-bg:rgba(192,132,252,.10)">
@@ -2261,7 +2443,7 @@
         <div class="pc-icon">🎶</div>
         <div class="pc-body">
           <div class="pc-name">Jazz Night · Blue Note</div>
-          <div class="pc-meta">0.8 mi &nbsp;·&nbsp; Tonight 8 PM</div>
+          <div class="pc-meta">Live music &nbsp;·&nbsp; Tonight</div>
         </div>
         <span class="pc-status pc-open">On now</span>
       </div>
@@ -2271,7 +2453,7 @@
         <div class="pc-icon">☕</div>
         <div class="pc-body">
           <div class="pc-name">Blue Bottle Coffee</div>
-          <div class="pc-meta">0.5 mi &nbsp;·&nbsp; ★ 4.6</div>
+          <div class="pc-meta">Café &nbsp;·&nbsp; ★ 4.6</div>
         </div>
         <span class="pc-status pc-busy">Busy</span>
       </div>
@@ -2281,7 +2463,7 @@
         <div class="pc-icon">🍽️</div>
         <div class="pc-body">
           <div class="pc-name">O'Hara's Bar &amp; Grill</div>
-          <div class="pc-meta">0.1 mi &nbsp;·&nbsp; ★ 4.4</div>
+          <div class="pc-meta">Bar &amp; Grill &nbsp;·&nbsp; ★ 4.4</div>
         </div>
         <span class="pc-status pc-open">Open</span>
       </div>
@@ -2342,7 +2524,7 @@
           </button>
           <button class="feature-tile" data-feature="entertainment">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg>
-            <span class="tile-label" data-i18n="tile_cinema">Cinema</span>
+            <span class="tile-label" data-i18n="tile_cinema">Entertainment</span>
           </button>
           <button class="feature-tile" data-feature="events">
             <svg class="tile-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -2645,27 +2827,64 @@
       setTimeout(kick, ROWS * 160 + 900);
     })();
 
-    // ── Live preview: real local venues via IP geolocation ──────────────
+    // ── Shared location promise: ONE GPS request reused by weather + hero cards ──
+    window._locationPromise = new Promise((resolve, reject) => {
+      if (!navigator.geolocation) { reject(new Error('no geolocation')); return; }
+      navigator.geolocation.getCurrentPosition(
+        pos => resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude, fromGPS: true }),
+        async () => {
+          // GPS denied — use IP geo for weather coords only (city label NOT shown)
+          try {
+            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
+            if (d.latitude && d.longitude) resolve({ lat: d.latitude, lng: d.longitude, fromGPS: false });
+            else reject(new Error('no ip geo'));
+          } catch { reject(new Error('location failed')); }
+        },
+        { timeout: 8000, maximumAge: 300000 }
+      );
+    });
+
+    // ── Live preview: real local venues via GPS ──────────────────────────
     (function () {
       const cards = Array.from(document.querySelectorAll('.preview-card'));
       if (!cards.length) return;
 
-      // Decorative fallback shown until real data arrives
-      const FALLBACK = [
-        { icon:'🍺', name:'The Rooftop Bar',      meta:'0.3 mi · ★ 4.7', status:'Open',     sc:'pc-open', accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-        { icon:'🅿️', name:'Central Parking',       meta:'142 ft · $8 / hr',status:'42 spots', sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🎶', name:'Jazz Night · Blue Note', meta:'0.8 mi · Tonight', status:'On now',  sc:'pc-open', accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
-        { icon:'☕', name:'Blue Bottle Coffee',     meta:'0.5 mi · ★ 4.6', status:'Busy',     sc:'pc-busy', accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-        { icon:'🍽️', name:"O'Hara's Bar & Grill",  meta:'0.1 mi · ★ 4.4', status:'Open',     sc:'pc-open', accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-        { icon:'🏋️', name:'Crunch Fitness',         meta:'0.6 mi · Open 24h',status:'Open',   sc:'pc-open', accent:'#34D399', bg:'rgba(52,211,153,.10)' },
-        { icon:'🎬', name:'AMC Theatres',            meta:'0.4 mi · 8:30 PM',status:'On now',  sc:'pc-open', accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-        { icon:'🛍️', name:'Westfield Mall',          meta:'0.9 mi · Open',   status:'Open',    sc:'pc-open', accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-        { icon:'🅿️', name:'QuickPark Garage',        meta:'0.2 mi · $6 / hr',status:'18 spots',sc:'pc-open', accent:'#4ADE80', bg:'rgba(74,222,128,.10)' },
-        { icon:'🍕', name:"Grimaldi's Pizzeria",     meta:'0.3 mi · ★ 4.5', status:'Busy',    sc:'pc-busy', accent:'#FB923C', bg:'rgba(251,146,60,.10)' },
+      const STYLES = [
+        { accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
+        { accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
+        { accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
+        { accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
+        { accent:'#4ADE80', bg:'rgba(74,222,128,.10)'  },
+        { accent:'#FB923C', bg:'rgba(251,146,60,.10)'  },
+        { accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
+        { accent:'#34D399', bg:'rgba(52,211,153,.10)'  },
+        { accent:'#C084FC', bg:'rgba(192,132,252,.10)' },
       ];
+      const ICONS = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️','🎬','🎶'];
+      const TAG_ICON = {
+        // food
+        restaurant:'🍽️', fast_food:'🍔', food_court:'🍽️',
+        diner:'🍽️', bistro:'🍽️', canteen:'🍽️',
+        // drinks
+        cafe:'☕', bar:'🍺', pub:'🍺', biergarten:'🍺',
+        nightclub:'🎶', lounge:'🍸', brewery:'🍺', tavern:'🍺',
+        // shopping
+        mall:'🛍️', department_store:'🛍️', supermarket:'🛒',
+        clothing:'👗', electronics:'📱', convenience:'🛒',
+        shopping_centre:'🛍️',
+        // fitness
+        fitness_centre:'🏋️', sports_centre:'🏋️', gym:'🏋️',
+        // entertainment
+        cinema:'🎬', theatre:'🎭', bowling_alley:'🎳',
+        amusement_arcade:'🕹️', escape_game:'🔐',
+        miniature_golf:'⛳', playground:'🎠',
+        // other
+        park:'🌳', parking:'🅿️', fuel:'⛽',
+        hotel:'🏨', hostel:'🏨', pharmacy:'💊', hospital:'🏥',
+        bank:'🏦', atm:'🏧', library:'📚', school:'🏫',
+      };
 
-      let pool = [...FALLBACK];
-      let poolIdx = 5;
+      function haversineMi(la1,lo1,la2,lo2){const R=d=>d*Math.PI/180,dLa=R(la2-la1),dLo=R(lo2-lo1),a=Math.sin(dLa/2)**2+Math.cos(R(la1))*Math.cos(R(la2))*Math.sin(dLo/2)**2;return 3958.8*2*Math.asin(Math.sqrt(a));}
 
       function applyVenue(card, v, animate) {
         card.style.setProperty('--pc-accent', v.accent);
@@ -2674,12 +2893,10 @@
         card.querySelector('.pc-name').textContent = v.name;
         card.querySelector('.pc-meta').textContent = v.meta;
         const st = card.querySelector('.pc-status');
-        st.textContent = v.status;
-        st.className = 'pc-status ' + v.sc;
+        st.textContent = v.status; st.className = 'pc-status ' + v.sc;
         if (animate) { card.classList.remove('refreshing'); void card.offsetWidth; card.classList.add('refreshing'); }
       }
 
-      // Click → Google Maps
       cards.forEach(card => {
         card.addEventListener('click', () => {
           const n = card.querySelector('.pc-name').textContent;
@@ -2687,104 +2904,78 @@
         });
       });
 
-      // Rotation interval (uses whatever is in pool)
+      // Rotation from pool (starts with decorative fallback, replaced by real data)
+      let pool = null; // null until GPS loads — no rotation until then
+      let poolIdx = 5;
       setInterval(() => {
+        if (!pool) return;
         const card = cards[Math.floor(Math.random() * cards.length)];
         applyVenue(card, pool[poolIdx % pool.length], true);
         poolIdx++;
       }, 3800);
 
-      // ── Async: fetch real venues for the visitor's actual location ──────
-      async function loadLocal() {
-        let lat, lng, city;
-
-        // 1. Already-granted precise geolocation — no prompt shown
-        try {
-          const perm = await navigator.permissions?.query({ name: 'geolocation' });
-          if (perm?.state === 'granted') {
-            await new Promise(resolve =>
-              navigator.geolocation.getCurrentPosition(
-                p => { lat = p.coords.latitude; lng = p.coords.longitude; resolve(); },
-                resolve, { timeout: 4000, maximumAge: 600000 }
-              )
-            );
+      // ── GPS → real venues (reuses shared location promise) ──────────────
+      window._locationPromise.then(async ({ lat, lng, fromGPS }) => {
+        // Reverse-geocode city name for the label (GPS only — IP geo too inaccurate for city label)
+        if (fromGPS) try {
+          const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+          const d = await r.json();
+          const city = d.address?.city || d.address?.town || d.address?.village || d.address?.suburb;
+          if (city) {
+            const lbl = document.getElementById('hp-label-text');
+            if (lbl) lbl.textContent = `Live near ${city}`;
           }
         } catch {}
 
-        // 2. IP geolocation fallback (no permission needed)
-        if (!lat) {
-          const r = await fetch('https://ipapi.co/json/');
-          const d = await r.json();
-          if (!d.latitude) return;
-          lat = d.latitude; lng = d.longitude; city = d.city;
-        }
+        // Fetch real nearby places — food + bars + coffee for variety
+        try {
+          const featureList = ['food', 'bars', 'coffee'];
+          const featureIcon = { food:'🍽️', bars:'🍺', coffee:'☕' };
+          const results = await Promise.allSettled(
+            featureList.map(f => fetch('/api/nearby', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ lat, lng, feature: f, units: 'imperial' }),
+            }).then(r => r.ok ? r.json().then(d => ({ d, f })) : null))
+          );
+          const elements = results
+            .flatMap(r => r.status === 'fulfilled' && r.value
+              ? (r.value.d.elements || []).map(el => ({ ...el, _feature: r.value.f }))
+              : [])
+            .filter(el => el.tags?.name);
+          if (elements.length < 2) return;
 
-        // 3. Fetch real nearby places from OSM
-        const res = await fetch('/api/nearby', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lat, lng, feature: 'food', units: 'imperial' }),
-        });
-        if (!res.ok) return;
-        const data = await res.json();
+          const realVenues = elements.slice(0, 10).map((el, i) => {
+            const tags = el.tags;
+            const name = tags.name;
+            const eLat = el.lat ?? el.center?.lat, eLon = el.lon ?? el.center?.lon;
+            const mi   = (eLat && eLon) ? haversineMi(lat, lng, eLat, eLon) : null;
+            const dist = mi === null ? '' : mi < 0.1 ? `${Math.round(mi*5280)} ft` : `${mi.toFixed(1)} mi`;
+            const rat  = tags.rating ? `★ ${tags.rating}` : '';
+            const isOpen = tags.open_status === 'Open now';
+            const isClosed = tags.open_status === 'Closed now';
+            const s = STYLES[i % STYLES.length];
+            const nameLow = name.toLowerCase();
+            const nameIcon = nameLow.match(/coffee|starbucks|cafe|brew|espresso|latte/) ? '☕'
+              : nameLow.match(/bar|pub|tavern|grill|lounge|brewery|tap|ale|beer/) ? '🍺'
+              : nameLow.match(/pizza|sushi|burger|taco|bbq|steakhouse|diner/) ? '🍽️'
+              : nameLow.match(/gym|fitness|crossfit|equinox|planet fitness/) ? '🏋️'
+              : nameLow.match(/cinema|theater|theatre|amc|regal/) ? '🎬'
+              : nameLow.match(/shop|store|mall|market/) ? '🛍️'
+              : null;
+            return {
+              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || nameIcon || featureIcon[el._feature] || '🍽️', name,
+              meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
+              status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
+              sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
+            };
+          });
 
-        const elements = (data.elements || []).filter(el => el.tags?.name || el.tags?.brand);
-        if (elements.length < 2) return;
-
-        const ICONS  = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️'];
-        const STYLES = [
-          { accent:'#F59E0B', bg:'rgba(245,158,11,.12)' },
-          { accent:'#67E8F9', bg:'rgba(103,232,249,.09)' },
-          { accent:'#FB7185', bg:'rgba(251,113,133,.10)' },
-          { accent:'#F472B6', bg:'rgba(244,114,182,.10)' },
-          { accent:'#4ADE80', bg:'rgba(74,222,128,.10)'  },
-          { accent:'#FB923C', bg:'rgba(251,146,60,.10)'  },
-          { accent:'#A78BFA', bg:'rgba(167,139,250,.10)' },
-          { accent:'#34D399', bg:'rgba(52,211,153,.10)'  },
-        ];
-
-        function haversine(la1, lo1, la2, lo2) {
-          const R = d => d * Math.PI / 180;
-          const dLa = R(la2-la1), dLo = R(lo2-lo1);
-          const a = Math.sin(dLa/2)**2 + Math.cos(R(la1)) * Math.cos(R(la2)) * Math.sin(dLo/2)**2;
-          return 3958.8 * 2 * Math.asin(Math.sqrt(a));
-        }
-
-        const realVenues = elements.slice(0, 10).map((el, i) => {
-          const tags = el.tags;
-          const name = tags.name || tags.brand;
-          const eLat = el.lat ?? el.center?.lat, eLon = el.lon ?? el.center?.lon;
-          const mi   = (eLat && eLon) ? haversine(lat, lng, eLat, eLon) : null;
-          const dist = mi === null ? '' : mi < 0.1 ? `${Math.round(mi*5280)} ft` : `${mi.toFixed(1)} mi`;
-          const rat  = tags.rating ? `★ ${tags.rating}` : '';
-          const isOpen   = tags.open_status === 'Open now';
-          const isClosed = tags.open_status === 'Closed now';
-          const s = STYLES[i % STYLES.length];
-          return {
-            icon:   ICONS[i % ICONS.length],
-            name,
-            meta:   [dist, rat].filter(Boolean).join(' · '),
-            status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
-            sc:     isClosed ? 'pc-busy' : 'pc-open',
-            ...s,
-          };
-        });
-
-        // Update visible cards with real local data
-        realVenues.slice(0, 5).forEach((v, i) => { if (cards[i]) applyVenue(cards[i], v, true); });
-
-        // Update city label if we have a city name
-        if (city) {
-          const lbl = document.querySelector('.hp-label [data-i18n="live_near"]');
-          if (lbl) lbl.textContent = `Live near ${city}`;
-        }
-
-        // Replace rotation pool with real venues
-        pool = realVenues;
-        poolIdx = 5;
-      }
-
-      loadLocal().catch(() => {}); // silent fail — fallback stays
+          realVenues.slice(0, cards.length).forEach((v, i) => applyVenue(cards[i], v, true));
+          pool = realVenues;
+          poolIdx = cards.length;
+        } catch {}
+      }).catch(() => { /* location denied — cards stay decorative */ });
     })();
 
 
@@ -2932,71 +3123,45 @@
       return { lat: r.latitude, lon: r.longitude, label: r.name + (r.admin1 ? ', ' + r.admin1 : '') };
     }
 
-    // ── Load weather: GPS first, IP chain fallback, hard 4s default ─────
+    // ── Load weather from shared location ────────────────────────────────
     (async () => {
-      let weatherResolved = false;
+      const fallbackTimer = setTimeout(() => {
+        document.getElementById('w-city').textContent = '';
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+        document.getElementById('weather-card').classList.remove('loading');
+      }, 12000);
 
-      // Hard fallback: if nothing loads in 4s, show New York so it's never stuck
-      setTimeout(() => {
-        if (!weatherResolved) fetchWeather(40.7128, -74.0060, 'New York, NY');
-      }, 4000);
-
-      // 1. Try GPS — most accurate
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async pos => {
-          if (weatherResolved) return;
-          weatherResolved = true;
-          const { latitude: lat, longitude: lon } = pos.coords;
+      try {
+        const { lat, lng, fromGPS } = await window._locationPromise;
+        clearTimeout(fallbackTimer);
+        let cityLabel = '';
+        if (fromGPS) {
+          cityLabel = 'Your Location';
           try {
-            let lbl = 'Your Location';
             if (window._gmapsReady && window._geocoder) {
               await new Promise(resolve => {
-                window._geocoder.geocode({ location: { lat, lng: lon } }, (results, status) => {
+                window._geocoder.geocode({ location: { lat, lng } }, (results, status) => {
                   if (status === 'OK' && results?.[0]) {
                     const get = type => results[0].address_components.find(c => c.types.includes(type));
-                    lbl = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ') || lbl;
+                    cityLabel = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ') || cityLabel;
                   }
                   resolve();
                 });
               });
             } else {
-              const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+              const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
               const d = await r.json();
-              lbl = d.address?.city || d.address?.town || d.address?.village || lbl;
+              cityLabel = d.address?.city || d.address?.town || d.address?.village || cityLabel;
             }
-            fetchWeather(lat, lon, lbl);
-          } catch { fetchWeather(lat, lon, 'Your Location'); }
-        }, () => { /* GPS denied */ }, { timeout: 8000, maximumAge: 60000 });
-      }
-
-      // 2. IP geolocation chain — runs in parallel, tries two services
-      setTimeout(async () => {
-        if (weatherResolved) return;
-        const ipSources = [
-          async () => {
-            const d = await fetch('https://ipapi.co/json/').then(r => r.json());
-            if (!d.latitude || !d.longitude) throw new Error('no coords');
-            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region_code].filter(Boolean).join(', ') };
-          },
-          async () => {
-            const d = await fetch('https://ipwho.is/').then(r => r.json());
-            if (!d.latitude || !d.longitude) throw new Error('no coords');
-            return { lat: d.latitude, lon: d.longitude, label: [d.city, d.region].filter(Boolean).join(', ') };
-          },
-        ];
-        for (const src of ipSources) {
-          if (weatherResolved) return;
-          try {
-            const { lat, lon, label } = await src();
-            if (!weatherResolved) {
-              weatherResolved = true;
-              fetchWeather(lat, lon, label || 'Nearby');
-              return;
-            }
-          } catch { /* try next */ }
+          } catch {}
         }
-        // All IP sources failed — hard fallback timer fires at 4s
-      }, 300);
+        fetchWeather(lat, lng, cityLabel);
+      } catch {
+        clearTimeout(fallbackTimer);
+        document.getElementById('w-city').textContent = '';
+        document.getElementById('w-desc').textContent = 'Weather unavailable';
+        document.getElementById('weather-card').classList.remove('loading');
+      }
     })();
 
     // Update weather when a city chip is clicked
