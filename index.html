@@ -2762,15 +2762,19 @@
 
         // Fetch real nearby places — food + bars + coffee for variety
         try {
+          const featureList = ['food', 'bars', 'coffee'];
+          const featureIcon = { food:'🍽️', bars:'🍺', coffee:'☕' };
           const results = await Promise.allSettled(
-            ['food', 'bars', 'coffee'].map(f => fetch('/api/nearby', {
+            featureList.map(f => fetch('/api/nearby', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ lat, lng, feature: f, units: 'imperial' }),
-            }).then(r => r.ok ? r.json() : null))
+            }).then(r => r.ok ? r.json().then(d => ({ d, f })) : null))
           );
           const elements = results
-            .flatMap(r => r.status === 'fulfilled' && r.value ? (r.value.elements || []) : [])
+            .flatMap(r => r.status === 'fulfilled' && r.value
+              ? (r.value.d.elements || []).map(el => ({ ...el, _feature: r.value.f }))
+              : [])
             .filter(el => el.tags?.name);
           if (elements.length < 2) return;
 
@@ -2793,7 +2797,7 @@
               : nameLow.match(/shop|store|mall|market/) ? '🛍️'
               : null;
             return {
-              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || nameIcon || '🍽️', name,
+              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || nameIcon || featureIcon[el._feature] || '🍽️', name,
               meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
               status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
               sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
