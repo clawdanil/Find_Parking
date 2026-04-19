@@ -2692,11 +2692,23 @@
       ];
       const ICONS = ['🍽️','☕','🍺','🛍️','🥗','🍕','🎭','🏋️','🎬','🎶'];
       const TAG_ICON = {
-        restaurant:'🍽️', cafe:'☕', bar:'🍺', pub:'🍺',
-        fast_food:'🍔', food_court:'🍽️', ice_cream:'🍦',
-        shop:'🛍️', supermarket:'🛒', convenience:'🛒',
-        gym:'🏋️', fitness_centre:'🏋️', sports_centre:'⚽',
-        cinema:'🎬', theatre:'🎭', nightclub:'🎶',
+        // food
+        restaurant:'🍽️', fast_food:'🍔', food_court:'🍽️',
+        diner:'🍽️', bistro:'🍽️', canteen:'🍽️',
+        // drinks
+        cafe:'☕', bar:'🍺', pub:'🍺', biergarten:'🍺',
+        nightclub:'🎶', lounge:'🍸', brewery:'🍺', tavern:'🍺',
+        // shopping
+        mall:'🛍️', department_store:'🛍️', supermarket:'🛒',
+        clothing:'👗', electronics:'📱', convenience:'🛒',
+        shopping_centre:'🛍️',
+        // fitness
+        fitness_centre:'🏋️', sports_centre:'🏋️', gym:'🏋️',
+        // entertainment
+        cinema:'🎬', theatre:'🎭', bowling_alley:'🎳',
+        amusement_arcade:'🕹️', escape_game:'🔐',
+        miniature_golf:'⛳', playground:'🎠',
+        // other
         park:'🌳', parking:'🅿️', fuel:'⛽',
         hotel:'🏨', hostel:'🏨', pharmacy:'💊', hospital:'🏥',
         bank:'🏦', atm:'🏧', library:'📚', school:'🏫',
@@ -2770,7 +2782,7 @@
             const isClosed = tags.open_status === 'Closed now';
             const s = STYLES[i % STYLES.length];
             return {
-              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.shop] || TAG_ICON[tags.leisure] || TAG_ICON[tags.tourism] || ICONS[i % ICONS.length], name,
+              icon: TAG_ICON[tags.amenity] || TAG_ICON[tags.leisure] || TAG_ICON[tags.shop] || TAG_ICON[tags.tourism] || ICONS[i % ICONS.length], name,
               meta: [dist, rat].filter(Boolean).join(' · ') || (tags['addr:street'] || 'Nearby'),
               status: isOpen ? 'Open' : isClosed ? 'Closed' : (rat || 'Nearby'),
               sc: isClosed ? 'pc-busy' : 'pc-open', ...s,
