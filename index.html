@@ -61,27 +61,6 @@
     }
     .page-wrap { overflow-x: hidden; width: 100%; }
 
-    /* ── Static drink background ─────────────────────────────────────────── */
-    .bg-drink {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=85');
-      background-size: cover;
-      background-position: center 40%;
-      opacity: 0.13;
-    }
-    .bg-drink-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      background:
-        radial-gradient(ellipse 100% 60% at 50% 50%, transparent 20%, rgba(0,0,0,.70) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.72) 100%);
-    }
-
     /* ── Background slideshow ────────────────────────────────────────────── */
     .bg-scene {
       position: fixed;
@@ -3082,10 +3061,6 @@
       </div>
     </div>
   </nav>
-
-  <!-- Static drink background — cocktail bar photo at low opacity -->
-  <div class="bg-drink" aria-hidden="true"></div>
-  <div class="bg-drink-overlay" aria-hidden="true"></div>
 
   <!-- Slideshow bg — fixed, crossfades through venue photos -->
   <div class="bg-scene" aria-hidden="true">
