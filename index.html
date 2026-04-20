@@ -52,7 +52,7 @@
 
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: #F7F7FA;
+      background: #000000;
       min-height: 100vh;
       color: var(--text);
       -webkit-font-smoothing: antialiased;
@@ -68,6 +68,8 @@
       z-index: 0;
       pointer-events: none;
       overflow: hidden;
+      /* SLIDESHOW PAUSED — hidden for pure black mode. Re-enable by removing display:none */
+      display: none;
     }
 
     /* Slideshow container — stacks slides on top of each other */
@@ -1478,7 +1480,7 @@
     }
 
     /* ── Pure black body & background ───────────────────────────────── */
-    [data-theme="dark"] body      { background: #090909; }
+    [data-theme="dark"] body      { background: #000000; }
     /* collage bg — no overrides needed in dark mode, overlay handles it */
 
     /* ── Surfaces ────────────────────────────────────────────────────── */
