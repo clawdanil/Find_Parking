@@ -638,61 +638,94 @@ locationBtn.addEventListener('click', () => {
   locationBtn.disabled = true;
   locationBtn.textContent = t('locating_text','⏳ Locating…');
 
-  navigator.geolocation.getCurrentPosition(
-    async ({ coords }) => {
-      const { latitude: lat, longitude: lng } = coords;
-      try {
-        // Prefer Google Geocoder (already loaded, works in Instagram browser)
-        // Fall back to Nominatim if Maps JS API not ready yet
-        let city = '', street = '';
+  // iOS returns a coarse network-based fix first, then a precise GPS fix seconds
+  // later. watchPosition lets us grab the best reading within a 12s window rather
+  // than locking in the first (often wrong) result from getCurrentPosition.
+  const GPS_ACCURACY_THRESHOLD = 65; // metres — accept immediately if this good
+  let bestPosition = null;
+  let settled = false;
 
-        if (window._gmapsReady && window._geocoder) {
-          await new Promise(resolve => {
-            window._geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-              if (status === 'OK' && results?.[0]) {
-                const get = type => results[0].address_components.find(c => c.types.includes(type));
-                street = [get('street_number')?.long_name, get('route')?.long_name].filter(Boolean).join(' ');
-                city   = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ');
-              }
-              resolve();
-            });
+  const finish = async (position) => {
+    if (settled) return;
+    settled = true;
+    navigator.geolocation.clearWatch(watchId);
+    clearTimeout(watchTimeout);
+
+    const { latitude: lat, longitude: lng } = position.coords;
+    try {
+      let city = '', street = '';
+
+      if (window._gmapsReady && window._geocoder) {
+        await new Promise(resolve => {
+          window._geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+            if (status === 'OK' && results?.[0]) {
+              const get = type => results[0].address_components.find(c => c.types.includes(type));
+              street = [get('street_number')?.long_name, get('route')?.long_name].filter(Boolean).join(' ');
+              city   = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ');
+            }
+            resolve();
           });
-        }
-
-        // Nominatim fallback
-        if (!city) {
-          const r    = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': 'en' } });
-          const data = await r.json();
-          const a    = data.address || {};
-          street = [(a.house_number || ''), (a.road || a.pedestrian || a.footway || '')].filter(Boolean).join(' ');
-          city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
-        }
-
-        if (!city) throw new Error('Could not determine location');
-
-        selectedCity = city;
-        selectedLat  = lat;
-        selectedLon  = lng;
-        streetInput.value = [street, city].filter(Boolean).join(', ');
-        if (typeof fetchWeather === 'function') fetchWeather(lat, lng, city);
-      } catch {
-        showMessage(t('err_location','Could not find your address. Please type it manually.'), true);
-        locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
-        locationBtn.disabled = false;
-        return;
+        });
       }
 
-      locationBtn.textContent = t('loc_success','📍 My Location ✓');
+      // Nominatim fallback
+      if (!city) {
+        const r    = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`, { headers: { 'Accept-Language': 'en' } });
+        const data = await r.json();
+        const a    = data.address || {};
+        street = [(a.house_number || ''), (a.road || a.pedestrian || a.footway || '')].filter(Boolean).join(' ');
+        city   = [a.city || a.town || a.village || a.county, a.state].filter(Boolean).join(', ');
+      }
+
+      if (!city) throw new Error('Could not determine location');
+
+      selectedCity = city;
+      selectedLat  = lat;
+      selectedLon  = lng;
+      streetInput.value = [street, city].filter(Boolean).join(', ');
+      if (typeof fetchWeather === 'function') fetchWeather(lat, lng, city);
+    } catch {
+      showMessage(t('err_location','Could not find your address. Please type it manually.'), true);
+      locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
       locationBtn.disabled = false;
-      // Do NOT auto-search — user must click Search explicitly
+      return;
+    }
+
+    locationBtn.textContent = t('loc_success','📍 My Location ✓');
+    locationBtn.disabled = false;
+  };
+
+  const watchId = navigator.geolocation.watchPosition(
+    (pos) => {
+      // Keep the most accurate reading seen so far
+      if (!bestPosition || pos.coords.accuracy < bestPosition.coords.accuracy) {
+        bestPosition = pos;
+      }
+      // Settle immediately once GPS is precise enough
+      if (pos.coords.accuracy <= GPS_ACCURACY_THRESHOLD) finish(pos);
     },
     () => {
+      settled = true;
+      clearTimeout(watchTimeout);
+      navigator.geolocation.clearWatch(watchId);
       locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
       locationBtn.disabled = false;
       showMessage(t('err_loc_denied','Location access denied. Please enter your address manually.'), true);
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+    { enableHighAccuracy: true, maximumAge: 0 }
   );
+
+  // After 12s use the best fix we've collected, even if coarser than threshold
+  const watchTimeout = setTimeout(() => {
+    if (!settled && bestPosition) finish(bestPosition);
+    else if (!settled) {
+      settled = true;
+      navigator.geolocation.clearWatch(watchId);
+      locationBtn.textContent = t('loc_reset','📍 Use My Current Location');
+      locationBtn.disabled = false;
+      showMessage(t('err_location','Could not determine your location. Please type it manually.'), true);
+    }
+  }, 12000);
 });
 
 // ── Unit detection: US/UK/Myanmar → imperial; everywhere else → metric ────────
