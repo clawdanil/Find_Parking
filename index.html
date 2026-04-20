@@ -65,17 +65,7 @@
 
     /* ── Background slideshow ────────────────────────────────────────────── */
     .bg-scene {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-      overflow: hidden;
-      /* Force GPU compositing layer — required for iOS Safari fixed rendering */
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-      -webkit-backface-visibility: hidden;
-      backface-visibility: hidden;
-      isolation: isolate;
+      display: none !important;
     }
 
     /* Slideshow container — stacks slides on top of each other */
