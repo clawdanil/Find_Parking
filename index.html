@@ -630,8 +630,8 @@
 
     /* ── Cities · Worldwide board ──────────────────────────────────────── */
     .flap-board {
-      background: rgba(6,6,14,.90);
-      border: 1px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.14);
       border-radius: 20px;
       padding: 18px 16px 14px;
       overflow: hidden;
@@ -2904,11 +2904,11 @@
 
   /* 13 — FLAP BOARD — deep dark intelligence panel */
   [data-theme="dark"] .flap-board {
-    background: rgba(0,0,0,.60) !important;
-    border: 1px solid rgba(255,255,255,.10) !important;
-    box-shadow: 0 20px 72px rgba(0,0,0,.80), inset 0 1px 0 rgba(255,255,255,.14) !important;
-    backdrop-filter: blur(72px) !important;
-    -webkit-backdrop-filter: blur(72px) !important;
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+    box-shadow: 0 24px 64px rgba(0,0,0,.40), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+    backdrop-filter: blur(80px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(80px) saturate(160%) !important;
   }
   [data-theme="dark"] .flap-city { color: #ffffff !important; letter-spacing: 2px !important; }
   [data-theme="dark"] .flap-num  { color: rgba(255,255,255,.24) !important; }
