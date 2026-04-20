@@ -1808,46 +1808,48 @@
 
     /* 8 — SEARCH CARD (glass-panel) */
     .glass-panel {
-      background: linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.05) 15%, rgba(255,255,255,.04) 100%) !important;
-      border: 1px solid rgba(255,255,255,.16) !important;
-      box-shadow: 0 48px 100px rgba(0,0,0,.78), 0 16px 40px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(0,0,0,.12) !important;
-      backdrop-filter: blur(100px) !important;
-      -webkit-backdrop-filter: blur(100px) !important;
+      background: rgba(255,255,255,.06) !important;
+      border: 1px solid rgba(255,255,255,.18) !important;
+      box-shadow: 0 24px 64px rgba(0,0,0,.40), inset 0 1.5px 0 rgba(255,255,255,.28) !important;
+      backdrop-filter: blur(80px) saturate(160%) !important;
+      -webkit-backdrop-filter: blur(80px) saturate(160%) !important;
     }
     .input-group label        { color: rgba(255,255,255,.68) !important; font-weight: 500 !important; letter-spacing: .02em !important; }
     .ai-spark                 { color: rgba(255,255,255,.55) !important; }
     .input-field {
-      background: rgba(0,0,0,.28) !important;
+      background: rgba(255,255,255,.07) !important;
       border: 1px solid rgba(255,255,255,.18) !important;
       color: #ffffff !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-      box-shadow: inset 0 2px 8px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.05) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
+      box-shadow: inset 0 1.5px 4px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08) !important;
     }
-    .input-field::placeholder { color: rgba(255,255,255,.30) !important; }
+    .input-field::placeholder { color: rgba(255,255,255,.32) !important; }
     .input-field:focus {
-      background: rgba(0,0,0,.36) !important;
-      border-color: rgba(255,255,255,.46) !important;
-      box-shadow: 0 0 0 4px rgba(255,255,255,.08), inset 0 2px 8px rgba(0,0,0,.44) !important;
+      background: rgba(255,255,255,.11) !important;
+      border-color: rgba(255,255,255,.44) !important;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.07), inset 0 1.5px 4px rgba(0,0,0,.14) !important;
     }
-    /* Search button — solid white dominant CTA */
+    /* Search button — transparent glass CTA */
     .search-btn {
-      background: #FFFFFF !important;
-      color: #000000 !important;
-      border: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
+      background: rgba(255,255,255,.18) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255,255,255,.36) !important;
+      backdrop-filter: blur(20px) !important;
+      -webkit-backdrop-filter: blur(20px) !important;
       font-weight: 800 !important;
       letter-spacing: -.01em !important;
-      box-shadow: 0 4px 20px rgba(255,255,255,.18), 0 2px 8px rgba(0,0,0,.28) !important;
+      box-shadow: inset 0 1.5px 0 rgba(255,255,255,.40), 0 4px 20px rgba(0,0,0,.28) !important;
     }
     .search-btn:hover {
-      background: rgba(255,255,255,.92) !important;
-      box-shadow: 0 10px 32px rgba(255,255,255,.22), 0 4px 12px rgba(0,0,0,.24) !important;
+      background: rgba(255,255,255,.26) !important;
+      border-color: rgba(255,255,255,.52) !important;
+      box-shadow: inset 0 1.5px 0 rgba(255,255,255,.48), 0 10px 32px rgba(0,0,0,.36) !important;
     }
     .search-btn:disabled {
-      background: rgba(255,255,255,.20) !important;
-      color: rgba(0,0,0,.45) !important;
+      background: rgba(255,255,255,.06) !important;
+      color: rgba(255,255,255,.30) !important;
+      border-color: rgba(255,255,255,.10) !important;
       opacity: 1 !important;
       box-shadow: none !important;
     }
@@ -2159,18 +2161,19 @@
       font-size: 1.25rem;
       line-height: 1;
       border-radius: 12px;
-      border: 1px solid rgba(255,255,255,.22);
-      background: rgba(180,210,255,.10);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 16px rgba(0,0,0,.18);
+      border: 1px solid rgba(255,255,255,.20);
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.20), 0 2px 10px rgba(0,0,0,.18);
       cursor: pointer;
       transition: background .18s, box-shadow .18s, transform .12s;
       color: #fff;
     }
     .lang-btn:hover {
-      background: rgba(180,210,255,.18);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 6px 24px rgba(0,0,0,.24);
+      background: rgba(255,255,255,.15);
+      border-color: rgba(255,255,255,.34);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.28), 0 6px 20px rgba(0,0,0,.24);
       transform: translateY(-1px);
     }
     .lang-dropdown {
@@ -2625,16 +2628,17 @@
 
   /* ── App-mode: strip ALL blue — white/neutral palette only ───────────── */
 
-  /* Search button — white glass instead of blue */
+  /* Search button — transparent glass */
   .app-mode .search-btn {
-    background: rgba(255,255,255,.16) !important;
-    border: 1px solid rgba(255,255,255,.32) !important;
-    box-shadow: 0 4px 20px rgba(0,0,0,.28), inset 0 1.5px 0 rgba(255,255,255,.24) !important;
+    background: rgba(255,255,255,.18) !important;
+    border: 1px solid rgba(255,255,255,.36) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.40), 0 4px 20px rgba(0,0,0,.28) !important;
   }
   .app-mode .search-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,.24) !important;
-    border-color: rgba(255,255,255,.48) !important;
-    box-shadow: 0 8px 32px rgba(0,0,0,.32), inset 0 1.5px 0 rgba(255,255,255,.28) !important;
+    background: rgba(255,255,255,.26) !important;
+    border-color: rgba(255,255,255,.52) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.48), 0 10px 32px rgba(0,0,0,.36) !important;
   }
 
   /* Input focus ring — white glow */
@@ -2748,66 +2752,61 @@
   }
   [data-theme="dark"] .hero-sub { color: rgba(255,255,255,.52) !important; line-height: 1.72 !important; }
 
-  /* 4 — SEARCH CARD — most elevated surface on screen */
+  /* 4 — SEARCH CARD — pure transparent glass, no dark fill */
   [data-theme="dark"] .search-card {
-    background: linear-gradient(180deg,
-      rgba(255,255,255,.10) 0%,
-      rgba(255,255,255,.055) 18%,
-      rgba(255,255,255,.04) 100%) !important;
-    border: 1px solid rgba(255,255,255,.16) !important;
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
     box-shadow:
-      0 48px 100px rgba(0,0,0,.80),
-      0 16px 40px rgba(0,0,0,.52),
-      inset 0 1.5px 0 rgba(255,255,255,.36),
-      inset 0 -1px 0 rgba(0,0,0,.12) !important;
-    backdrop-filter: blur(100px) !important;
-    -webkit-backdrop-filter: blur(100px) !important;
+      0 24px 64px rgba(0,0,0,.40),
+      0 4px 16px rgba(0,0,0,.20),
+      inset 0 1.5px 0 rgba(255,255,255,.28),
+      inset 0 -1px 0 rgba(255,255,255,.04) !important;
+    backdrop-filter: blur(80px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(80px) saturate(160%) !important;
   }
 
-  /* 5 — INPUT FIELD — dark inset well inside the bright card */
+  /* 5 — INPUT FIELD — transparent glass, not dark gray */
   [data-theme="dark"] .input-field {
-    background: rgba(0,0,0,.30) !important;
+    background: rgba(255,255,255,.07) !important;
     border: 1px solid rgba(255,255,255,.18) !important;
     color: #ffffff !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
-    box-shadow:
-      inset 0 2px 8px rgba(0,0,0,.45),
-      inset 0 1px 0 rgba(255,255,255,.05) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: inset 0 1.5px 4px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.08) !important;
   }
-  [data-theme="dark"] .input-field::placeholder { color: rgba(255,255,255,.30) !important; }
+  [data-theme="dark"] .input-field::placeholder { color: rgba(255,255,255,.32) !important; }
   [data-theme="dark"] .input-field:focus {
-    background: rgba(0,0,0,.38) !important;
-    border-color: rgba(255,255,255,.46) !important;
-    box-shadow:
-      0 0 0 4px rgba(255,255,255,.08),
-      inset 0 2px 8px rgba(0,0,0,.45) !important;
+    background: rgba(255,255,255,.11) !important;
+    border-color: rgba(255,255,255,.44) !important;
+    box-shadow: 0 0 0 4px rgba(255,255,255,.07), inset 0 1.5px 4px rgba(0,0,0,.14) !important;
   }
 
-  /* 6 — SEARCH BUTTON — solid white dominant CTA */
+  /* 6 — SEARCH BUTTON — premium glass, not solid white */
   [data-theme="dark"] .search-btn {
-    background: #FFFFFF !important;
-    color: #000000 !important;
-    border: none !important;
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: rgba(255,255,255,.18) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,.36) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
     font-weight: 800 !important;
     letter-spacing: -.01em !important;
-    box-shadow: 0 4px 20px rgba(255,255,255,.18), 0 2px 8px rgba(0,0,0,.28) !important;
-    transition: transform .20s cubic-bezier(.16,1,.3,1), box-shadow .20s ease !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.40), 0 4px 20px rgba(0,0,0,.28) !important;
+    transition: transform .20s cubic-bezier(.16,1,.3,1), box-shadow .20s ease, background .15s ease !important;
   }
   [data-theme="dark"] .search-btn:hover:not(:disabled) {
-    background: rgba(255,255,255,.92) !important;
+    background: rgba(255,255,255,.26) !important;
+    border-color: rgba(255,255,255,.52) !important;
     transform: translateY(-2px) scale(1.01) !important;
-    box-shadow: 0 12px 36px rgba(255,255,255,.24), 0 4px 12px rgba(0,0,0,.24) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.48), 0 10px 32px rgba(0,0,0,.36) !important;
   }
   [data-theme="dark"] .search-btn:active:not(:disabled) {
     transform: scale(.98) translateY(0) !important;
-    box-shadow: 0 2px 8px rgba(255,255,255,.12) !important;
+    background: rgba(255,255,255,.14) !important;
   }
   [data-theme="dark"] .search-btn:disabled {
-    background: rgba(255,255,255,.20) !important;
-    color: rgba(0,0,0,.45) !important;
+    background: rgba(255,255,255,.06) !important;
+    color: rgba(255,255,255,.30) !important;
+    border-color: rgba(255,255,255,.10) !important;
     opacity: 1 !important;
     box-shadow: none !important;
     cursor: default !important;
@@ -2816,15 +2815,17 @@
   /* 7 — LOCATION BUTTON — glass secondary action */
   [data-theme="dark"] .location-btn {
     background: rgba(255,255,255,.07) !important;
-    border: 1px solid rgba(255,255,255,.16) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
     color: rgba(255,255,255,.72) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 2px 8px rgba(0,0,0,.32) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 2px 8px rgba(0,0,0,.18) !important;
   }
   [data-theme="dark"] .location-btn:hover {
-    background: rgba(255,255,255,.13) !important;
-    border-color: rgba(255,255,255,.30) !important;
+    background: rgba(255,255,255,.14) !important;
+    border-color: rgba(255,255,255,.32) !important;
     color: #ffffff !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 20px rgba(0,0,0,.44) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 20px rgba(0,0,0,.28) !important;
   }
 
   /* 8 — WEATHER PILL — elegant tighter glass */
