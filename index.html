@@ -1808,42 +1808,48 @@
 
     /* 8 — SEARCH CARD (glass-panel) */
     .glass-panel {
-      background: rgba(255,255,255,.05) !important;
-      border: 1px solid rgba(255,255,255,.12) !important;
-      box-shadow: 0 24px 64px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.14) !important;
-      backdrop-filter: blur(44px) saturate(200%) !important;
-      -webkit-backdrop-filter: blur(44px) saturate(200%) !important;
+      background: linear-gradient(180deg, rgba(255,255,255,.10) 0%, rgba(255,255,255,.05) 15%, rgba(255,255,255,.04) 100%) !important;
+      border: 1px solid rgba(255,255,255,.16) !important;
+      box-shadow: 0 48px 100px rgba(0,0,0,.78), 0 16px 40px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.34), inset 0 -1px 0 rgba(0,0,0,.12) !important;
+      backdrop-filter: blur(100px) !important;
+      -webkit-backdrop-filter: blur(100px) !important;
     }
     .input-group label        { color: rgba(255,255,255,.68) !important; font-weight: 500 !important; letter-spacing: .02em !important; }
     .ai-spark                 { color: rgba(255,255,255,.55) !important; }
     .input-field {
-      background: rgba(255,255,255,.06) !important;
-      border: 1px solid rgba(255,255,255,.10) !important;
+      background: rgba(0,0,0,.28) !important;
+      border: 1px solid rgba(255,255,255,.18) !important;
       color: #ffffff !important;
-      backdrop-filter: blur(8px) !important;
-      -webkit-backdrop-filter: blur(8px) !important;
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,.44), inset 0 1px 0 rgba(255,255,255,.05) !important;
     }
-    .input-field::placeholder { color: rgba(255,255,255,.35) !important; }
+    .input-field::placeholder { color: rgba(255,255,255,.30) !important; }
     .input-field:focus {
-      background: rgba(255,255,255,.10) !important;
-      border-color: rgba(255,255,255,.40) !important;
-      box-shadow: 0 0 0 4px rgba(255,255,255,.07), inset 0 1px 0 rgba(255,255,255,.12) !important;
+      background: rgba(0,0,0,.36) !important;
+      border-color: rgba(255,255,255,.46) !important;
+      box-shadow: 0 0 0 4px rgba(255,255,255,.08), inset 0 2px 8px rgba(0,0,0,.44) !important;
     }
-    /* Search button — white neutral glass */
+    /* Search button — solid white dominant CTA */
     .search-btn {
-      background: rgba(255,255,255,.13) !important;
-      border: 1px solid rgba(255,255,255,.26) !important;
-      backdrop-filter: blur(20px) !important;
-      -webkit-backdrop-filter: blur(20px) !important;
-      color: #ffffff !important;
-      font-weight: 700 !important;
-      box-shadow: 0 4px 20px rgba(0,0,0,.40), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+      background: #FFFFFF !important;
+      color: #000000 !important;
+      border: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      font-weight: 800 !important;
+      letter-spacing: -.01em !important;
+      box-shadow: 0 4px 20px rgba(255,255,255,.18), 0 2px 8px rgba(0,0,0,.28) !important;
     }
     .search-btn:hover {
+      background: rgba(255,255,255,.92) !important;
+      box-shadow: 0 10px 32px rgba(255,255,255,.22), 0 4px 12px rgba(0,0,0,.24) !important;
+    }
+    .search-btn:disabled {
       background: rgba(255,255,255,.20) !important;
-      border-color: rgba(255,255,255,.40) !important;
-      box-shadow: 0 8px 30px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.28) !important;
+      color: rgba(0,0,0,.45) !important;
+      opacity: 1 !important;
+      box-shadow: none !important;
     }
     .location-btn {
       background: rgba(255,255,255,.08) !important;
@@ -2685,6 +2691,337 @@
     border-bottom-color: rgba(255,255,255,.28) !important;
   }
 
+  /* ══════════════════════════════════════════════════════════════════════
+     PREMIUM LUXURY UPGRADE — cinematic glass · confident hierarchy
+     ══════════════════════════════════════════════════════════════════════ */
+
+  /* 1 — CINEMATIC BACKGROUND
+     Deeper black gradient + tight white crown at top edge */
+  [data-theme="dark"] .bg-overlay {
+    background:
+      radial-gradient(ellipse 160% 40% at 50% 0%, rgba(255,255,255,.028) 0%, transparent 55%),
+      linear-gradient(180deg, rgba(0,0,0,.62) 0%, rgba(0,0,0,.96) 100%) !important;
+  }
+
+  /* Hero spotlight — pulls eye to the headline */
+  .hero::before {
+    background: radial-gradient(ellipse, rgba(255,255,255,.11) 0%, rgba(255,255,255,.042) 38%, transparent 70%) !important;
+    width: min(860px, 86vw) !important;
+    height: 480px !important;
+    top: 8% !important;
+  }
+
+  /* 2 — SITE NAV — deepest blur, crisp rim light */
+  [data-theme="dark"] .site-nav {
+    background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.03) 100%) !important;
+    backdrop-filter: blur(80px) !important;
+    -webkit-backdrop-filter: blur(80px) !important;
+    border-bottom: 1px solid rgba(255,255,255,.09) !important;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.18),
+      0 8px 48px rgba(0,0,0,.65) !important;
+  }
+  [data-theme="dark"] .nav-icon {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,.60), inset 0 1px 0 rgba(255,255,255,.22) !important;
+  }
+  [data-theme="dark"] .nav-cta {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border: none !important;
+    font-weight: 700 !important;
+    box-shadow: 0 2px 14px rgba(255,255,255,.18), 0 1px 4px rgba(0,0,0,.24) !important;
+  }
+  [data-theme="dark"] .nav-cta:hover {
+    background: rgba(255,255,255,.90) !important;
+    box-shadow: 0 6px 24px rgba(255,255,255,.26), 0 2px 8px rgba(0,0,0,.18) !important;
+  }
+
+  /* 3 — HERO HEADLINE — crisp, full-white power */
+  [data-theme="dark"] .hero-headline { color: #ffffff !important; letter-spacing: -0.045em !important; }
+  [data-theme="dark"] .hero-headline .accent-word {
+    background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,.85) 100%) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+  [data-theme="dark"] .hero-sub { color: rgba(255,255,255,.52) !important; line-height: 1.72 !important; }
+
+  /* 4 — SEARCH CARD — most elevated surface on screen */
+  [data-theme="dark"] .search-card {
+    background: linear-gradient(180deg,
+      rgba(255,255,255,.10) 0%,
+      rgba(255,255,255,.055) 18%,
+      rgba(255,255,255,.04) 100%) !important;
+    border: 1px solid rgba(255,255,255,.16) !important;
+    box-shadow:
+      0 48px 100px rgba(0,0,0,.80),
+      0 16px 40px rgba(0,0,0,.52),
+      inset 0 1.5px 0 rgba(255,255,255,.36),
+      inset 0 -1px 0 rgba(0,0,0,.12) !important;
+    backdrop-filter: blur(100px) !important;
+    -webkit-backdrop-filter: blur(100px) !important;
+  }
+
+  /* 5 — INPUT FIELD — dark inset well inside the bright card */
+  [data-theme="dark"] .input-field {
+    background: rgba(0,0,0,.30) !important;
+    border: 1px solid rgba(255,255,255,.18) !important;
+    color: #ffffff !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow:
+      inset 0 2px 8px rgba(0,0,0,.45),
+      inset 0 1px 0 rgba(255,255,255,.05) !important;
+  }
+  [data-theme="dark"] .input-field::placeholder { color: rgba(255,255,255,.30) !important; }
+  [data-theme="dark"] .input-field:focus {
+    background: rgba(0,0,0,.38) !important;
+    border-color: rgba(255,255,255,.46) !important;
+    box-shadow:
+      0 0 0 4px rgba(255,255,255,.08),
+      inset 0 2px 8px rgba(0,0,0,.45) !important;
+  }
+
+  /* 6 — SEARCH BUTTON — solid white dominant CTA */
+  [data-theme="dark"] .search-btn {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    font-weight: 800 !important;
+    letter-spacing: -.01em !important;
+    box-shadow: 0 4px 20px rgba(255,255,255,.18), 0 2px 8px rgba(0,0,0,.28) !important;
+    transition: transform .20s cubic-bezier(.16,1,.3,1), box-shadow .20s ease !important;
+  }
+  [data-theme="dark"] .search-btn:hover:not(:disabled) {
+    background: rgba(255,255,255,.92) !important;
+    transform: translateY(-2px) scale(1.01) !important;
+    box-shadow: 0 12px 36px rgba(255,255,255,.24), 0 4px 12px rgba(0,0,0,.24) !important;
+  }
+  [data-theme="dark"] .search-btn:active:not(:disabled) {
+    transform: scale(.98) translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(255,255,255,.12) !important;
+  }
+  [data-theme="dark"] .search-btn:disabled {
+    background: rgba(255,255,255,.20) !important;
+    color: rgba(0,0,0,.45) !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+    cursor: default !important;
+  }
+
+  /* 7 — LOCATION BUTTON — glass secondary action */
+  [data-theme="dark"] .location-btn {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.16) !important;
+    color: rgba(255,255,255,.72) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.14), 0 2px 8px rgba(0,0,0,.32) !important;
+  }
+  [data-theme="dark"] .location-btn:hover {
+    background: rgba(255,255,255,.13) !important;
+    border-color: rgba(255,255,255,.30) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 6px 20px rgba(0,0,0,.44) !important;
+  }
+
+  /* 8 — WEATHER PILL — elegant tighter glass */
+  [data-theme="dark"] .weather-pill {
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.20) !important;
+    backdrop-filter: blur(56px) !important;
+    -webkit-backdrop-filter: blur(56px) !important;
+    padding: 5px 14px 5px 8px !important;
+  }
+  [data-theme="dark"] .w-temp { color: rgba(255,255,255,.96) !important; font-weight: 700 !important; }
+  [data-theme="dark"] .w-desc { color: rgba(255,255,255,.46) !important; }
+  [data-theme="dark"] .w-city { color: rgba(255,255,255,.30) !important; }
+
+  /* 9 — CHIPS — refined contrast, top-rim highlight */
+  [data-theme="dark"] .chip {
+    background: rgba(255,255,255,.055) !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    color: rgba(255,255,255,.62) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 2px 8px rgba(0,0,0,.28) !important;
+    font-weight: 600 !important;
+  }
+  [data-theme="dark"] .chip:hover {
+    background: rgba(255,255,255,.12) !important;
+    border-color: rgba(255,255,255,.28) !important;
+    color: rgba(255,255,255,.96) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 6px 20px rgba(0,0,0,.44) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  /* 10 — FEATURE TILES — stark inactive/active hierarchy */
+  [data-theme="dark"] .feature-tile {
+    background: rgba(255,255,255,.04) !important;
+    border: 1px solid rgba(255,255,255,.09) !important;
+    color: rgba(255,255,255,.38) !important;
+    box-shadow: 0 2px 8px rgba(0,0,0,.30), inset 0 1px 0 rgba(255,255,255,.10) !important;
+    transition: all .22s cubic-bezier(.16,1,.3,1) !important;
+  }
+  [data-theme="dark"] .feature-tile:hover {
+    background: rgba(255,255,255,.10) !important;
+    border-color: rgba(255,255,255,.22) !important;
+    color: rgba(255,255,255,.90) !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,.48), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+    transform: translateY(-2px) !important;
+  }
+  [data-theme="dark"] .feature-tile.active {
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    border-color: #FFFFFF !important;
+    box-shadow: 0 6px 24px rgba(255,255,255,.22), 0 2px 8px rgba(0,0,0,.30) !important;
+  }
+  [data-theme="dark"] .feature-tile.active:hover { transform: translateY(-2px) !important; }
+  [data-theme="dark"] .feature-tile.active .tile-svg { stroke: #000000 !important; }
+  /* All per-category hover — keep neutral */
+  [data-theme="dark"] .feature-tile[data-feature]:hover {
+    background: rgba(255,255,255,.10) !important;
+    border-color: rgba(255,255,255,.22) !important;
+    color: rgba(255,255,255,.90) !important;
+  }
+
+  /* 11 — HERO EYEBROW — crisp pill */
+  [data-theme="dark"] .hero-eyebrow {
+    background: rgba(255,255,255,.07) !important;
+    border-color: rgba(255,255,255,.16) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.20), 0 4px 16px rgba(0,0,0,.36) !important;
+  }
+
+  /* 12 — HW-ITEMS (proof row) — refined legibility */
+  [data-theme="dark"] .hw-item {
+    background: rgba(255,255,255,.06) !important;
+    border-color: rgba(255,255,255,.14) !important;
+    color: rgba(255,255,255,.68) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.16) !important;
+  }
+
+  /* 13 — FLAP BOARD — deep dark intelligence panel */
+  [data-theme="dark"] .flap-board {
+    background: rgba(0,0,0,.60) !important;
+    border: 1px solid rgba(255,255,255,.10) !important;
+    box-shadow: 0 20px 72px rgba(0,0,0,.80), inset 0 1px 0 rgba(255,255,255,.14) !important;
+    backdrop-filter: blur(72px) !important;
+    -webkit-backdrop-filter: blur(72px) !important;
+  }
+  [data-theme="dark"] .flap-city { color: #ffffff !important; letter-spacing: 2px !important; }
+  [data-theme="dark"] .flap-num  { color: rgba(255,255,255,.24) !important; }
+  [data-theme="dark"] .flap-title { color: rgba(255,255,255,.28) !important; }
+
+  /* 14 — RESULT / PARKING CARDS — elevated depth */
+  [data-theme="dark"] .result-card,
+  [data-theme="dark"] .parking-card {
+    background: linear-gradient(180deg, rgba(255,255,255,.08) 0%, rgba(255,255,255,.04) 100%) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 8px 36px rgba(0,0,0,.58), inset 0 1.5px 0 rgba(255,255,255,.22) !important;
+    backdrop-filter: blur(48px) !important;
+    -webkit-backdrop-filter: blur(48px) !important;
+  }
+  [data-theme="dark"] .result-card:hover,
+  [data-theme="dark"] .parking-card:hover {
+    background: linear-gradient(180deg, rgba(255,255,255,.12) 0%, rgba(255,255,255,.06) 100%) !important;
+    border-color: rgba(255,255,255,.22) !important;
+    box-shadow: 0 20px 60px rgba(0,0,0,.72), inset 0 1.5px 0 rgba(255,255,255,.30) !important;
+  }
+
+  /* 15 — PREVIEW CARDS (Live Near You) */
+  [data-theme="dark"] .preview-card {
+    background: linear-gradient(180deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.04) 100%) !important;
+    border: 1px solid rgba(255,255,255,.14) !important;
+    box-shadow: 0 10px 30px rgba(0,0,0,.55), inset 0 1.5px 0 rgba(255,255,255,.26) !important;
+    backdrop-filter: blur(56px) !important;
+    -webkit-backdrop-filter: blur(56px) !important;
+  }
+
+  /* 16 — METRICS GRID — elevated, inset lit */
+  [data-theme="dark"] .metrics-grid {
+    background: rgba(255,255,255,.055) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 8px 36px rgba(0,0,0,.55), inset 0 1.5px 0 rgba(255,255,255,.20) !important;
+    backdrop-filter: blur(56px) !important;
+    -webkit-backdrop-filter: blur(56px) !important;
+  }
+  [data-theme="dark"] .metric-value { color: #ffffff !important; }
+  [data-theme="dark"] .metric-label { color: rgba(255,255,255,.52) !important; }
+
+  /* 17 — STATS BAR */
+  [data-theme="dark"] .stats-inner {
+    background: rgba(255,255,255,.06) !important;
+    border: 1px solid rgba(255,255,255,.13) !important;
+    box-shadow: 0 6px 28px rgba(0,0,0,.50), inset 0 1.5px 0 rgba(255,255,255,.18) !important;
+  }
+
+  /* 18 — TABS BAR */
+  [data-theme="dark"] .tabs-bar {
+    background: rgba(255,255,255,.055) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,.50), inset 0 1px 0 rgba(255,255,255,.16) !important;
+  }
+  [data-theme="dark"] .tab-btn.active {
+    background: rgba(255,255,255,.18) !important;
+    border-color: rgba(255,255,255,.32) !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,.40), inset 0 1px 0 rgba(255,255,255,.28) !important;
+  }
+
+  /* 19 — ATTRIBUTION + FOOTER — fix remaining blue tints */
+  .attr-card {
+    background: rgba(255,255,255,.05) !important;
+    border-color: rgba(255,255,255,.12) !important;
+  }
+  .attr-card a:hover {
+    color: rgba(255,255,255,.92) !important;
+    border-bottom-color: rgba(255,255,255,.32) !important;
+  }
+  footer {
+    background: rgba(255,255,255,.03) !important;
+  }
+
+  /* 20 — BOTTOM NAV — premium monochrome bar */
+  .app-mode .app-bottom-nav {
+    background: linear-gradient(180deg,
+      rgba(0,0,0,.01) 0%,
+      rgba(0,0,0,.90) 20%,
+      rgba(0,0,0,.97) 100%) !important;
+    border-top: 1px solid rgba(255,255,255,.08) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.10), 0 -12px 40px rgba(0,0,0,.65) !important;
+    backdrop-filter: blur(72px) !important;
+    -webkit-backdrop-filter: blur(72px) !important;
+  }
+
+  /* Nav icon: svg sizing + monochrome treatment */
+  .abn-icon {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 22px !important;
+    height: 22px !important;
+  }
+  .abn-icon svg {
+    width: 22px !important;
+    height: 22px !important;
+    display: block !important;
+    stroke: currentColor !important;
+  }
+  .abn-item { color: rgba(255,255,255,.34) !important; }
+  .abn-item.active {
+    background: rgba(255,255,255,.11) !important;
+    color: #ffffff !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.22), 0 2px 12px rgba(0,0,0,.35) !important;
+  }
+
+  /* App-mode overrides — keep white glass, not blue */
+  .app-mode .abn-item { color: rgba(255,255,255,.34) !important; }
+  .app-mode .abn-item.active {
+    background: rgba(255,255,255,.14) !important;
+    color: rgba(255,255,255,.98) !important;
+    box-shadow: inset 0 1.5px 0 rgba(255,255,255,.24), 0 2px 12px rgba(0,0,0,.30) !important;
+  }
+
   </style>
 </head>
 <body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
@@ -3076,39 +3413,39 @@
 <!-- App-mode bottom navigation (visible only when ?app=1) -->
 <nav class="app-bottom-nav" id="app-bottom-nav" aria-label="Category navigation">
   <button class="abn-item" data-feature="food">
-    <span class="abn-icon">🍽️</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3v7"/></svg></span>
     <span class="abn-label">Food</span>
   </button>
   <button class="abn-item" data-feature="bars">
-    <span class="abn-icon">🍺</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22V11.5M16 22V11.5M2 8l2-6h16l2 6H2zm0 0h20"/><line x1="12" y1="8" x2="12" y2="22"/></svg></span>
     <span class="abn-label">Bars</span>
   </button>
   <button class="abn-item" data-feature="coffee">
-    <span class="abn-icon">☕</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h1a4 4 0 010 8h-1"/><path d="M3 8h14v9a4 4 0 01-4 4H7a4 4 0 01-4-4V8z"/><line x1="6" y1="2" x2="6" y2="4"/><line x1="10" y1="2" x2="10" y2="4"/><line x1="14" y1="2" x2="14" y2="4"/></svg></span>
     <span class="abn-label">Coffee</span>
   </button>
   <button class="abn-item" data-feature="gym">
-    <span class="abn-icon">🏋️</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5h11M6.5 17.5h11M3 9v6M21 9v6M6.5 9v6M17.5 9v6"/></svg></span>
     <span class="abn-label">Gym</span>
   </button>
   <button class="abn-item" data-feature="shopping">
-    <span class="abn-icon">🛍️</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg></span>
     <span class="abn-label">Shop</span>
   </button>
   <button class="abn-item" data-feature="entertainment">
-    <span class="abn-icon">🎭</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="2" y1="7" x2="7" y2="7"/><line x1="2" y1="17" x2="7" y2="17"/><line x1="17" y1="17" x2="22" y2="17"/><line x1="17" y1="7" x2="22" y2="7"/></svg></span>
     <span class="abn-label">Entertain</span>
   </button>
   <button class="abn-item" data-feature="events">
-    <span class="abn-icon">🎟️</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
     <span class="abn-label">Events</span>
   </button>
   <button class="abn-item" data-feature="transit">
-    <span class="abn-icon">🚇</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M4 10h16M8 6h.01M16 6h.01M8 16l-2 4M16 16l2 4"/></svg></span>
     <span class="abn-label">Transit</span>
   </button>
   <button class="abn-item" data-feature="parking">
-    <span class="abn-icon">🅿️</span>
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg></span>
     <span class="abn-label">Parking</span>
   </button>
 </nav>
