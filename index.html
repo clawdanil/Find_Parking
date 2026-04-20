@@ -61,7 +61,7 @@
       -moz-osx-font-smoothing: grayscale;
       text-rendering: optimizeLegibility;
     }
-    .page-wrap { overflow-x: hidden; width: 100%; }
+    .page-wrap { overflow-x: hidden; width: 100%; position: relative; z-index: 1; }
 
     /* ── Background slideshow ────────────────────────────────────────────── */
     .bg-scene {
@@ -70,6 +70,12 @@
       z-index: 0;
       pointer-events: none;
       overflow: hidden;
+      /* Force GPU compositing layer — required for iOS Safari fixed rendering */
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      isolation: isolate;
     }
 
     /* Slideshow container — stacks slides on top of each other */
@@ -79,19 +85,24 @@
     }
 
     /* Each slide: full-viewport, starts invisible, crossfades in/out
-       Treatment: full desaturation + heavy darken + soft blur = embedded into
-       the black canvas, atmosphere only — not a visible wallpaper */
+       IMPORTANT: No blur() in filter — Safari drops fixed children that use blur.
+       Atmosphere comes from heavy darkening + strong overlay instead. */
     .bg-slide {
       position: absolute;
       inset: 0;
       background-size: cover;
       background-position: center;
+      background-attachment: scroll; /* fixed attachment breaks on iOS Safari */
       opacity: 0;
-      filter: grayscale(1) brightness(0.28) contrast(1.12) blur(1px);
+      filter: grayscale(1) brightness(0.30) contrast(1.10);
+      -webkit-filter: grayscale(1) brightness(0.30) contrast(1.10);
+      -webkit-animation: bgSlide 80s infinite ease-in-out;
       animation: bgSlide 80s infinite ease-in-out;
       animation-fill-mode: backwards;
+      -webkit-animation-fill-mode: backwards;
       will-change: opacity;
-      transform: scale(1.04); /* prevent blur edge bleed */
+      transform: scale(1.04) translateZ(0);
+      -webkit-transform: scale(1.04) translateZ(0);
     }
 
     /* 8 slides × 10s stagger = 80s cycle
@@ -99,6 +110,13 @@
        Hold: 1.5→11.5s (14.375%) — next slide fully opaque at 11.5s
        Fade out: 11.5→13s (16.25%)
        Silent: 16.25→100% */
+    @-webkit-keyframes bgSlide {
+      0%      { opacity: 0; }
+      1.875%  { opacity: 1; }
+      14.375% { opacity: 1; }
+      16.25%  { opacity: 0; }
+      100%    { opacity: 0; }
+    }
     @keyframes bgSlide {
       0%      { opacity: 0; }
       1.875%  { opacity: 1; }
@@ -108,14 +126,14 @@
     }
 
     /* 8 cinematic monochrome-friendly images — dark urban / architectural */
-    .bs-1 { background-image: url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1920&q=75'); animation-delay: 0s;  } /* NYC night skyline */
-    .bs-2 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=75'); animation-delay: 10s; } /* city skyline at night */
-    .bs-3 { background-image: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1920&q=75'); animation-delay: 20s; } /* dark urban night street */
-    .bs-4 { background-image: url('https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1920&q=75'); animation-delay: 30s; } /* rainy neon city street */
-    .bs-5 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=75'); animation-delay: 40s; } /* dark bar interior */
-    .bs-6 { background-image: url('https://images.unsplash.com/photo-1487088678257-3a541e6e3922?auto=format&fit=crop&w=1920&q=75'); animation-delay: 50s; } /* night city lights */
-    .bs-7 { background-image: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1920&q=75'); animation-delay: 60s; } /* dark city buildings */
-    .bs-8 { background-image: url('https://images.unsplash.com/photo-1499092346302-2616885de2a6?auto=format&fit=crop&w=1920&q=75'); animation-delay: 70s; } /* blurred city bokeh night */
+    .bs-1 { background-image: url('https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 0s;  animation-delay: 0s;  }
+    .bs-2 { background-image: url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 10s; animation-delay: 10s; }
+    .bs-3 { background-image: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 20s; animation-delay: 20s; }
+    .bs-4 { background-image: url('https://images.unsplash.com/photo-1518391846015-55a9cc003b25?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 30s; animation-delay: 30s; }
+    .bs-5 { background-image: url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 40s; animation-delay: 40s; }
+    .bs-6 { background-image: url('https://images.unsplash.com/photo-1487088678257-3a541e6e3922?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 50s; animation-delay: 50s; }
+    .bs-7 { background-image: url('https://images.unsplash.com/photo-1486325212027-8081e485255e?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 60s; animation-delay: 60s; }
+    .bs-8 { background-image: url('https://images.unsplash.com/photo-1499092346302-2616885de2a6?auto=format&fit=crop&w=1920&q=75'); -webkit-animation-delay: 70s; animation-delay: 70s; }
 
     /* Keep legacy .bc-cell selector harmless — collage no longer used */
     .bc-cell {
