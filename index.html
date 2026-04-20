@@ -3348,14 +3348,14 @@
   [data-theme="dark"] .lang-btn,
   .abn-item { transition: all 220ms cubic-bezier(0.16, 1, 0.3, 1) !important; }
 
-  /* ─ NAV: dark opaque base prevents iOS status-bar color bleed ───────── */
+  /* ─ NAV: transparent on pure black — no visible patch ───────────────── */
   [data-theme="dark"] .site-nav,
   .app-mode .site-nav {
-    background: rgba(0,0,0,.92) !important;
-    backdrop-filter: blur(24px) !important;
-    -webkit-backdrop-filter: blur(24px) !important;
-    border-bottom: 1px solid rgba(255,255,255,.06) !important;
-    box-shadow: 0 1px 0 rgba(255,255,255,.04), 0 8px 32px rgba(0,0,0,.50) !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border-bottom: none !important;
+    box-shadow: none !important;
   }
   [data-theme="dark"] .nav-cta {
     background: transparent !important;
