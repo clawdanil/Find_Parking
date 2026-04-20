@@ -641,7 +641,7 @@ locationBtn.addEventListener('click', () => {
   // iOS returns a coarse network-based fix first, then a precise GPS fix seconds
   // later. watchPosition lets us grab the best reading within a 12s window rather
   // than locking in the first (often wrong) result from getCurrentPosition.
-  const GPS_ACCURACY_THRESHOLD = 65; // metres — accept immediately if this good
+  const GPS_ACCURACY_THRESHOLD = 20; // metres — accept immediately if this good (65m accepts wifi positioning which is a full city block off)
   let bestPosition = null;
   let settled = false;
 
@@ -658,8 +658,10 @@ locationBtn.addEventListener('click', () => {
       if (window._gmapsReady && window._geocoder) {
         await new Promise(resolve => {
           window._geocoder.geocode({ location: { lat, lng } }, (results, status) => {
-            if (status === 'OK' && results?.[0]) {
-              const get = type => results[0].address_components.find(c => c.types.includes(type));
+            if (status === 'OK' && results?.length) {
+              // Prefer a precise street_address result over POI / premise snapping
+              const best = results.find(r => r.types.includes('street_address')) || results[0];
+              const get = type => best.address_components.find(c => c.types.includes(type));
               street = [get('street_number')?.long_name, get('route')?.long_name].filter(Boolean).join(' ');
               city   = [get('locality')?.long_name || get('sublocality')?.long_name, get('administrative_area_level_1')?.short_name].filter(Boolean).join(', ');
             }
