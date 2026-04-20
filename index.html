@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>html,body{background:#000000!important}</style>
+  <script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
   <link rel="manifest" href="/manifest.json">
   <meta name="theme-color" content="#090909">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -3730,8 +3731,7 @@
 
   </style>
 </head>
-<body><script>if(new URLSearchParams(location.search).get('app')==='1')document.documentElement.classList.add('app-mode');</script>
-
+<body>
 <!-- iOS App Splash Screen — shown only in app-mode (?app=1) -->
 <div id="app-splash" role="presentation" aria-hidden="true">
   <div class="splash-inner">
