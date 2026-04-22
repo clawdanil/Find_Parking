@@ -9,12 +9,12 @@
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="Orbi">
+  <meta name="apple-mobile-web-app-title" content="Orbinear">
   <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512.png">
   <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
   <link rel="shortcut icon" href="/icons/icon-192.png">
   <link rel="apple-touch-icon" href="/icons/icon-192.png">
-  <title>Orbi – Find Parking, Transit &amp; More</title>
+  <title>Orbinear – Find Parking, Transit &amp; More</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Inter — industry-standard screen typeface, maximum readability at all sizes -->
@@ -3785,19 +3785,25 @@
 <div id="app-splash" role="presentation" aria-hidden="true">
   <div class="splash-inner">
     <div class="splash-icon">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" fill="none">
         <defs>
-          <clipPath id="splash-clip-front">
-            <rect x="0" y="44" width="100" height="56"/>
+          <clipPath id="splash-ring-front">
+            <rect x="0" y="50" width="100" height="55"/>
           </clipPath>
         </defs>
-        <ellipse cx="50" cy="48" rx="50" ry="11" stroke="rgba(255,255,255,0.28)" stroke-width="5.5" transform="rotate(-20 50 48)"/>
-        <path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/>
-        <circle cx="50" cy="43" r="20" fill="#000000"/>
-        <ellipse cx="50" cy="48" rx="50" ry="11" stroke="white" stroke-width="5.5" transform="rotate(-20 50 48)" clip-path="url(#splash-clip-front)"/>
+        <!-- Back orbital ring -->
+        <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="3.2" transform="rotate(-16 50 54)" opacity="0.40"/>
+        <!-- Planet O outer -->
+        <ellipse cx="50" cy="42" rx="34" ry="38" fill="white"/>
+        <!-- Planet O inner hole -->
+        <ellipse cx="50" cy="42" rx="20" ry="24" fill="#000000"/>
+        <!-- Location pin tip -->
+        <path d="M43,74 L50,88 L57,74 Z" fill="white"/>
+        <!-- Front orbital ring -->
+        <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="4" transform="rotate(-16 50 54)" clip-path="url(#splash-ring-front)"/>
       </svg>
     </div>
-    <div class="splash-wordmark">Orbi</div>
+    <div class="splash-wordmark">Orbi<span style="font-weight:400;opacity:.7">near</span></div>
     <div class="splash-tagline">Find anything. Instantly.</div>
   </div>
 </div>
@@ -3809,14 +3815,20 @@
       <div class="nav-left"></div>
       <div class="nav-brand">
         <div class="nav-icon">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
-            <ellipse cx="50" cy="48" rx="50" ry="11" stroke="rgba(255,255,255,0.32)" stroke-width="5.5" transform="rotate(-20 50 48)"/>
-            <path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/>
-            <circle cx="50" cy="43" r="20" fill="#07070F"/>
-            <ellipse cx="50" cy="48" rx="50" ry="11" stroke="white" stroke-width="5.5" transform="rotate(-20 50 48)" clip-path="url(#orb-clip-front)"/>
+          <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" fill="none">
+            <defs>
+              <clipPath id="nav-ring-front">
+                <rect x="0" y="50" width="100" height="55"/>
+              </clipPath>
+            </defs>
+            <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="3.2" transform="rotate(-16 50 54)" opacity="0.40"/>
+            <ellipse cx="50" cy="42" rx="34" ry="38" fill="white"/>
+            <ellipse cx="50" cy="42" rx="20" ry="24" fill="#000000"/>
+            <path d="M43,74 L50,88 L57,74 Z" fill="white"/>
+            <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="4" transform="rotate(-16 50 54)" clip-path="url(#nav-ring-front)"/>
           </svg>
         </div>
-        <span class="nav-wordmark">Orbi</span>
+        <span class="nav-wordmark">Orbinear</span>
       </div>
       <div class="nav-right">
         <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
@@ -4184,7 +4196,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=101"></script>
+  <script src="app.js?v=102"></script>
   <script src="i18n.js?v=3"></script>
 
 </div><!-- /.page-wrap -->

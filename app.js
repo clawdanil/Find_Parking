@@ -254,7 +254,7 @@ function showSkeletons(feature) {
       <div class="meter-head">
         <div class="meter-screen">
           <div class="meter-fill-bar"></div>
-          <span class="meter-p">P</span>
+          <svg viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:24px;height:24px;display:block"><path d="M50 6 C28 6 9 24 9 45 C9 63 19 77 33 84 L50 97 L67 84 C81 77 91 63 91 45 C91 24 72 6 50 6 Z" fill="white"/><circle cx="50" cy="43" r="20" fill="#07070F"/></svg>
         </div>
         <div class="meter-coin-slot"></div>
       </div>
