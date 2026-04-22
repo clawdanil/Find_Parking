@@ -1,16 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="112" ry="112" fill="#000000"/>
   <defs>
-    <clipPath id="icon-n-clip">
-      <circle cx="256" cy="240" r="160"/>
-    </clipPath>
+    <linearGradient id="ag" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+      <stop offset="28%"  stop-color="white" stop-opacity="0.55"/>
+      <stop offset="50%"  stop-color="white" stop-opacity="1"/>
+      <stop offset="72%"  stop-color="white" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="cg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="white" stop-opacity="0.38"/>
+      <stop offset="100%" stop-color="white" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <!-- N letterform: bars width=32 (8*4), gap 128px apart (66-34)*4=128 -->
-  <g clip-path="url(#icon-n-clip)">
-    <rect x="160" y="60" width="32" height="400" fill="white"/>
-    <rect x="320" y="60" width="32" height="400" fill="white"/>
-    <polygon points="160,60 192,60 352,460 320,460" fill="white"/>
-  </g>
-  <!-- O arc: outer r=160, inner r=108 (27*4), gap at 90°–145° -->
-  <path d="M 348,371 A 160,160 0 1,1 416,240 L 364,240 A 108,108 0 1,0 318,329 Z" fill="white"/>
+  <!-- Apex glow cloud (arc peak at y≈230, scale=5× from 100×70 viewbox) -->
+  <ellipse cx="256" cy="240" rx="100" ry="55" fill="url(#cg)"/>
+  <!-- Arc bloom layers -->
+  <path d="M 31,345 A 277,277 0 0,1 481,345" fill="none" stroke="url(#ag)" stroke-width="46" opacity="0.10"/>
+  <path d="M 31,345 A 277,277 0 0,1 481,345" fill="none" stroke="url(#ag)" stroke-width="20" opacity="0.22"/>
+  <path d="M 31,345 A 277,277 0 0,1 481,345" fill="none" stroke="url(#ag)" stroke-width="9"  opacity="0.60"/>
+  <!-- Main arc line -->
+  <path d="M 31,345 A 277,277 0 0,1 481,345" fill="none" stroke="url(#ag)" stroke-width="5"/>
+  <!-- Orb halo -->
+  <circle cx="256" cy="160" r="50" fill="white" opacity="0.10"/>
+  <!-- Orb -->
+  <circle cx="256" cy="160" r="28" fill="white"/>
 </svg>

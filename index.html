@@ -188,7 +188,7 @@
       transition: box-shadow .2s ease, border-color .2s ease;
     }
     .nav-icon:hover { border-color: rgba(255,255,255,.28); box-shadow: 0 4px 20px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.14); }
-    .nav-icon svg { width: 21px; height: 21px; display: block; }
+    .nav-icon svg { width: 30px; height: 21px; display: block; }
     @keyframes dangle {
       0%   { transform: rotate(0deg);    }
       15%  { transform: rotate(4deg);    }
@@ -3383,10 +3383,11 @@
     height: 32px !important;
   }
   .app-mode .nav-wordmark {
-    font-size: 0.72rem !important;
-    letter-spacing: 0.08em !important;
-    font-weight: 700 !important;
-    color: rgba(255,255,255,.70) !important;
+    font-size: 0.68rem !important;
+    letter-spacing: 0.20em !important;
+    word-spacing: 0.35em !important;
+    font-weight: 300 !important;
+    color: rgba(255,255,255,.80) !important;
     animation: none !important;
   }
   .app-mode .nav-right {
@@ -3727,23 +3728,22 @@
     animation: splashIn 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .splash-icon {
-    width: 104px;
-    height: 104px;
-    border-radius: 28px;
-    background: rgba(255,255,255,.06);
-    border: 1px solid rgba(255,255,255,.16);
-    box-shadow: 0 0 80px rgba(255,255,255,.08), inset 0 1.5px 0 rgba(255,255,255,.22);
+    width: 210px;
+    height: 147px;
+    background: transparent;
+    border: none;
+    box-shadow: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: splashGlow 2s ease-in-out infinite;
   }
-  .splash-icon svg { width: 80px; height: 80px; display: block; }
+  .splash-icon svg { width: 210px; height: 147px; display: block; }
   .splash-wordmark {
     font-family: 'Inter', sans-serif;
-    font-size: 2.4rem;
-    font-weight: 800;
-    letter-spacing: -0.055em;
+    font-size: 1.75rem;
+    font-weight: 300;
+    letter-spacing: 0.22em;
+    word-spacing: 0.4em;
     color: #ffffff;
     opacity: 0;
     animation: splashFadeUp 500ms 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -3785,21 +3785,35 @@
 <div id="app-splash" role="presentation" aria-hidden="true">
   <div class="splash-inner">
     <div class="splash-icon">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="splash-n-clip">
-            <circle cx="50" cy="45" r="40"/>
-          </clipPath>
+          <linearGradient id="spl-ag" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+            <stop offset="28%"  stop-color="white" stop-opacity="0.55"/>
+            <stop offset="50%"  stop-color="white" stop-opacity="1"/>
+            <stop offset="72%"  stop-color="white" stop-opacity="0.55"/>
+            <stop offset="100%" stop-color="white" stop-opacity="0"/>
+          </linearGradient>
+          <radialGradient id="spl-cg" cx="50%" cy="50%" r="50%">
+            <stop offset="0%"   stop-color="white" stop-opacity="0.38"/>
+            <stop offset="100%" stop-color="white" stop-opacity="0"/>
+          </radialGradient>
         </defs>
-        <g clip-path="url(#splash-n-clip)">
-          <rect x="26" y="0" width="8" height="100" fill="white"/>
-          <rect x="66" y="0" width="8" height="100" fill="white"/>
-          <polygon points="26,0 34,0 74,100 66,100" fill="white"/>
-        </g>
-        <path d="M 73,78 A 40,40 0 1,1 90,45 L 77,45 A 27,27 0 1,0 65.5,67 Z" fill="white"/>
+        <!-- Apex glow cloud -->
+        <ellipse cx="50" cy="37" rx="20" ry="11" fill="url(#spl-cg)"/>
+        <!-- Arc glow layers (simulate soft bloom without filter) -->
+        <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#spl-ag)" stroke-width="9"   opacity="0.10"/>
+        <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#spl-ag)" stroke-width="4"   opacity="0.22"/>
+        <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#spl-ag)" stroke-width="1.8" opacity="0.60"/>
+        <!-- Main arc line -->
+        <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#spl-ag)" stroke-width="1"/>
+        <!-- Orb subtle halo -->
+        <circle cx="50" cy="21" r="10" fill="white" opacity="0.10"/>
+        <!-- Orb -->
+        <circle cx="50" cy="21" r="5.5" fill="white"/>
       </svg>
     </div>
-    <div class="splash-wordmark"><span style="font-weight:700">Orbi</span><span style="font-weight:300;opacity:.8;letter-spacing:0.08em">near</span></div>
+    <div class="splash-wordmark">Orbi Near</div>
     <div class="splash-tagline">Find anything. Instantly.</div>
   </div>
 </div>
@@ -3811,21 +3825,30 @@
       <div class="nav-left"></div>
       <div class="nav-brand">
         <div class="nav-icon">
-          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <clipPath id="nav-n-clip">
-                <circle cx="50" cy="45" r="40"/>
-              </clipPath>
+              <linearGradient id="nav-ag" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="white" stop-opacity="0"/>
+                <stop offset="28%"  stop-color="white" stop-opacity="0.55"/>
+                <stop offset="50%"  stop-color="white" stop-opacity="1"/>
+                <stop offset="72%"  stop-color="white" stop-opacity="0.55"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </linearGradient>
+              <radialGradient id="nav-cg" cx="50%" cy="50%" r="50%">
+                <stop offset="0%"   stop-color="white" stop-opacity="0.38"/>
+                <stop offset="100%" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
             </defs>
-            <g clip-path="url(#nav-n-clip)">
-              <rect x="26" y="0" width="8" height="100" fill="white"/>
-              <rect x="66" y="0" width="8" height="100" fill="white"/>
-              <polygon points="26,0 34,0 74,100 66,100" fill="white"/>
-            </g>
-            <path d="M 73,78 A 40,40 0 1,1 90,45 L 77,45 A 27,27 0 1,0 65.5,67 Z" fill="white"/>
+            <ellipse cx="50" cy="37" rx="20" ry="11" fill="url(#nav-cg)"/>
+            <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#nav-ag)" stroke-width="9"   opacity="0.10"/>
+            <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#nav-ag)" stroke-width="4"   opacity="0.22"/>
+            <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#nav-ag)" stroke-width="1.8" opacity="0.60"/>
+            <path d="M 5,58 A 55.5,55.5 0 0,1 95,58" fill="none" stroke="url(#nav-ag)" stroke-width="1"/>
+            <circle cx="50" cy="21" r="10" fill="white" opacity="0.10"/>
+            <circle cx="50" cy="21" r="5.5" fill="white"/>
           </svg>
         </div>
-        <span class="nav-wordmark"><span style="font-weight:700">Orbi</span><span style="font-weight:300;letter-spacing:0.06em;opacity:.8">near</span></span>
+        <span class="nav-wordmark">Orbi Near</span>
       </div>
       <div class="nav-right">
         <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
