@@ -3785,25 +3785,21 @@
 <div id="app-splash" role="presentation" aria-hidden="true">
   <div class="splash-inner">
     <div class="splash-icon">
-      <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" fill="none">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <clipPath id="splash-ring-front">
-            <rect x="0" y="50" width="100" height="55"/>
+          <clipPath id="splash-n-clip">
+            <circle cx="50" cy="45" r="40"/>
           </clipPath>
         </defs>
-        <!-- Back orbital ring -->
-        <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="3.2" transform="rotate(-16 50 54)" opacity="0.40"/>
-        <!-- Planet O outer -->
-        <ellipse cx="50" cy="42" rx="34" ry="38" fill="white"/>
-        <!-- Planet O inner hole -->
-        <ellipse cx="50" cy="42" rx="20" ry="24" fill="#000000"/>
-        <!-- Location pin tip -->
-        <path d="M43,74 L50,88 L57,74 Z" fill="white"/>
-        <!-- Front orbital ring -->
-        <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="4" transform="rotate(-16 50 54)" clip-path="url(#splash-ring-front)"/>
+        <g clip-path="url(#splash-n-clip)">
+          <rect x="26" y="0" width="11" height="100" fill="white"/>
+          <rect x="63" y="0" width="11" height="100" fill="white"/>
+          <polygon points="26,0 37,0 74,100 63,100" fill="white"/>
+        </g>
+        <path d="M 70,79.6 A 40,40 0 1,1 90,45 L 75,45 A 25,25 0 1,0 62.5,66.7 Z" fill="white"/>
       </svg>
     </div>
-    <div class="splash-wordmark">Orbi<span style="font-weight:400;opacity:.7">near</span></div>
+    <div class="splash-wordmark"><span style="font-weight:700">Orbi</span><span style="font-weight:300;opacity:.8;letter-spacing:0.08em">near</span></div>
     <div class="splash-tagline">Find anything. Instantly.</div>
   </div>
 </div>
@@ -3815,20 +3811,21 @@
       <div class="nav-left"></div>
       <div class="nav-brand">
         <div class="nav-icon">
-          <svg viewBox="0 0 100 105" xmlns="http://www.w3.org/2000/svg" fill="none">
+          <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
             <defs>
-              <clipPath id="nav-ring-front">
-                <rect x="0" y="50" width="100" height="55"/>
+              <clipPath id="nav-n-clip">
+                <circle cx="50" cy="45" r="40"/>
               </clipPath>
             </defs>
-            <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="3.2" transform="rotate(-16 50 54)" opacity="0.40"/>
-            <ellipse cx="50" cy="42" rx="34" ry="38" fill="white"/>
-            <ellipse cx="50" cy="42" rx="20" ry="24" fill="#000000"/>
-            <path d="M43,74 L50,88 L57,74 Z" fill="white"/>
-            <ellipse cx="50" cy="54" rx="50" ry="10" stroke="white" stroke-width="4" transform="rotate(-16 50 54)" clip-path="url(#nav-ring-front)"/>
+            <g clip-path="url(#nav-n-clip)">
+              <rect x="26" y="0" width="11" height="100" fill="white"/>
+              <rect x="63" y="0" width="11" height="100" fill="white"/>
+              <polygon points="26,0 37,0 74,100 63,100" fill="white"/>
+            </g>
+            <path d="M 70,79.6 A 40,40 0 1,1 90,45 L 75,45 A 25,25 0 1,0 62.5,66.7 Z" fill="white"/>
           </svg>
         </div>
-        <span class="nav-wordmark">Orbinear</span>
+        <span class="nav-wordmark"><span style="font-weight:700">Orbi</span><span style="font-weight:300;letter-spacing:0.06em;opacity:.8">near</span></span>
       </div>
       <div class="nav-right">
         <span class="nav-tag" data-i18n="nav_tag">Navigate Your World</span>
@@ -4196,7 +4193,7 @@
   </footer>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="app.js?v=102"></script>
+  <script src="app.js?v=103"></script>
   <script src="i18n.js?v=3"></script>
 
 </div><!-- /.page-wrap -->
