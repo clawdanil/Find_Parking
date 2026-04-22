@@ -289,6 +289,117 @@
       padding: 4px 4px 4px 2px;
     }
 
+    /* ── Hamburger button ──────────────────────────────────────────────── */
+    .hamburger-btn {
+      display: flex; flex-direction: column; justify-content: center; gap: 5px;
+      width: 36px; height: 36px; padding: 6px;
+      background: none; border: none; cursor: pointer;
+      border-radius: 8px;
+      transition: background .18s ease;
+    }
+    .hamburger-btn:hover { background: rgba(255,255,255,.08); }
+    .hamburger-btn span {
+      display: block; height: 1.5px; border-radius: 2px;
+      background: rgba(255,255,255,.75);
+      transition: transform .28s cubic-bezier(.16,1,.3,1), opacity .2s ease, width .28s ease;
+      transform-origin: center;
+    }
+    .hamburger-btn span:nth-child(1) { width: 22px; }
+    .hamburger-btn span:nth-child(2) { width: 16px; }
+    .hamburger-btn span:nth-child(3) { width: 20px; }
+    .hamburger-btn.is-open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); width: 20px; }
+    .hamburger-btn.is-open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .hamburger-btn.is-open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); width: 20px; }
+
+    /* ── Menu drawer ───────────────────────────────────────────────────── */
+    .menu-overlay {
+      position: fixed; inset: 0; z-index: 9100;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(3px);
+      -webkit-backdrop-filter: blur(3px);
+      opacity: 0; pointer-events: none;
+      transition: opacity .32s ease;
+    }
+    .menu-overlay.is-open { opacity: 1; pointer-events: all; }
+    .menu-drawer {
+      position: fixed; top: 0; left: 0; bottom: 0; z-index: 9200;
+      width: min(360px, 88vw);
+      background: rgba(8,8,10,.97);
+      border-right: 1px solid rgba(255,255,255,.09);
+      display: flex; flex-direction: column;
+      transform: translateX(-100%);
+      transition: transform .36s cubic-bezier(.16,1,.3,1);
+      overflow-y: auto;
+    }
+    .menu-drawer.is-open { transform: translateX(0); }
+    .menu-drawer-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 14px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      flex-shrink: 0;
+    }
+    .menu-drawer-logo {
+      display: flex; align-items: center; gap: 9px;
+    }
+    .menu-drawer-logo svg { width: 22px; height: 22px; }
+    .menu-drawer-wordmark {
+      font-family: 'Cabinet Grotesk','Inter',sans-serif;
+      font-size: 1rem; font-weight: 800; letter-spacing: -.03em;
+      color: rgba(255,255,255,.92);
+    }
+    .menu-close-btn {
+      background: rgba(255,255,255,.07); border: none; cursor: pointer;
+      color: rgba(255,255,255,.55); font-size: 1.1rem; line-height: 1;
+      width: 30px; height: 30px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .18s ease, color .18s ease;
+    }
+    .menu-close-btn:hover { background: rgba(255,255,255,.14); color: rgba(255,255,255,.9); }
+    .menu-sections { padding: 6px 0 40px; flex: 1; }
+    .menu-sec {
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .menu-sec-toggle {
+      display: flex; align-items: center; justify-content: space-between; width: 100%;
+      padding: 18px 22px;
+      background: none; border: none; cursor: pointer; text-align: left;
+      color: rgba(255,255,255,.88);
+      font-family: 'Cabinet Grotesk','Inter',sans-serif;
+      font-size: .95rem; font-weight: 700; letter-spacing: -.01em;
+      transition: color .18s ease;
+    }
+    .menu-sec-toggle:hover { color: #fff; }
+    .menu-sec-arrow {
+      width: 18px; height: 18px; flex-shrink: 0;
+      color: rgba(255,255,255,.35);
+      transition: transform .28s cubic-bezier(.16,1,.3,1), color .18s ease;
+    }
+    .menu-sec-toggle[aria-expanded="true"] .menu-sec-arrow { transform: rotate(180deg); color: rgba(255,255,255,.7); }
+    .menu-sec-body {
+      display: grid; grid-template-rows: 0fr;
+      transition: grid-template-rows .32s cubic-bezier(.16,1,.3,1);
+    }
+    .menu-sec-body.is-open { grid-template-rows: 1fr; }
+    .menu-sec-inner { overflow: hidden; }
+    .menu-sec-content {
+      padding: 0 22px 22px;
+      color: rgba(255,255,255,.55);
+      font-size: .82rem; line-height: 1.7; font-weight: 400;
+    }
+    .menu-sec-content p { margin: 0 0 12px; }
+    .menu-sec-content p:last-child { margin-bottom: 0; }
+    .menu-team-member { margin-top: 14px; }
+    .menu-team-name {
+      font-size: .82rem; font-weight: 700;
+      color: rgba(255,255,255,.82); margin-bottom: 2px;
+    }
+    .menu-team-role {
+      font-size: .75rem; color: rgba(255,255,255,.38); font-weight: 500; letter-spacing: .01em;
+    }
+    .menu-team-bio {
+      font-size: .79rem; color: rgba(255,255,255,.50); line-height: 1.6; margin-top: 5px;
+    }
+
     /* ── Hero ──────────────────────────────────────────────────────────── */
     .hero {
       position: relative;
@@ -3880,7 +3991,11 @@
 
   <nav class="site-nav" id="site-nav">
     <div class="nav-inner">
-      <div class="nav-left"></div>
+      <div class="nav-left">
+        <button class="hamburger-btn" id="menu-toggle" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
       <div class="nav-brand">
         <div class="nav-icon">
           <svg viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg">
@@ -3918,6 +4033,74 @@
       </div>
     </div>
   </nav>
+
+  <!-- Menu overlay + drawer -->
+  <div class="menu-overlay" id="menu-overlay"></div>
+  <aside class="menu-drawer" id="menu-drawer" aria-hidden="true">
+    <div class="menu-drawer-head">
+      <div class="menu-drawer-logo">
+        <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect width="512" height="512" rx="112" ry="112" fill="#000"/>
+          <defs>
+            <linearGradient id="dr-ag" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="white" stop-opacity="0"/>
+              <stop offset="50%" stop-color="white" stop-opacity="1"/>
+              <stop offset="100%" stop-color="white" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d="M 80,345 A 220,220 0 0,1 432,345" fill="none" stroke="url(#dr-ag)" stroke-width="10"/>
+          <circle cx="256" cy="168" r="34" fill="white"/>
+        </svg>
+        <span class="menu-drawer-wordmark">Orbi Near</span>
+      </div>
+      <button class="menu-close-btn" id="menu-close" aria-label="Close menu">✕</button>
+    </div>
+
+    <div class="menu-sections">
+      <!-- About Us -->
+      <div class="menu-sec">
+        <button class="menu-sec-toggle" aria-expanded="true" data-target="sec-about">
+          About Us
+          <svg class="menu-sec-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="menu-sec-body is-open" id="sec-about">
+          <div class="menu-sec-inner">
+            <div class="menu-sec-content">
+              <p>Orbi Near is built to redefine how you experience the world around you.</p>
+              <p>We believe discovery should be effortless, intelligent, and beautifully simple. Whether it's finding the perfect café, a hidden bar, a gym, or even parking — Orbi Near brings everything "near you" into one seamless, AI-powered experience.</p>
+              <p>Designed with a focus on minimalism and precision, Orbi Near blends location intelligence with modern design to help you navigate your surroundings with clarity and confidence.</p>
+              <p>This is not just another discovery app — it's your local universe, intelligently curated.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Team -->
+      <div class="menu-sec">
+        <button class="menu-sec-toggle" aria-expanded="false" data-target="sec-team">
+          Team
+          <svg class="menu-sec-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="menu-sec-body" id="sec-team">
+          <div class="menu-sec-inner">
+            <div class="menu-sec-content">
+              <p>We are a small, focused team of two tech-driven builders with a shared passion for creating impactful, AI-powered products. Both of us come from strong engineering backgrounds and have actively contributed to open-source AI applications, shaping systems that prioritize scalability, intelligence, and real-world usability.</p>
+              <div class="menu-team-member">
+                <div class="menu-team-name">Anil Vurity</div>
+                <div class="menu-team-role">Principal Engineer</div>
+                <div class="menu-team-bio">Leads architecture and core platform development, with a focus on building scalable, intelligent systems.</div>
+              </div>
+              <div class="menu-team-member">
+                <div class="menu-team-name">Sunil Vurity</div>
+                <div class="menu-team-role">Engineering Advisor</div>
+                <div class="menu-team-bio">Provides strategic technical guidance, ensuring robust design and forward-thinking innovation.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </aside>
 
   <!-- Slideshow bg — cinematic B&W, crossfades behind glassmorphic UI -->
   <div class="bg-scene" aria-hidden="true">
@@ -4304,6 +4487,52 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="app.js?v=103"></script>
   <script src="i18n.js?v=3"></script>
+
+  <script>
+    (function(){
+      var toggle  = document.getElementById('menu-toggle');
+      var overlay = document.getElementById('menu-overlay');
+      var drawer  = document.getElementById('menu-drawer');
+
+      function openMenu(){
+        toggle.classList.add('is-open');
+        toggle.setAttribute('aria-expanded','true');
+        overlay.classList.add('is-open');
+        drawer.classList.add('is-open');
+        drawer.setAttribute('aria-hidden','false');
+        document.body.style.overflow = 'hidden';
+      }
+      function closeMenu(){
+        toggle.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded','false');
+        overlay.classList.remove('is-open');
+        drawer.classList.remove('is-open');
+        drawer.setAttribute('aria-hidden','true');
+        document.body.style.overflow = '';
+      }
+
+      toggle.addEventListener('click', function(){
+        drawer.classList.contains('is-open') ? closeMenu() : openMenu();
+      });
+      overlay.addEventListener('click', closeMenu);
+      document.getElementById('menu-close').addEventListener('click', closeMenu);
+
+      // Accordion toggles
+      drawer.querySelectorAll('.menu-sec-toggle').forEach(function(btn){
+        btn.addEventListener('click', function(){
+          var expanded = btn.getAttribute('aria-expanded') === 'true';
+          var body = document.getElementById(btn.dataset.target);
+          btn.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+          body.classList.toggle('is-open', !expanded);
+        });
+      });
+
+      // Close on Escape
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'Escape' && drawer.classList.contains('is-open')) closeMenu();
+      });
+    })();
+  </script>
 
 </div><!-- /.page-wrap -->
 
