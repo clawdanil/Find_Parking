@@ -5663,6 +5663,43 @@
     btn.addEventListener('click', send);
     inp.addEventListener('keydown', function(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
     document.addEventListener('keydown', function(e) { if (e.key==='Escape'&&isOpen) closeChat(); });
+
+    // ── iOS keyboard: keep popup small and pinned ────────────────────────
+    var _scrollY = 0;
+    inp.addEventListener('focus', function() {
+      // Lock body scroll so iOS doesn't pan the page under the fixed popup
+      _scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = '-' + _scrollY + 'px';
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    });
+    inp.addEventListener('blur', function() {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      window.scrollTo(0, _scrollY);
+      popup.style.height = '';
+      popup.style.bottom = '';
+    });
+
+    // Use visualViewport to shrink popup when keyboard slides up
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', function() {
+        if (!popup.classList.contains('is-open')) return;
+        var kbHeight = window.innerHeight - window.visualViewport.height;
+        if (kbHeight > 80) {
+          // Keyboard open — compact popup above keyboard
+          var compact = Math.max(180, window.visualViewport.height - 104);
+          popup.style.height = compact + 'px';
+          popup.style.bottom = (kbHeight + 8) + 'px';
+        } else {
+          popup.style.height = '';
+          popup.style.bottom = '';
+        }
+      });
+    }
   })();
   </script>
 </body>
