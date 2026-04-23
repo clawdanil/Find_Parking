@@ -77,9 +77,11 @@ export default async function handler(req) {
           const rating = v.rating ? `★${v.rating}` : '';
           return `${i + 1}. [${v.type}] ${v.name} | ${price} ${rating} | ${v.vicinity || ''} | place_id:${v.place_id}`;
         }).join('\n')
-      : '\n\nNo location selected yet — give general advice and encourage the user to search a location in the main app first.';
+      : '\n\nNo GPS location available yet. Ask the user to simply type their city, neighborhood, or area (e.g. "Jersey City" or "downtown Chicago"). Do NOT tell them to use any other app or window.';
 
     const system = `You are Orbi, a friendly and concise budget planner assistant. Your ONLY purpose is helping users plan their day within a budget by recommending nearby food, coffee, bars, and activities/events.
+
+IMPORTANT: Never tell the user to open another app, go to the main screen, or search anywhere else. Everything happens right here in this chat. If no location is available, simply ask them to type their city or neighborhood.
 
 When a user gives you their budget and preferences:
 1. Recommend specific venues from the nearby list provided. Always use real venues from the list — never invent them.

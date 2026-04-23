@@ -4173,6 +4173,18 @@
   .chat-send:hover   { transform: scale(1.08); }
   .chat-send:disabled { opacity: .35; cursor: not-allowed; transform: none; }
   .chat-send svg { width: 15px; height: 15px; }
+  .chat-loc-btn {
+    align-self: flex-start;
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 7px 13px;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+    border-radius: 100px; cursor: pointer;
+    color: rgba(255,255,255,.75); font-size: .74rem; font-weight: 600;
+    font-family: 'Inter',sans-serif;
+    transition: background .18s, color .18s;
+  }
+  .chat-loc-btn:hover { background: rgba(255,255,255,.13); color: rgba(255,255,255,.95); }
+  .chat-loc-btn:disabled { opacity: .5; cursor: not-allowed; }
 
   </style>
 </head>
@@ -5454,15 +5466,55 @@
         o.classList.toggle('active', o.dataset.lang === code);
       });
       langDrop.classList.remove('is-open');
-      // Re-greet in new language if chat is already open
       if (greeted) {
         msgs.innerHTML = '';
         history = [];
         var g = GREETINGS[code] || GREETINGS['en'];
         addMsg('bot', g);
+        addLocationButton();
       }
     }
     setLang(chatLang);
+
+    // ── In-chat location button ───────────────────────────────────────────
+    function addLocationButton() {
+      if (document.getElementById('chat-loc-quick')) return;
+      var btn = document.createElement('button');
+      btn.className = 'chat-loc-btn';
+      btn.id = 'chat-loc-quick';
+      btn.innerHTML =
+        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+        ' Use My Current Location';
+      btn.addEventListener('click', handleLocClick);
+      msgs.appendChild(btn);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function handleLocClick() {
+      var btn = document.getElementById('chat-loc-quick');
+      if (btn) { btn.disabled = true; btn.innerHTML = '⌛ Getting location…'; }
+      if (!navigator.geolocation) {
+        if (btn) btn.remove();
+        addMsg('bot', 'Location unavailable — just type your city or neighborhood and I\'ll find spots near you!');
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          chatLat = pos.coords.latitude;
+          chatLng = pos.coords.longitude;
+          if (locSub) locSub.textContent = 'AI · location ready ✓';
+          if (btn) btn.remove();
+          // Automatically kick off suggestions
+          inp.value = 'I\'m at my current location. What can you suggest based on my budget?';
+          send();
+        },
+        function() {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Use My Current Location'; }
+          addMsg('bot', 'Couldn\'t get your location — no worries! Just type your city or neighborhood and I\'ll find great spots near you.');
+        },
+        { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
+      );
+    }
 
     langBtn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -5554,7 +5606,7 @@
       if (!greeted) {
         greeted = true;
         var g = GREETINGS[chatLang] || GREETINGS['en'];
-        setTimeout(function() { addMsg('bot', g); }, 200);
+        setTimeout(function() { addMsg('bot', g); addLocationButton(); }, 200);
       }
       setTimeout(function() { inp.focus(); }, 300);
     }
