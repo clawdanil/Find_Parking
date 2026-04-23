@@ -4045,7 +4045,11 @@
   }
   .chat-popup.is-open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
   @media (max-width: 767px) { .chat-popup { bottom: 152px; right: 16px; } }
-  .app-mode .chat-popup { bottom: 96px; right: 8px; left: auto !important; width: min(310px, calc(100vw - 20px)); height: 370px; max-height: calc(100vh - 200px); }
+  .app-mode .chat-popup {
+    bottom: 96px; right: 8px; left: auto !important;
+    width: min(300px, calc(100vw - 24px));
+    height: 320px; max-height: 320px; min-height: 200px;
+  }
 
   .chat-head {
     display: flex; align-items: center; justify-content: space-between;
@@ -5687,39 +5691,28 @@
     inp.addEventListener('keydown', function(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
     document.addEventListener('keydown', function(e) { if (e.key==='Escape'&&isOpen) closeChat(); });
 
-    // ── iOS keyboard: keep popup small and pinned ────────────────────────
-    var _scrollY = 0;
-    inp.addEventListener('focus', function() {
-      // Lock body scroll so iOS doesn't pan the page under the fixed popup
-      _scrollY = window.scrollY;
-      document.body.style.position = 'fixed';
-      document.body.style.top = '-' + _scrollY + 'px';
-      document.body.style.width = '100%';
-      document.body.style.overflow = 'hidden';
-    });
+    // ── iOS keyboard: reposition popup above keyboard via visualViewport ───
+    // No body scroll lock — it causes the white-strip flash in Expo WebView.
+    // visualViewport shrinks when keyboard opens; we just nudge the popup up.
     inp.addEventListener('blur', function() {
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.width = '';
-      document.body.style.overflow = '';
-      window.scrollTo(0, _scrollY);
       popup.style.height = '';
       popup.style.bottom = '';
     });
 
-    // Use visualViewport to shrink popup when keyboard slides up
     if (window.visualViewport) {
+      var NAV_H = 56; // app bottom-nav height in px
       window.visualViewport.addEventListener('resize', function() {
         if (!popup.classList.contains('is-open')) return;
-        var kbHeight = window.innerHeight - window.visualViewport.height;
-        if (kbHeight > 80) {
-          // Keyboard open — compact popup above keyboard
-          var compact = Math.max(180, window.visualViewport.height - 104);
-          popup.style.height = compact + 'px';
-          popup.style.bottom = (kbHeight + 8) + 'px';
+        var kbH = window.innerHeight - window.visualViewport.height;
+        if (kbH > 100) {
+          // Keyboard open: pin popup just above the keyboard
+          var bottomOffset = kbH + 8;
+          var availH       = window.visualViewport.height - 12;
+          popup.style.bottom = bottomOffset + 'px';
+          popup.style.height = Math.max(160, Math.min(280, availH)) + 'px';
         } else {
-          popup.style.height = '';
           popup.style.bottom = '';
+          popup.style.height = '';
         }
       });
     }
