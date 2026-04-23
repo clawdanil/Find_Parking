@@ -4029,7 +4029,7 @@
   }
   .chat-popup.is-open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
   @media (max-width: 767px) { .chat-popup { bottom: 152px; right: 16px; } }
-  .app-mode .chat-popup { bottom: 96px; right: 8px; width: min(320px, calc(100vw - 16px)); height: min(460px, calc(100vh - 160px)); }
+  .app-mode .chat-popup { bottom: 96px; left: 8px; right: 8px; width: auto; max-width: 100%; height: min(460px, calc(100vh - 180px)); }
 
   .chat-head {
     display: flex; align-items: center; justify-content: space-between;
@@ -4835,6 +4835,10 @@
     <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 002-2V2M7 2v20M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3v7"/></svg></span>
     <span class="abn-label">Food</span>
   </button>
+  <button class="abn-item" id="abn-chat-btn-top">
+    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
+    <span class="abn-label">Plan</span>
+  </button>
   <button class="abn-item" data-feature="bars">
     <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 22V11.5M16 22V11.5M2 8l2-6h16l2 6H2zm0 0h20"/><line x1="12" y1="8" x2="12" y2="22"/></svg></span>
     <span class="abn-label">Bars</span>
@@ -4866,10 +4870,6 @@
   <button class="abn-item" data-feature="parking">
     <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 17V7h4a3 3 0 010 6H9"/></svg></span>
     <span class="abn-label">Parking</span>
-  </button>
-  <button class="abn-item" id="abn-chat-btn">
-    <span class="abn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></span>
-    <span class="abn-label">Plan</span>
   </button>
 </nav>
 
@@ -5566,7 +5566,7 @@
     // ── Event bindings ───────────────────────────────────────────────────────
     if (fab) fab.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
 
-    var abnChat = document.getElementById('abn-chat-btn');
+    var abnChat = document.getElementById('abn-chat-btn-top');
     if (abnChat) {
       abnChat.addEventListener('click', function() {
         if (isOpen) { closeChat(); } else { openChat(); abnChat.classList.add('active'); }
