@@ -3995,6 +3995,22 @@
     to   { opacity: 0; transform: scale(1.04); }
   }
 
+  /* ── Plan My Day button (app-mode only, inside search card) ───────────── */
+  .plan-day-btn { display: none; }
+  .app-mode .plan-day-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    width: 100%; margin-top: 8px;
+    padding: 11px 16px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 14px;
+    color: rgba(255,255,255,.75);
+    font-size: .82rem; font-weight: 600; font-family: 'Inter',sans-serif;
+    cursor: pointer; letter-spacing: .02em;
+    transition: background .18s, border-color .18s, color .18s;
+  }
+  .app-mode .plan-day-btn:hover { background: rgba(255,255,255,.11); border-color: rgba(255,255,255,.24); color: rgba(255,255,255,.95); }
+
   /* ── Budget Chat FAB + Popup ──────────────────────────────────────────── */
   .chat-fab {
     position: fixed; z-index: 8100;
@@ -4443,6 +4459,10 @@
         </div>
       </div>
       <button id="location-btn" class="location-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> <span data-i18n="location_btn">Use My Current Location</span></button>
+      <button class="plan-day-btn" id="plan-day-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        Plan My Day with Orbi
+      </button>
       <div class="chips">
         <span class="chips-label" data-i18n="chips_label">Popular cities</span>
         <button class="chip" data-city="Jersey City, NJ" data-lat="40.7178" data-lng="-74.0431">Jersey City, NJ</button>
@@ -5565,6 +5585,10 @@
 
     // ── Event bindings ───────────────────────────────────────────────────────
     if (fab) fab.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+
+    // "Plan My Day" button inside search card (app-mode)
+    var planBtn = document.getElementById('plan-day-btn');
+    if (planBtn) planBtn.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
 
     var abnChat = document.getElementById('abn-chat-btn-top');
     if (abnChat) {
