@@ -4047,8 +4047,8 @@
   @media (max-width: 767px) { .chat-popup { bottom: 152px; right: 16px; } }
   .app-mode .chat-popup {
     bottom: 96px; right: 8px; left: auto !important;
-    width: min(300px, calc(100vw - 24px));
-    height: 320px; max-height: 320px; min-height: 200px;
+    width: min(296px, calc(100vw - 24px));
+    height: 260px; max-height: 260px; min-height: 160px;
   }
 
   .chat-head {
@@ -5691,29 +5691,40 @@
     inp.addEventListener('keydown', function(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
     document.addEventListener('keydown', function(e) { if (e.key==='Escape'&&isOpen) closeChat(); });
 
-    // ── iOS keyboard: reposition popup above keyboard via visualViewport ───
-    // No body scroll lock — it causes the white-strip flash in Expo WebView.
-    // visualViewport shrinks when keyboard opens; we just nudge the popup up.
+    // ── iOS keyboard: top-anchor popup inside visual viewport ────────────────
+    // Using bottom-based positioning was wrong: position:fixed bottom is
+    // relative to the layout viewport (full screen height), not the visible
+    // area above the keyboard. Flip to top-anchoring via visualViewport so
+    // the popup always stays in the visible slice regardless of whether the
+    // WebView shrinks or the keyboard overlays it.
+    var _origVH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    inp.addEventListener('focus', function() {
+      // overflow:hidden prevents iOS panning the page (no white strip)
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    });
     inp.addEventListener('blur', function() {
-      popup.style.height = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+      popup.style.top    = '';
       popup.style.bottom = '';
+      popup.style.height = '';
     });
 
     if (window.visualViewport) {
-      var NAV_H = 56; // app bottom-nav height in px
       window.visualViewport.addEventListener('resize', function() {
-        if (!popup.classList.contains('is-open')) return;
-        var kbH = window.innerHeight - window.visualViewport.height;
-        if (kbH > 100) {
-          // Keyboard open: pin popup just above the keyboard
-          var bottomOffset = kbH + 8;
-          var availH       = window.visualViewport.height - 12;
-          popup.style.bottom = bottomOffset + 'px';
-          popup.style.height = Math.max(160, Math.min(280, availH)) + 'px';
-        } else {
-          popup.style.bottom = '';
-          popup.style.height = '';
-        }
+        var vvH = window.visualViewport.height;
+        // Keep baseline up to date when no keyboard
+        if (vvH > _origVH) { _origVH = vvH; }
+        // Only reposition when keyboard has reduced visible height noticeably
+        if (vvH > _origVH * 0.82 || !popup.classList.contains('is-open')) return;
+        // Anchor popup to the TOP of the visual viewport so it stays visible
+        var topOffset = (window.visualViewport.offsetTop || 0) + 8;
+        var popupH    = Math.min(260, vvH - 72); // leave room below for input
+        popup.style.top    = topOffset + 'px';
+        popup.style.bottom = 'auto';
+        popup.style.height = Math.max(150, popupH) + 'px';
       });
     }
   })();
