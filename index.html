@@ -4045,7 +4045,7 @@
   }
   .chat-popup.is-open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
   @media (max-width: 767px) { .chat-popup { bottom: 152px; right: 16px; } }
-  .app-mode .chat-popup { bottom: 96px; left: 8px; right: 8px; width: auto; max-width: 100%; height: min(460px, calc(100vh - 180px)); }
+  .app-mode .chat-popup { bottom: 96px; right: 8px; left: auto !important; width: min(310px, calc(100vw - 20px)); height: 370px; max-height: calc(100vh - 200px); }
 
   .chat-head {
     display: flex; align-items: center; justify-content: space-between;
@@ -4151,12 +4151,15 @@
     display: flex; align-items: center; gap: 8px;
     padding: 9px 11px 11px;
     border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+    box-sizing: border-box; width: 100%; overflow: hidden;
   }
   .chat-input {
-    flex: 1; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10);
+    flex: 1; min-width: 0;
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10);
     border-radius: 100px; padding: 9px 14px;
     color: rgba(255,255,255,.92); font-size: .79rem; font-family: 'Inter',sans-serif;
     outline: none; transition: border-color .18s, background .18s;
+    box-sizing: border-box;
   }
   .chat-input::placeholder { color: rgba(255,255,255,.26); }
   .chat-input:focus { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.10); }
