@@ -4053,6 +4053,33 @@
     transition: background .18s, color .18s; flex-shrink: 0;
   }
   .chat-close-btn:hover { background: rgba(255,255,255,.13); color: rgba(255,255,255,.88); }
+  .chat-lang-wrap { position: relative; flex-shrink: 0; }
+  .chat-lang-btn {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 100px; padding: 3px 9px 3px 7px;
+    color: rgba(255,255,255,.70); font-size: .65rem; font-weight: 600;
+    font-family: 'Inter',sans-serif; cursor: pointer; letter-spacing: .04em;
+    display: flex; align-items: center; gap: 4px;
+    transition: background .18s, border-color .18s;
+  }
+  .chat-lang-btn:hover { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.22); }
+  .chat-lang-drop {
+    position: absolute; top: calc(100% + 6px); right: 0; z-index: 100;
+    background: rgba(12,12,16,.98); border: 1px solid rgba(255,255,255,.12);
+    border-radius: 12px; padding: 6px; min-width: 140px;
+    box-shadow: 0 8px 32px rgba(0,0,0,.60);
+    display: none; flex-direction: column; gap: 1px;
+  }
+  .chat-lang-drop.is-open { display: flex; }
+  .chat-lang-opt {
+    background: none; border: none; cursor: pointer; text-align: left;
+    padding: 7px 10px; border-radius: 8px;
+    color: rgba(255,255,255,.65); font-size: .74rem; font-family: 'Inter',sans-serif;
+    display: flex; align-items: center; gap: 7px;
+    transition: background .15s, color .15s;
+  }
+  .chat-lang-opt:hover   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.92); }
+  .chat-lang-opt.active  { background: rgba(255,255,255,.10); color: #fff; font-weight: 600; }
 
   .chat-msgs {
     flex: 1; overflow-y: auto; padding: 12px 12px 6px;
@@ -4667,10 +4694,31 @@
         <span class="chat-head-dot"></span>
         <div>
           <div class="chat-head-title">Orbi Budget Planner</div>
-          <div class="chat-head-sub">AI · all languages</div>
+          <div class="chat-head-sub" id="chat-loc-sub">AI · getting location…</div>
         </div>
       </div>
-      <button class="chat-close-btn" id="chat-close" aria-label="Close">✕</button>
+      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+        <div class="chat-lang-wrap">
+          <button class="chat-lang-btn" id="chat-lang-btn" aria-label="Change language">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+            <span id="chat-lang-label">EN</span>
+          </button>
+          <div class="chat-lang-drop" id="chat-lang-drop">
+            <button class="chat-lang-opt" data-lang="en">🇺🇸 English</button>
+            <button class="chat-lang-opt" data-lang="es">🇪🇸 Español</button>
+            <button class="chat-lang-opt" data-lang="fr">🇫🇷 Français</button>
+            <button class="chat-lang-opt" data-lang="de">🇩🇪 Deutsch</button>
+            <button class="chat-lang-opt" data-lang="zh">🇨🇳 中文</button>
+            <button class="chat-lang-opt" data-lang="ja">🇯🇵 日本語</button>
+            <button class="chat-lang-opt" data-lang="pt">🇧🇷 Português</button>
+            <button class="chat-lang-opt" data-lang="ar">🇸🇦 العربية</button>
+            <button class="chat-lang-opt" data-lang="hi">🇮🇳 हिन्दी</button>
+            <button class="chat-lang-opt" data-lang="ko">🇰🇷 한국어</button>
+            <button class="chat-lang-opt" data-lang="it">🇮🇹 Italiano</button>
+          </div>
+        </div>
+        <button class="chat-close-btn" id="chat-close" aria-label="Close">✕</button>
+      </div>
     </div>
     <div class="chat-msgs" id="chat-msgs"></div>
     <div class="chat-input-area">
@@ -5341,64 +5389,103 @@
   <!-- Budget Chat -->
   <script>
   (function () {
-    var fab   = document.getElementById('chat-fab');
-    var popup = document.getElementById('chat-popup');
-    var msgs  = document.getElementById('chat-msgs');
-    var inp   = document.getElementById('chat-input');
-    var btn   = document.getElementById('chat-send');
-    var close = document.getElementById('chat-close');
+    var fab     = document.getElementById('chat-fab');
+    var popup   = document.getElementById('chat-popup');
+    var msgs    = document.getElementById('chat-msgs');
+    var inp     = document.getElementById('chat-input');
+    var btn     = document.getElementById('chat-send');
+    var close   = document.getElementById('chat-close');
+    var locSub  = document.getElementById('chat-loc-sub');
+    var langBtn = document.getElementById('chat-lang-btn');
+    var langDrop= document.getElementById('chat-lang-drop');
+    var langLbl = document.getElementById('chat-lang-label');
 
-    var isOpen   = false;
-    var greeted  = false;
-    var loading  = false;
-    var history  = [];
+    var isOpen  = false;
+    var greeted = false;
+    var loading = false;
+    var history = [];
+    var chatLat = null;
+    var chatLng = null;
+    var chatLang = (function(){ try { return localStorage.getItem('orbi-lang') || document.documentElement.lang || 'en'; } catch(e){ return 'en'; } })();
 
+    var LANG_LABELS = { en:'EN', es:'ES', fr:'FR', de:'DE', zh:'中文', ja:'日本語', pt:'PT', ar:'AR', hi:'हिं', ko:'한국어', it:'IT' };
     var GREETINGS = {
       en: "Hey there! I'm Orbi, your budget planner 👋\nTell me your budget for the day and what you'd like to do — I'll help you plan it!",
       es: "¡Hola! Soy Orbi, tu planificador de presupuesto 👋\nDime tu presupuesto y qué quieres hacer hoy.",
       fr: "Salut ! Je suis Orbi, ton planificateur de budget 👋\nDis-moi ton budget et ce que tu veux faire aujourd'hui !",
       de: "Hallo! Ich bin Orbi, dein Budget-Planer 👋\nSag mir dein Budget und was du heute machen möchtest!",
       zh: "嗨！我是Orbi，您的预算规划师 👋\n告诉我您今天的预算和想做什么吧！",
-      ja: "こんにちは！私はOrbiです、あなたの予算プランナー 👋\n今日の予算とやりたいことを教えてください！",
+      ja: "こんにちは！Orbiです、予算プランナー 👋\n今日の予算とやりたいことを教えてください！",
       pt: "Oi! Sou Orbi, seu planejador de orçamento 👋\nMe diga seu orçamento e o que quer fazer hoje!",
       ar: "مرحبًا! أنا أوربي، مخطط ميزانيتك 👋\nأخبرني بميزانيتك وما تريد فعله اليوم!",
       hi: "नमस्ते! मैं Orbi हूं, आपका बजट प्लानर 👋\nआज का बजट और क्या करना चाहते हैं बताइए!",
-      ko: "안녕하세요! 저는 Orbi, 예산 플래너입니다 👋\n오늘 예산과 하고 싶은 것을 알려주세요!",
+      ko: "안녕하세요! Orbi, 예산 플래너입니다 👋\n오늘 예산과 하고 싶은 것을 알려주세요!",
+      it: "Ciao! Sono Orbi, il tuo pianificatore di budget 👋\nDimmi il tuo budget e cosa vuoi fare oggi!",
     };
 
-    function getLang() {
-      try { return localStorage.getItem('orbi-lang') || document.documentElement.lang || 'en'; } catch(e) { return 'en'; }
+    // ── Language picker ──────────────────────────────────────────────────────
+    function setLang(code) {
+      chatLang = code;
+      langLbl.textContent = LANG_LABELS[code] || code.toUpperCase();
+      langDrop.querySelectorAll('.chat-lang-opt').forEach(function(o) {
+        o.classList.toggle('active', o.dataset.lang === code);
+      });
+      langDrop.classList.remove('is-open');
+    }
+    setLang(chatLang);
+
+    langBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      langDrop.classList.toggle('is-open');
+    });
+    langDrop.querySelectorAll('.chat-lang-opt').forEach(function(opt) {
+      opt.addEventListener('click', function() { setLang(opt.dataset.lang); });
+    });
+    document.addEventListener('click', function() { langDrop.classList.remove('is-open'); });
+
+    // ── Geolocation ──────────────────────────────────────────────────────────
+    function requestGeo() {
+      if (!navigator.geolocation) { updateLocSub(false); return; }
+      navigator.geolocation.getCurrentPosition(
+        function(pos) {
+          chatLat = pos.coords.latitude;
+          chatLng = pos.coords.longitude;
+          updateLocSub(true);
+        },
+        function() {
+          // Fall back to app search location if available
+          if (typeof window.getOrbiSearchLocation === 'function') {
+            var loc = window.getOrbiSearchLocation();
+            if (loc.lat && loc.lng) { chatLat = loc.lat; chatLng = loc.lng; updateLocSub(true); return; }
+          }
+          updateLocSub(false);
+        },
+        { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
+      );
     }
 
-    function getLocation() {
-      if (typeof window.getOrbiSearchLocation === 'function') {
-        var loc = window.getOrbiSearchLocation();
-        if (loc.lat && loc.lng) return { lat: loc.lat, lng: loc.lng };
-      }
-      return null;
+    function updateLocSub(hasLoc) {
+      if (locSub) locSub.textContent = hasLoc ? 'AI · location ready ✓' : 'AI · all languages';
     }
 
-    function esc(s) {
-      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+    // ── Helpers ──────────────────────────────────────────────────────────────
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
     function renderText(s) {
       return esc(s)
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\n/g, '<br>');
+        .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+        .replace(/\n/g,'<br>');
     }
 
     function addMsg(role, text, venues) {
       var wrap   = document.createElement('div');
       wrap.className = 'chat-msg ' + role;
-
       var bubble = document.createElement('div');
       bubble.className = 'chat-bubble';
       bubble.innerHTML = renderText(text);
       wrap.appendChild(bubble);
-
       (venues || []).forEach(function(v) {
-        var card = document.createElement('div');
+        var card    = document.createElement('div');
         card.className = 'chat-venue-card';
         var mapsUrl = 'https://www.google.com/maps/place/?q=place_id:' + encodeURIComponent(v.place_id);
         var price   = v.price_level ? '$'.repeat(v.price_level) : '';
@@ -5411,12 +5498,10 @@
             (meta ? '<div class="chat-venue-meta">' + esc(meta) + '</div>' : '') +
           '</div>' +
           '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="chat-venue-map">' +
-            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-            ' Maps' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Maps' +
           '</a>';
         wrap.appendChild(card);
       });
-
       msgs.appendChild(wrap);
       msgs.scrollTop = msgs.scrollHeight;
       return wrap;
@@ -5426,86 +5511,72 @@
       var w = document.createElement('div');
       w.className = 'chat-msg bot'; w.id = 'chat-typing-row';
       w.innerHTML = '<div class="chat-bubble" style="padding:10px 14px"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
-      msgs.appendChild(w);
-      msgs.scrollTop = msgs.scrollHeight;
+      msgs.appendChild(w); msgs.scrollTop = msgs.scrollHeight;
     }
+    function removeTyping() { var el = document.getElementById('chat-typing-row'); if (el) el.remove(); }
 
-    function removeTyping() {
-      var el = document.getElementById('chat-typing-row');
-      if (el) el.remove();
-    }
-
+    // ── Open / Close ─────────────────────────────────────────────────────────
     function openChat() {
       isOpen = true;
       popup.classList.add('is-open');
-      popup.setAttribute('aria-hidden', 'false');
+      popup.setAttribute('aria-hidden','false');
+      requestGeo();
       if (!greeted) {
         greeted = true;
-        var lang = getLang();
-        var g = GREETINGS[lang] || GREETINGS['en'];
-        setTimeout(function() { addMsg('bot', g); }, 180);
+        var g = GREETINGS[chatLang] || GREETINGS['en'];
+        setTimeout(function() { addMsg('bot', g); }, 200);
       }
       setTimeout(function() { inp.focus(); }, 300);
-    }
-
-    async function send() {
-      var text = inp.value.trim();
-      if (!text || loading) return;
-      inp.value = '';
-      btn.disabled = true;
-      loading = true;
-
-      addMsg('user', text);
-      history.push({ role: 'user', content: text });
-      showTyping();
-
-      try {
-        var res = await fetch('/api/budget-chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ messages: history, location: getLocation(), lang: getLang() }),
-        });
-        var data = await res.json();
-        removeTyping();
-        if (data.error) throw new Error(data.error);
-        addMsg('bot', data.text, data.venues);
-        history.push({ role: 'assistant', content: data.text });
-      } catch(e) {
-        removeTyping();
-        addMsg('bot', "Sorry, something went wrong. Please try again in a moment.");
-      }
-
-      btn.disabled = false;
-      loading = false;
-      inp.focus();
-    }
-
-    fab.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
-
-    // Bottom nav "Plan" tab (app-mode)
-    var abnChat = document.getElementById('abn-chat-btn');
-    if (abnChat) {
-      abnChat.addEventListener('click', function() {
-        if (isOpen) { closeChat(); abnChat.classList.remove('active'); }
-        else        { openChat();  abnChat.classList.add('active'); }
-      });
     }
 
     function closeChat() {
       isOpen = false;
       popup.classList.remove('is-open');
-      popup.setAttribute('aria-hidden', 'true');
+      popup.setAttribute('aria-hidden','true');
       if (abnChat) abnChat.classList.remove('active');
+    }
+
+    // ── Send ─────────────────────────────────────────────────────────────────
+    async function send() {
+      var text = inp.value.trim();
+      if (!text || loading) return;
+      inp.value = ''; btn.disabled = true; loading = true;
+      addMsg('user', text);
+      history.push({ role:'user', content:text });
+      showTyping();
+      try {
+        var loc = (chatLat && chatLng) ? { lat: chatLat, lng: chatLng } : null;
+        var res = await fetch('/api/budget-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history, location: loc, lang: chatLang }),
+        });
+        var data = await res.json();
+        removeTyping();
+        if (data.error) throw new Error(data.error);
+        addMsg('bot', data.text, data.venues);
+        history.push({ role:'assistant', content:data.text });
+      } catch(e) {
+        removeTyping();
+        addMsg('bot', 'Sorry, something went wrong. Please try again.');
+      }
+      btn.disabled = false; loading = false; inp.focus();
+    }
+
+    // ── Event bindings ───────────────────────────────────────────────────────
+    if (fab) fab.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+
+    var abnChat = document.getElementById('abn-chat-btn');
+    if (abnChat) {
+      abnChat.addEventListener('click', function() {
+        if (isOpen) { closeChat(); } else { openChat(); abnChat.classList.add('active'); }
+      });
     }
 
     close.addEventListener('click', closeChat);
     btn.addEventListener('click', send);
-    inp.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-    });
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape' && isOpen) closeChat();
-    });
+    inp.addEventListener('keydown', function(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} });
+    document.addEventListener('keydown', function(e) { if (e.key==='Escape'&&isOpen) closeChat(); });
   })();
   </script>
 </body>
