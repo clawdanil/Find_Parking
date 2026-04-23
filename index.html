@@ -5504,13 +5504,37 @@
           chatLng = pos.coords.longitude;
           if (locSub) locSub.textContent = 'AI · location ready ✓';
           if (btn) btn.remove();
-          // Automatically kick off suggestions
-          inp.value = 'I\'m at my current location. What can you suggest based on my budget?';
-          send();
+
+          function showLocReady(cityName) {
+            var locLabel = cityName || 'your area';
+            addMsg('bot', '📍 You\'re in ' + locLabel + '! What\'s your budget for the day — food, drinks, coffee, or something else?');
+          }
+
+          // Try main app's selected city first
+          var appCity = '';
+          try { appCity = (window.getOrbiSearchLocation ? window.getOrbiSearchLocation() : {}).city || ''; } catch(e) {}
+          if (appCity) { showLocReady(appCity); return; }
+
+          // Reverse geocode via Google Maps to get real city name
+          if (window.google && window.google.maps && window.google.maps.Geocoder) {
+            var gc = new window.google.maps.Geocoder();
+            gc.geocode({ location: { lat: chatLat, lng: chatLng } }, function(results, status) {
+              var city = '';
+              if (status === 'OK' && results && results[0]) {
+                var comps = results[0].address_components || [];
+                var locality = comps.find(function(c) { return c.types.indexOf('locality') !== -1; });
+                var area = comps.find(function(c) { return c.types.indexOf('administrative_area_level_2') !== -1; });
+                city = (locality || area || {}).long_name || '';
+              }
+              showLocReady(city);
+            });
+          } else {
+            showLocReady('');
+          }
         },
         function() {
           if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Use My Current Location'; }
-          addMsg('bot', 'Couldn\'t get your location — no worries! Just type your city or neighborhood and I\'ll find great spots near you.');
+          addMsg('bot', 'Couldn\'t get your GPS — no worries! Just type your city or neighborhood and I\'ll find great spots near you.');
         },
         { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
       );

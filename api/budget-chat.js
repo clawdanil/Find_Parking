@@ -63,6 +63,11 @@ export default async function handler(req) {
     // Default to food + coffee if budget mentioned but no categories
     if (!typesToFetch.length && hasBudget) typesToFetch.push('restaurant', 'cafe');
 
+    // Always fetch venues when GPS is available, even if no category keywords
+    if (!typesToFetch.length && location?.lat && location?.lng) {
+      typesToFetch.push('restaurant', 'cafe', 'bar');
+    }
+
     // Fetch nearby venues from Google Places
     const allVenues = [];
     if (mapsKey && location?.lat && location?.lng && typesToFetch.length) {
