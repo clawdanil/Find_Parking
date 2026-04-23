@@ -3995,6 +3995,139 @@
     to   { opacity: 0; transform: scale(1.04); }
   }
 
+  /* ── Budget Chat FAB + Popup ──────────────────────────────────────────── */
+  .chat-fab {
+    position: fixed; z-index: 8100;
+    bottom: 24px; right: 24px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: rgba(255,255,255,.95); color: #090909;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,.45), 0 1px 6px rgba(0,0,0,.22);
+    transition: transform .22s cubic-bezier(.16,1,.3,1), box-shadow .22s ease;
+  }
+  .chat-fab:hover { transform: scale(1.08); box-shadow: 0 8px 32px rgba(0,0,0,.55); }
+  .chat-fab svg { width: 22px; height: 22px; flex-shrink: 0; }
+  @media (max-width: 767px) { .chat-fab { bottom: 88px; right: 16px; } }
+  .app-mode .chat-fab { bottom: 104px; right: 16px; }
+
+  .chat-popup {
+    position: fixed; z-index: 8000;
+    bottom: 88px; right: 24px;
+    width: min(340px, calc(100vw - 32px));
+    height: min(480px, calc(100vh - 140px));
+    background: rgba(8,8,12,.97);
+    border: 1px solid rgba(255,255,255,.10);
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.75), 0 4px 16px rgba(0,0,0,.40);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    display: flex; flex-direction: column; overflow: hidden;
+    transform: scale(.92) translateY(14px);
+    opacity: 0; pointer-events: none;
+    transition: transform .28s cubic-bezier(.16,1,.3,1), opacity .22s ease;
+  }
+  .chat-popup.is-open { transform: scale(1) translateY(0); opacity: 1; pointer-events: all; }
+  @media (max-width: 767px) { .chat-popup { bottom: 152px; right: 16px; } }
+  .app-mode .chat-popup { bottom: 168px; right: 16px; }
+
+  .chat-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 13px 15px 11px;
+    border-bottom: 1px solid rgba(255,255,255,.07);
+    flex-shrink: 0;
+  }
+  .chat-head-info { display: flex; align-items: center; gap: 9px; }
+  .chat-head-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,.75);
+    animation: ticker-pulse 2s ease-in-out infinite; flex-shrink: 0;
+  }
+  .chat-head-title { font-size: .82rem; font-weight: 700; color: rgba(255,255,255,.92); }
+  .chat-head-sub   { font-size: .63rem; color: rgba(255,255,255,.35); margin-top: 1px; }
+  .chat-close-btn {
+    background: rgba(255,255,255,.06); border: none; cursor: pointer;
+    color: rgba(255,255,255,.45); font-size: 1rem; line-height: 1;
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .18s, color .18s; flex-shrink: 0;
+  }
+  .chat-close-btn:hover { background: rgba(255,255,255,.13); color: rgba(255,255,255,.88); }
+
+  .chat-msgs {
+    flex: 1; overflow-y: auto; padding: 12px 12px 6px;
+    display: flex; flex-direction: column; gap: 9px;
+    scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.08) transparent;
+  }
+  .chat-msg { display: flex; flex-direction: column; gap: 5px; max-width: 88%; }
+  .chat-msg.bot  { align-self: flex-start; }
+  .chat-msg.user { align-self: flex-end; }
+  .chat-bubble {
+    padding: 8px 12px; border-radius: 16px;
+    font-size: .79rem; line-height: 1.58; font-weight: 400;
+  }
+  .chat-msg.bot  .chat-bubble {
+    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.09);
+    color: rgba(255,255,255,.88); border-radius: 4px 16px 16px 16px;
+  }
+  .chat-msg.user .chat-bubble {
+    background: rgba(255,255,255,.92); color: #0a0a0a;
+    border-radius: 16px 4px 16px 16px;
+  }
+  .chat-typing { display: flex; gap: 4px; align-items: center; padding: 2px 0; }
+  .chat-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: rgba(255,255,255,.4);
+    animation: chat-bounce .9s ease-in-out infinite;
+  }
+  .chat-typing span:nth-child(2) { animation-delay: .15s; }
+  .chat-typing span:nth-child(3) { animation-delay: .30s; }
+  @keyframes chat-bounce {
+    0%,80%,100% { transform: translateY(0); opacity: .4; }
+    40%          { transform: translateY(-5px); opacity: 1; }
+  }
+  .chat-venue-card {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 7px 10px; gap: 8px;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.10);
+    border-radius: 10px;
+  }
+  .chat-venue-name { font-size: .75rem; font-weight: 700; color: rgba(255,255,255,.90); }
+  .chat-venue-meta { font-size: .66rem; color: rgba(255,255,255,.40); margin-top: 2px; }
+  .chat-venue-map {
+    flex-shrink: 0;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 10px;
+    background: rgba(66,133,244,.18); color: #7AB3FF;
+    border: 1px solid rgba(66,133,244,.28); border-radius: 100px;
+    font-size: .67rem; font-weight: 700; text-decoration: none; white-space: nowrap;
+    transition: background .18s;
+  }
+  .chat-venue-map:hover { background: rgba(66,133,244,.33); }
+  .chat-input-area {
+    display: flex; align-items: center; gap: 8px;
+    padding: 9px 11px 11px;
+    border-top: 1px solid rgba(255,255,255,.07); flex-shrink: 0;
+  }
+  .chat-input {
+    flex: 1; background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.10);
+    border-radius: 100px; padding: 9px 14px;
+    color: rgba(255,255,255,.92); font-size: .79rem; font-family: 'Inter',sans-serif;
+    outline: none; transition: border-color .18s, background .18s;
+  }
+  .chat-input::placeholder { color: rgba(255,255,255,.26); }
+  .chat-input:focus { border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.10); }
+  .chat-send {
+    flex-shrink: 0; width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,.92); color: #090909;
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform .18s, opacity .18s;
+  }
+  .chat-send:hover   { transform: scale(1.08); }
+  .chat-send:disabled { opacity: .35; cursor: not-allowed; transform: none; }
+  .chat-send svg { width: 15px; height: 15px; }
+
   </style>
 </head>
 <body>
@@ -4517,6 +4650,36 @@
         Orbinear aggregates publicly available data from third-party providers. Accuracy of parking availability, event details, and transit times may vary.<br>
         Always verify posted street signs before parking. Event pricing and schedules subject to change — check provider websites for the latest information.
       </p>
+    </div>
+  </div>
+
+  <!-- Budget Chat FAB -->
+  <button class="chat-fab" id="chat-fab" aria-label="Open budget planner">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+    </svg>
+  </button>
+
+  <!-- Budget Chat Popup -->
+  <div class="chat-popup" id="chat-popup" role="dialog" aria-label="Orbi Budget Planner" aria-hidden="true">
+    <div class="chat-head">
+      <div class="chat-head-info">
+        <span class="chat-head-dot"></span>
+        <div>
+          <div class="chat-head-title">Orbi Budget Planner</div>
+          <div class="chat-head-sub">AI · all languages</div>
+        </div>
+      </div>
+      <button class="chat-close-btn" id="chat-close" aria-label="Close">✕</button>
+    </div>
+    <div class="chat-msgs" id="chat-msgs"></div>
+    <div class="chat-input-area">
+      <input class="chat-input" id="chat-input" type="text" placeholder="Tell me your budget…" autocomplete="off" maxlength="300" />
+      <button class="chat-send" id="chat-send" aria-label="Send">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
     </div>
   </div>
 
@@ -5169,6 +5332,166 @@
       // Dismiss after 2.2s (enough for all entrance animations to complete)
       setTimeout(dismiss, 2200);
     })();
+  </script>
+
+  <!-- Budget Chat -->
+  <script>
+  (function () {
+    var fab   = document.getElementById('chat-fab');
+    var popup = document.getElementById('chat-popup');
+    var msgs  = document.getElementById('chat-msgs');
+    var inp   = document.getElementById('chat-input');
+    var btn   = document.getElementById('chat-send');
+    var close = document.getElementById('chat-close');
+
+    var isOpen   = false;
+    var greeted  = false;
+    var loading  = false;
+    var history  = [];
+
+    var GREETINGS = {
+      en: "Hey there! I'm Orbi, your budget planner 👋\nTell me your budget for the day and what you'd like to do — I'll help you plan it!",
+      es: "¡Hola! Soy Orbi, tu planificador de presupuesto 👋\nDime tu presupuesto y qué quieres hacer hoy.",
+      fr: "Salut ! Je suis Orbi, ton planificateur de budget 👋\nDis-moi ton budget et ce que tu veux faire aujourd'hui !",
+      de: "Hallo! Ich bin Orbi, dein Budget-Planer 👋\nSag mir dein Budget und was du heute machen möchtest!",
+      zh: "嗨！我是Orbi，您的预算规划师 👋\n告诉我您今天的预算和想做什么吧！",
+      ja: "こんにちは！私はOrbiです、あなたの予算プランナー 👋\n今日の予算とやりたいことを教えてください！",
+      pt: "Oi! Sou Orbi, seu planejador de orçamento 👋\nMe diga seu orçamento e o que quer fazer hoje!",
+      ar: "مرحبًا! أنا أوربي، مخطط ميزانيتك 👋\nأخبرني بميزانيتك وما تريد فعله اليوم!",
+      hi: "नमस्ते! मैं Orbi हूं, आपका बजट प्लानर 👋\nआज का बजट और क्या करना चाहते हैं बताइए!",
+      ko: "안녕하세요! 저는 Orbi, 예산 플래너입니다 👋\n오늘 예산과 하고 싶은 것을 알려주세요!",
+    };
+
+    function getLang() {
+      try { return localStorage.getItem('orbi-lang') || document.documentElement.lang || 'en'; } catch(e) { return 'en'; }
+    }
+
+    function getLocation() {
+      if (typeof window.getOrbiSearchLocation === 'function') {
+        var loc = window.getOrbiSearchLocation();
+        if (loc.lat && loc.lng) return { lat: loc.lat, lng: loc.lng };
+      }
+      return null;
+    }
+
+    function esc(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    function renderText(s) {
+      return esc(s)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n/g, '<br>');
+    }
+
+    function addMsg(role, text, venues) {
+      var wrap   = document.createElement('div');
+      wrap.className = 'chat-msg ' + role;
+
+      var bubble = document.createElement('div');
+      bubble.className = 'chat-bubble';
+      bubble.innerHTML = renderText(text);
+      wrap.appendChild(bubble);
+
+      (venues || []).forEach(function(v) {
+        var card = document.createElement('div');
+        card.className = 'chat-venue-card';
+        var mapsUrl = 'https://www.google.com/maps/place/?q=place_id:' + encodeURIComponent(v.place_id);
+        var price   = v.price_level ? '$'.repeat(v.price_level) : '';
+        var rating  = v.rating ? '★' + v.rating : '';
+        var area    = v.vicinity ? v.vicinity.split(',')[0] : '';
+        var meta    = [price, rating, area].filter(Boolean).join(' · ');
+        card.innerHTML =
+          '<div class="chat-venue-info">' +
+            '<div class="chat-venue-name">' + esc(v.name) + '</div>' +
+            (meta ? '<div class="chat-venue-meta">' + esc(meta) + '</div>' : '') +
+          '</div>' +
+          '<a href="' + mapsUrl + '" target="_blank" rel="noopener" class="chat-venue-map">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
+            ' Maps' +
+          '</a>';
+        wrap.appendChild(card);
+      });
+
+      msgs.appendChild(wrap);
+      msgs.scrollTop = msgs.scrollHeight;
+      return wrap;
+    }
+
+    function showTyping() {
+      var w = document.createElement('div');
+      w.className = 'chat-msg bot'; w.id = 'chat-typing-row';
+      w.innerHTML = '<div class="chat-bubble" style="padding:10px 14px"><div class="chat-typing"><span></span><span></span><span></span></div></div>';
+      msgs.appendChild(w);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function removeTyping() {
+      var el = document.getElementById('chat-typing-row');
+      if (el) el.remove();
+    }
+
+    function openChat() {
+      isOpen = true;
+      popup.classList.add('is-open');
+      popup.setAttribute('aria-hidden', 'false');
+      if (!greeted) {
+        greeted = true;
+        var lang = getLang();
+        var g = GREETINGS[lang] || GREETINGS['en'];
+        setTimeout(function() { addMsg('bot', g); }, 180);
+      }
+      setTimeout(function() { inp.focus(); }, 300);
+    }
+
+    function closeChat() {
+      isOpen = false;
+      popup.classList.remove('is-open');
+      popup.setAttribute('aria-hidden', 'true');
+    }
+
+    async function send() {
+      var text = inp.value.trim();
+      if (!text || loading) return;
+      inp.value = '';
+      btn.disabled = true;
+      loading = true;
+
+      addMsg('user', text);
+      history.push({ role: 'user', content: text });
+      showTyping();
+
+      try {
+        var res = await fetch('/api/budget-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ messages: history, location: getLocation(), lang: getLang() }),
+        });
+        var data = await res.json();
+        removeTyping();
+        if (data.error) throw new Error(data.error);
+        addMsg('bot', data.text, data.venues);
+        history.push({ role: 'assistant', content: data.text });
+      } catch(e) {
+        removeTyping();
+        addMsg('bot', "Sorry, something went wrong. Please try again in a moment.");
+      }
+
+      btn.disabled = false;
+      loading = false;
+      inp.focus();
+    }
+
+    fab.addEventListener('click', function() { isOpen ? closeChat() : openChat(); });
+    close.addEventListener('click', closeChat);
+    btn.addEventListener('click', send);
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && isOpen) closeChat();
+    });
+  })();
   </script>
 </body>
 </html>

@@ -18,6 +18,9 @@ let selectedLat  = null;
 let selectedLon  = null;
 let acTimer      = null;
 
+// Expose location for budget chat
+window.getOrbiSearchLocation = () => ({ lat: selectedLat, lng: selectedLon, city: selectedCity });
+
 const acDropdown = document.getElementById('ac-dropdown');
 
 // ── Google Maps JS API bootstrap ──────────────────────────────────────────────
