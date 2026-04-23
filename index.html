@@ -5466,6 +5466,53 @@
       it: "Ciao! Sono Orbi, il tuo pianificatore di budget 👋\nDimmi il tuo budget e cosa vuoi fare oggi!",
     };
 
+    // "Use My Current Location" button & related strings
+    var LOC_BTN = {
+      en: 'Use My Current Location',
+      es: 'Usar mi ubicación actual',
+      fr: 'Utiliser ma position actuelle',
+      de: 'Meinen Standort verwenden',
+      zh: '使用我的当前位置',
+      ja: '現在地を使用する',
+      pt: 'Usar minha localização atual',
+      ar: 'استخدام موقعي الحالي',
+      hi: 'मेरी वर्तमान स्थिति का उपयोग करें',
+      ko: '현재 위치 사용',
+      it: 'Usa la mia posizione attuale',
+    };
+    var LOC_GETTING = {
+      en: '⌛ Getting location…', es: '⌛ Obteniendo ubicación…', fr: '⌛ Localisation…',
+      de: '⌛ Standort wird ermittelt…', zh: '⌛ 正在获取位置…', ja: '⌛ 位置情報取得中…',
+      pt: '⌛ Obtendo localização…', ar: '⌛ جارٍ تحديد الموقع…', hi: '⌛ स्थान प्राप्त हो रहा है…',
+      ko: '⌛ 위치 가져오는 중…', it: '⌛ Recupero posizione…',
+    };
+    var LOC_UNAVAIL = {
+      en: 'Location unavailable — just type your city or neighborhood and I\'ll find spots near you!',
+      es: 'Ubicación no disponible — escribe tu ciudad o barrio y te encontraré lugares cercanos.',
+      fr: 'Localisation indisponible — tape ta ville ou ton quartier et je trouverai des endroits près de toi !',
+      de: 'Standort nicht verfügbar — gib einfach deine Stadt oder deinen Bezirk ein!',
+      zh: '位置不可用 — 请输入您的城市或街区，我来为您找附近的地方！',
+      ja: '位置情報が使えません — お住まいの街や地区を入力してください！',
+      pt: 'Localização indisponível — digite sua cidade ou bairro e encontrarei lugares perto de você!',
+      ar: 'الموقع غير متاح — اكتب مدينتك أو حيك وسأجد أماكن قريبة منك!',
+      hi: 'स्थान उपलब्ध नहीं — बस अपना शहर या मोहल्ला टाइप करें, मैं पास की जगहें ढूंढूंगा!',
+      ko: '위치를 사용할 수 없습니다 — 도시나 동네를 입력하시면 근처 장소를 찾아드릴게요!',
+      it: 'Posizione non disponibile — digita la tua città o quartiere e troverò posti vicino a te!',
+    };
+    var LOC_FAIL = {
+      en: 'Couldn\'t get your GPS — no worries! Just type your city or neighborhood and I\'ll find great spots near you.',
+      es: 'No se pudo obtener tu GPS — ¡sin problema! Solo escribe tu ciudad o barrio.',
+      fr: 'Impossible d\'obtenir le GPS — pas de souci ! Tape ta ville ou ton quartier.',
+      de: 'GPS nicht verfügbar — kein Problem! Gib einfach deine Stadt oder deinen Bezirk ein.',
+      zh: '无法获取GPS位置 — 没关系！请输入您的城市或街区。',
+      ja: 'GPSを取得できませんでした — 大丈夫！街や地区を入力してください。',
+      pt: 'Não foi possível obter o GPS — sem problema! Digite sua cidade ou bairro.',
+      ar: 'تعذّر الحصول على GPS — لا مشكلة! فقط اكتب مدينتك أو حيك.',
+      hi: 'GPS नहीं मिला — कोई बात नहीं! बस अपना शहर या मोहल्ला टाइप करें।',
+      ko: 'GPS를 가져올 수 없습니다 — 괜찮아요! 도시나 동네를 입력해 주세요.',
+      it: 'Impossibile ottenere il GPS — nessun problema! Digita la tua città o quartiere.',
+    };
+
     // Location-confirmed message (translated per language)
     var LOC_READY = {
       en: function(c) { return '📍 You\'re in ' + c + '! What\'s your budget for the day — food, drinks, coffee, or something else?'; },
@@ -5500,14 +5547,14 @@
     setLang(chatLang);
 
     // ── In-chat location button ───────────────────────────────────────────
+    var LOC_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
     function addLocationButton() {
       if (document.getElementById('chat-loc-quick')) return;
       var btn = document.createElement('button');
       btn.className = 'chat-loc-btn';
       btn.id = 'chat-loc-quick';
-      btn.innerHTML =
-        '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>' +
-        ' Use My Current Location';
+      btn.innerHTML = LOC_SVG + ' ' + (LOC_BTN[chatLang] || LOC_BTN['en']);
       btn.addEventListener('click', handleLocClick);
       msgs.appendChild(btn);
       msgs.scrollTop = msgs.scrollHeight;
@@ -5515,10 +5562,10 @@
 
     function handleLocClick() {
       var btn = document.getElementById('chat-loc-quick');
-      if (btn) { btn.disabled = true; btn.innerHTML = '⌛ Getting location…'; }
+      if (btn) { btn.disabled = true; btn.innerHTML = LOC_GETTING[chatLang] || LOC_GETTING['en']; }
       if (!navigator.geolocation) {
         if (btn) btn.remove();
-        addMsg('bot', 'Location unavailable — just type your city or neighborhood and I\'ll find spots near you!');
+        addMsg('bot', LOC_UNAVAIL[chatLang] || LOC_UNAVAIL['en']);
         return;
       }
       navigator.geolocation.getCurrentPosition(
@@ -5559,8 +5606,8 @@
           }
         },
         function() {
-          if (btn) { btn.disabled = false; btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> Use My Current Location'; }
-          addMsg('bot', 'Couldn\'t get your GPS — no worries! Just type your city or neighborhood and I\'ll find great spots near you.');
+          if (btn) { btn.disabled = false; btn.innerHTML = LOC_SVG + ' ' + (LOC_BTN[chatLang] || LOC_BTN['en']); }
+          addMsg('bot', LOC_FAIL[chatLang] || LOC_FAIL['en']);
         },
         { timeout: 8000, maximumAge: 60000, enableHighAccuracy: false }
       );
