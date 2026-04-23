@@ -5466,6 +5466,21 @@
       it: "Ciao! Sono Orbi, il tuo pianificatore di budget 👋\nDimmi il tuo budget e cosa vuoi fare oggi!",
     };
 
+    // Location-confirmed message (translated per language)
+    var LOC_READY = {
+      en: function(c) { return '📍 You\'re in ' + c + '! What\'s your budget for the day — food, drinks, coffee, or something else?'; },
+      es: function(c) { return '📍 ¡Estás en ' + c + '! ¿Cuál es tu presupuesto para hoy — comida, bebidas, café u otra cosa?'; },
+      fr: function(c) { return '📍 Tu es à ' + c + ' ! Quel est ton budget pour aujourd\'hui — repas, boissons, café ou autre chose ?'; },
+      de: function(c) { return '📍 Du bist in ' + c + '! Was ist dein Budget für heute — Essen, Getränke, Kaffee oder etwas anderes?'; },
+      zh: function(c) { return '📍 您在' + c + '！今天的预算是多少 — 餐饮、咖啡、娱乐还是其他？'; },
+      ja: function(c) { return '📍 ' + c + 'にいますね！今日の予算はいくらですか — 食事、カフェ、バーなど？'; },
+      pt: function(c) { return '📍 Você está em ' + c + '! Qual é o seu orçamento para hoje — comida, bebidas, café ou outra coisa?'; },
+      ar: function(c) { return '📍 أنت في ' + c + '! ما هي ميزانيتك اليوم — طعام، مشروبات، قهوة أم شيء آخر؟'; },
+      hi: function(c) { return '📍 आप ' + c + ' में हैं! आज का बजट क्या है — खाना, ड्रिंक्स, कॉफ़ी या कुछ और?'; },
+      ko: function(c) { return '📍 ' + c + '에 계시네요! 오늘 예산은 얼마인가요 — 음식, 음료, 카페 등?'; },
+      it: function(c) { return '📍 Sei a ' + c + '! Qual è il tuo budget per oggi — cibo, bevande, caffè o altro?'; },
+    };
+
     // ── Language picker ──────────────────────────────────────────────────────
     function setLang(code) {
       chatLang = code;
@@ -5516,7 +5531,8 @@
           function showLocReady(label) {
             chatCity = label || '';
             var locLabel = label || 'your area';
-            addMsg('bot', '📍 You\'re in ' + locLabel + '! What\'s your budget for the day — food, drinks, coffee, or something else?');
+            var fn = LOC_READY[chatLang] || LOC_READY['en'];
+            addMsg('bot', fn(locLabel));
           }
 
           // Reverse geocode for neighborhood-level precision
