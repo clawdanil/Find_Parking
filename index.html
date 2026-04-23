@@ -5451,6 +5451,13 @@
         o.classList.toggle('active', o.dataset.lang === code);
       });
       langDrop.classList.remove('is-open');
+      // Re-greet in new language if chat is already open
+      if (greeted) {
+        msgs.innerHTML = '';
+        history = [];
+        var g = GREETINGS[code] || GREETINGS['en'];
+        addMsg('bot', g);
+      }
     }
     setLang(chatLang);
 
