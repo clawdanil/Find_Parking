@@ -5435,8 +5435,9 @@
     var greeted = false;
     var loading = false;
     var history = [];
-    var chatLat = null;
-    var chatLng = null;
+    var chatLat  = null;
+    var chatLng  = null;
+    var chatCity = '';
     var chatLang = (function(){ try { return localStorage.getItem('orbi-lang') || document.documentElement.lang || 'en'; } catch(e){ return 'en'; } })();
 
     var LANG_LABELS = { en:'EN', es:'ES', fr:'FR', de:'DE', zh:'中文', ja:'日本語', pt:'PT', ar:'AR', hi:'हिं', ko:'한국어', it:'IT' };
@@ -5501,31 +5502,33 @@
           if (locSub) locSub.textContent = 'AI · location ready ✓';
           if (btn) btn.remove();
 
-          function showLocReady(cityName) {
-            var locLabel = cityName || 'your area';
+          function showLocReady(label) {
+            chatCity = label || '';
+            var locLabel = label || 'your area';
             addMsg('bot', '📍 You\'re in ' + locLabel + '! What\'s your budget for the day — food, drinks, coffee, or something else?');
           }
 
-          // Try main app's selected city first
-          var appCity = '';
-          try { appCity = (window.getOrbiSearchLocation ? window.getOrbiSearchLocation() : {}).city || ''; } catch(e) {}
-          if (appCity) { showLocReady(appCity); return; }
-
-          // Reverse geocode via Google Maps to get real city name
+          // Reverse geocode for neighborhood-level precision
           if (window.google && window.google.maps && window.google.maps.Geocoder) {
             var gc = new window.google.maps.Geocoder();
             gc.geocode({ location: { lat: chatLat, lng: chatLng } }, function(results, status) {
-              var city = '';
+              var label = '';
               if (status === 'OK' && results && results[0]) {
                 var comps = results[0].address_components || [];
-                var locality = comps.find(function(c) { return c.types.indexOf('locality') !== -1; });
-                var area = comps.find(function(c) { return c.types.indexOf('administrative_area_level_2') !== -1; });
-                city = (locality || area || {}).long_name || '';
+                var neighborhood  = comps.find(function(c) { return c.types.indexOf('neighborhood') !== -1; });
+                var sublocal      = comps.find(function(c) { return c.types.indexOf('sublocality_level_1') !== -1 || c.types.indexOf('sublocality') !== -1; });
+                var locality      = comps.find(function(c) { return c.types.indexOf('locality') !== -1; });
+                var hood = (neighborhood || sublocal || {}).long_name || '';
+                var city = (locality || {}).long_name || '';
+                label = hood && city ? hood + ', ' + city : hood || city;
               }
-              showLocReady(city);
+              showLocReady(label);
             });
           } else {
-            showLocReady('');
+            // Fall back to main app's selected city
+            var appCity = '';
+            try { appCity = (window.getOrbiSearchLocation ? window.getOrbiSearchLocation() : {}).city || ''; } catch(e) {}
+            showLocReady(appCity);
           }
         },
         function() {
@@ -5647,7 +5650,7 @@
       history.push({ role:'user', content:text });
       showTyping();
       try {
-        var loc = (chatLat && chatLng) ? { lat: chatLat, lng: chatLng } : null;
+        var loc = (chatLat && chatLng) ? { lat: chatLat, lng: chatLng, city: chatCity } : null;
         var res = await fetch('/api/budget-chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

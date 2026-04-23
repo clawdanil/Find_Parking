@@ -76,13 +76,17 @@ export default async function handler(req) {
       results.forEach(arr => allVenues.push(...arr));
     }
 
+    const locationLabel = location?.city || (location?.lat ? `${location.lat.toFixed(3)},${location.lng.toFixed(3)}` : null);
+
     const venueContext = allVenues.length
-      ? '\n\nNearby venues available:\n' + allVenues.map((v, i) => {
+      ? `\n\nUser location: ${locationLabel || 'provided'}\n\nNearby venues available:\n` + allVenues.map((v, i) => {
           const price  = v.price_level ? '$'.repeat(v.price_level) : 'price unknown';
           const rating = v.rating ? `★${v.rating}` : '';
           return `${i + 1}. [${v.type}] ${v.name} | ${price} ${rating} | ${v.vicinity || ''} | place_id:${v.place_id}`;
         }).join('\n')
-      : '\n\nNo GPS location available yet. Ask the user to simply type their city, neighborhood, or area (e.g. "Jersey City" or "downtown Chicago"). Do NOT tell them to use any other app or window.';
+      : locationLabel
+        ? `\n\nThe user is in ${locationLabel}. GPS confirmed — do NOT ask for their location again. No venue data available right now so give general advice based on their budget and preferences for that area.`
+        : '\n\nNo GPS location available yet. Ask the user to simply type their city, neighborhood, or area (e.g. "Jersey City" or "downtown Chicago"). Do NOT tell them to use any other app or window.';
 
     const system = `You are Orbi, a friendly and concise budget planner assistant. Your ONLY purpose is helping users plan their day within a budget by recommending nearby food, coffee, bars, and activities/events.
 
