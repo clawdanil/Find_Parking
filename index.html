@@ -2393,6 +2393,55 @@
     /* App mode: hide download prompts (user is already in the app) */
     .app-mode .dl-app-btn  { display: none !important; }
     .app-mode .app-dl-strip { display: none !important; }
+    /* ── App-mode city ticker ──────────────────────────────────────────── */
+    .city-ticker { display: none; }
+    .app-mode .city-ticker {
+      display: flex; align-items: center;
+      width: 100%; height: 32px;
+      margin: 4px 0 4px;
+      overflow: hidden; position: relative;
+      transition: opacity .3s ease, height .3s ease;
+    }
+    .app-mode .city-ticker.ticker-hidden {
+      opacity: 0; height: 0; margin: 0; pointer-events: none;
+    }
+    .city-ticker::before, .city-ticker::after {
+      content: ''; position: absolute; top: 0; bottom: 0; width: 36px; z-index: 2; pointer-events: none;
+    }
+    .city-ticker::before { left: 0;  background: linear-gradient(to right, #000 30%, transparent); }
+    .city-ticker::after  { right: 0; background: linear-gradient(to left,  #000 30%, transparent); }
+    .city-ticker-live {
+      position: absolute; left: 10px; z-index: 3;
+      display: flex; align-items: center;
+    }
+    .city-ticker-dot {
+      width: 5px; height: 5px; border-radius: 50%;
+      background: #22c55e; box-shadow: 0 0 5px rgba(34,197,94,.8);
+      animation: ticker-pulse 2s ease-in-out infinite;
+    }
+    @keyframes ticker-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: .5; transform: scale(.7); }
+    }
+    .city-ticker-track {
+      width: 100%; overflow: hidden; padding-left: 26px;
+    }
+    .city-ticker-inner {
+      display: flex; align-items: center; width: max-content;
+      animation: city-scroll 36s linear infinite;
+    }
+    .city-ticker-inner span {
+      font-size: .6rem; font-weight: 700; letter-spacing: .13em;
+      color: rgba(255,255,255,.38); white-space: nowrap;
+      padding: 0 14px;
+    }
+    .city-ticker-inner span::after {
+      content: '·'; margin-left: 14px; color: rgba(255,255,255,.16);
+    }
+    @keyframes city-scroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
     .lang-dropdown--open {
       opacity: 1;
       visibility: visible;
@@ -4287,6 +4336,23 @@
     </div>
    </div><!-- /.search-main -->
 
+   <!-- App-mode horizontal city ticker -->
+   <div class="city-ticker" id="city-ticker" aria-hidden="true">
+     <span class="city-ticker-live"><span class="city-ticker-dot"></span></span>
+     <div class="city-ticker-track">
+       <div class="city-ticker-inner">
+         <span>NEW YORK</span><span>LONDON</span><span>TOKYO</span><span>PARIS</span>
+         <span>DUBAI</span><span>SINGAPORE</span><span>LOS ANGELES</span><span>TORONTO</span>
+         <span>SYDNEY</span><span>AMSTERDAM</span><span>HONG KONG</span><span>BARCELONA</span>
+         <span>BERLIN</span><span>MIAMI</span><span>CHICAGO</span><span>SEOUL</span>
+         <span>NEW YORK</span><span>LONDON</span><span>TOKYO</span><span>PARIS</span>
+         <span>DUBAI</span><span>SINGAPORE</span><span>LOS ANGELES</span><span>TORONTO</span>
+         <span>SYDNEY</span><span>AMSTERDAM</span><span>HONG KONG</span><span>BARCELONA</span>
+         <span>BERLIN</span><span>MIAMI</span><span>CHICAGO</span><span>SEOUL</span>
+       </div>
+     </div>
+   </div>
+
    <!-- ✈ Flight information board -->
    <div class="flap-col">
      <div class="flap-board">
@@ -4488,6 +4554,23 @@
   <script src="i18n.js?v=3"></script>
 
   <script>
+    // Hide city ticker when results are visible
+    (function(){
+      var ticker = document.getElementById('city-ticker');
+      var resultsWrapper = document.getElementById('results-wrapper');
+      if (!ticker || !resultsWrapper) return;
+      var observer = new MutationObserver(function(){
+        var hasResults = resultsWrapper.querySelector('[class*="sp-card"],[class*="result"],[class*="card"]');
+        var resultsHidden = resultsWrapper.hidden || resultsWrapper.style.display === 'none';
+        if (hasResults && !resultsHidden) {
+          ticker.classList.add('ticker-hidden');
+        } else {
+          ticker.classList.remove('ticker-hidden');
+        }
+      });
+      observer.observe(resultsWrapper, { childList: true, subtree: true, attributes: true });
+    })();
+
     (function(){
       var toggle  = document.getElementById('menu-toggle');
       var overlay = document.getElementById('menu-overlay');
