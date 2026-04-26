@@ -127,6 +127,83 @@ async function fetchPlaceHours(placeId, key) {
   } catch { return null; }
 }
 
+// ── Gas stations via Places API (New) — includes fuelOptions prices ──────────
+const FUEL_LABEL = {
+  REGULAR_UNLEADED: 'Regular', MIDGRADE: 'Midgrade', PREMIUM: 'Premium',
+  DIESEL: 'Diesel', SP91: 'SP91', SP95: 'SP95', SP98: 'SP98', LPG: 'LPG',
+  E85: 'E85', METHANE: 'CNG',
+};
+
+async function queryGasStations(lat, lng, key, radius) {
+  if (!key) return null;
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 12000);
+    const res = await fetch('https://places.googleapis.com/v1/places:searchNearby', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Goog-Api-Key': key,
+        'X-Goog-FieldMask': [
+          'places.id', 'places.displayName', 'places.location',
+          'places.formattedAddress', 'places.rating',
+          'places.currentOpeningHours', 'places.regularOpeningHours',
+          'places.fuelOptions',
+        ].join(','),
+      },
+      body: JSON.stringify({
+        includedTypes: ['gas_station'],
+        locationRestriction: { circle: { center: { latitude: lat, longitude: lng }, radius: parseFloat(radius) } },
+        maxResultCount: 20,
+      }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(t);
+    if (!res.ok) return null;
+    const data = await res.json();
+    const places = (data.places || []);
+    if (!places.length) return null;
+
+    return places
+      .map(p => {
+        const loc = p.location || {};
+        const oh  = p.currentOpeningHours || p.regularOpeningHours;
+        const open_now   = oh?.openNow;
+        const openStatus = open_now === true ? 'Open now' : open_now === false ? 'Closed now' : '';
+        const todayIdx   = (new Date().getDay() + 6) % 7;
+        const todayHours = (oh?.weekdayDescriptions?.[todayIdx] || '').replace(/^[^:]+:\s*/, '').trim();
+
+        // Build ordered fuel price map (cheapest-first within grade)
+        const raw = p.fuelOptions?.fuelPrices || [];
+        const fuelMap = {};
+        for (const fp of raw) {
+          const label = FUEL_LABEL[fp.type];
+          if (!label) continue;
+          const units = parseInt(fp.price?.units || '0', 10);
+          const nanos = fp.price?.nanos || 0;
+          fuelMap[label] = {
+            price:    (units + nanos / 1e9).toFixed(2),
+            currency: fp.price?.currencyCode || 'USD',
+            updated:  fp.updateTime || '',
+          };
+        }
+
+        return {
+          type: 'node', lat: loc.latitude, lon: loc.longitude,
+          tags: {
+            name:          p.displayName?.text || '',
+            'addr:full':   p.formattedAddress || '',
+            open_status:   openStatus,
+            today_hours:   todayHours || '',
+            rating:        p.rating ? `★ ${p.rating}` : '',
+            fuel_prices:   Object.keys(fuelMap).length ? JSON.stringify(fuelMap) : '',
+          },
+        };
+      })
+      .filter(p => p.lat && p.lon && p.tags.name);
+  } catch { return null; }
+}
+
 // ── Google Places Nearby Search at a specific radius ─────────────────────────
 async function queryGooglePlaces(lat, lng, feature, key, radius) {
   const types = GOOGLE_TYPES[feature];
@@ -720,9 +797,13 @@ export default async function handler(req) {
   for (const radius of tiers) {
     usedRadius = radius;
 
-    // 1. Try Google Places at this radius
+    // 1. Try Google Places at this radius (gas uses new API with fuelOptions)
     if (key) {
-      try { elements = await queryGooglePlaces(lat, lng, feature, key, radius); } catch { elements = null; }
+      try {
+        elements = feature === 'gas'
+          ? await queryGasStations(lat, lng, key, radius)
+          : await queryGooglePlaces(lat, lng, feature, key, radius);
+      } catch { elements = null; }
     }
 
     // 2. Overpass fallback at same radius if Places returned nothing
