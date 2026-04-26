@@ -185,7 +185,7 @@ async function queryGasStations(lat, lng, key, radius) {
         'X-Goog-Api-Key': key,
         'X-Goog-FieldMask': [
           'places.id', 'places.displayName', 'places.location',
-          'places.formattedAddress', 'places.rating',
+          'places.formattedAddress', 'places.rating', 'places.userRatingCount',
           'places.currentOpeningHours', 'places.regularOpeningHours',
           'places.fuelOptions',
         ].join(','),
@@ -235,6 +235,7 @@ async function queryGasStations(lat, lng, key, radius) {
             open_status:   openStatus,
             today_hours:   todayHours || '',
             rating:        p.rating ? `★ ${p.rating}` : '',
+            review_count:  p.userRatingCount || 0,
             fuel_prices:   Object.keys(fuelMap).length ? JSON.stringify(fuelMap) : '',
           },
         };
@@ -264,13 +265,14 @@ async function queryGooglePlaces(lat, lng, feature, key, radius) {
       if (data.status !== 'OK' && data.status !== 'ZERO_RESULTS') return;
       for (const place of (data.results || [])) {
         rawPlaces.push({
-          placeId:  place.place_id,
-          name:     place.name || '',
-          lat:      place.geometry.location.lat,
-          lon:      place.geometry.location.lng,
-          vicinity: place.vicinity || '',
-          open_now: place.opening_hours?.open_now,
-          rating:   place.rating ?? null,
+          placeId:      place.place_id,
+          name:         place.name || '',
+          lat:          place.geometry.location.lat,
+          lon:          place.geometry.location.lng,
+          vicinity:     place.vicinity || '',
+          open_now:     place.opening_hours?.open_now,
+          rating:       place.rating ?? null,
+          review_count: place.user_ratings_total ?? 0,
         });
       }
     } catch { /* skip */ }
@@ -301,6 +303,7 @@ async function queryGooglePlaces(lat, lng, feature, key, radius) {
         open_status:   openStatus,
         today_hours:   todayHours || '',
         rating:        p.rating ? `★ ${p.rating}` : '',
+        review_count:  p.review_count || 0,
       },
     };
   });

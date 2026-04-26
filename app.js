@@ -19,6 +19,11 @@ let selectedLon     = null;
 let selectedCountry = '';
 let acTimer      = null;
 
+// ── Sort bar state ────────────────────────────────────────────────────────────
+const sortBar        = document.getElementById('sort-bar');
+let _nearbyItems     = null;   // mapped items cached for re-sorting
+let _nearbyFeature   = '';
+
 // Expose location for budget chat
 window.getOrbiSearchLocation = () => ({ lat: selectedLat, lng: selectedLon, city: selectedCity });
 
@@ -251,6 +256,7 @@ function showSkeletons(feature) {
   appModeHideHero();
   if (metricsSection) metricsSection.hidden = true;
   clearInterval(loadingTimer);
+  hideSortBar();
   let idx = 0;
   const msgs = (feature && getNearbyLoadingMsgs(feature)) || getLoadingMsgs();
   resultsDiv.innerHTML = `
@@ -494,6 +500,7 @@ async function handleReport(spotId, status, cardReportEl) {
 
 function showMessage(text, isError = false) {
   clearInterval(loadingTimer);
+  hideSortBar();
   resultsDiv.innerHTML = `
     <div class="msg ${isError ? 'error' : ''}">
       <div class="msg-icon">${isError ? '⚠️' : 'ℹ️'}</div>
@@ -781,6 +788,79 @@ function hideRadiusBanner() {
   if (rb) rb.innerHTML = '';
 }
 
+// ── Sort bar ──────────────────────────────────────────────────────────────────
+const SORT_BAR_FEATURES = new Set(['food','bars','coffee','gym','shopping','entertainment','gas']);
+
+function showSortBar(feature, items) {
+  if (!sortBar || !SORT_BAR_FEATURES.has(feature)) { hideSortBar(); return; }
+
+  const hasRating  = items.some(it => it.rating);
+  const hasReviews = items.some(it => it.reviewCount > 0);
+  const hasOpen    = items.some(it => it.openStatus);
+  const hasGas     = feature === 'gas' && items.some(it => {
+    try { return !!JSON.parse(it.fuelPrices || '{}').Regular; } catch { return false; }
+  });
+
+  const options = [
+    { value: 'nearest', label: t('sort_nearest', 'Nearest First') },
+    ...(hasRating  ? [{ value: 'rating',  label: t('sort_rated',    'Highest Rated') }]   : []),
+    ...(hasReviews ? [{ value: 'reviews', label: t('sort_reviewed', 'Most Reviewed') }]   : []),
+    ...(hasOpen    ? [{ value: 'open',    label: t('sort_open',     'Open Now First') }]  : []),
+    ...(hasGas     ? [{ value: 'price',   label: t('sort_price',    'Lowest Price') }]    : []),
+  ];
+
+  if (options.length <= 1) { hideSortBar(); return; }
+
+  sortBar.hidden = false;
+  sortBar.innerHTML = `
+    <div class="sort-bar-inner">
+      <span class="sort-bar-label">${t('sort_by','Sort by')}</span>
+      <div class="sort-select-wrap">
+        <select class="sort-select" id="sort-select-el">
+          ${options.map(o => `<option value="${o.value}">${escHtml(o.label)}</option>`).join('')}
+        </select>
+        <svg class="sort-caret" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+    </div>`;
+
+  document.getElementById('sort-select-el').addEventListener('change', e => applyNearbySort(e.target.value));
+}
+
+function hideSortBar() {
+  if (!sortBar) return;
+  sortBar.hidden = true;
+  sortBar.innerHTML = '';
+  _nearbyItems   = null;
+  _nearbyFeature = '';
+}
+
+function applyNearbySort(key) {
+  if (!_nearbyItems) return;
+  const sorted = [..._nearbyItems];
+
+  if (key === 'nearest') {
+    sorted.sort((a, b) => a.dist - b.dist);
+  } else if (key === 'rating') {
+    sorted.sort((a, b) => {
+      const ra = parseFloat((a.rating || '').replace(/[^\d.]/g, '')) || 0;
+      const rb = parseFloat((b.rating || '').replace(/[^\d.]/g, '')) || 0;
+      return rb - ra || a.dist - b.dist;
+    });
+  } else if (key === 'reviews') {
+    sorted.sort((a, b) => (b.reviewCount || 0) - (a.reviewCount || 0) || a.dist - b.dist);
+  } else if (key === 'open') {
+    sorted.sort((a, b) => {
+      const rank = s => s === 'Open now' ? 0 : s === 'Closed now' ? 2 : 1;
+      return rank(a.openStatus) - rank(b.openStatus) || a.dist - b.dist;
+    });
+  } else if (key === 'price') {
+    const reg = item => { try { return parseFloat(JSON.parse(item.fuelPrices || '{}').Regular?.price) || 999; } catch { return 999; } };
+    sorted.sort((a, b) => reg(a) - reg(b) || a.dist - b.dist);
+  }
+
+  _renderNearbyCards(sorted, _nearbyFeature);
+}
+
 function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {}) {
   const cfg   = FEATURE_CONFIG[feature];
   const items = elements
@@ -799,7 +879,8 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       const rating      = tags.rating       || '';
       const cuisine     = tags.cuisine      || '';
       const fuelPrices  = tags.fuel_prices  || '';
-      return { name, dist, addr, openStatus, todayHours, rating, cuisine, fuelPrices, lat, lon };
+      const reviewCount = parseInt(tags.review_count) || 0;
+      return { name, dist, addr, openStatus, todayHours, rating, cuisine, fuelPrices, reviewCount, lat, lon };
     })
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist)
@@ -837,6 +918,20 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       🔍 ${t('no_results_exp','No results nearby — expanded search to')} <strong style="margin:0 3px">${meta.radiusLabel}</strong> · ${t('nearest_first','Nearest shown first')}
     </div>`;
   }
+
+  _nearbyItems   = items;
+  _nearbyFeature = feature;
+  showSortBar(feature, items);
+  _renderNearbyCards(items, feature, cfg);
+  fetchAiInsight(feature, items);
+  if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
+}
+
+function _renderNearbyCards(items, feature, cfgOverride) {
+  const cfg = cfgOverride || FEATURE_CONFIG[feature] || {};
+  // Preserve the AI insight panel across re-renders triggered by sort changes
+  const aiPanel = document.getElementById('ai-insight-panel');
+  if (aiPanel) aiPanel.remove();
 
   resultsDiv.innerHTML = items.map((item, i) => {
     const num         = String(i + 1).padStart(2, '0');
@@ -911,8 +1006,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       </div>`;
   }).join('');
 
-  fetchAiInsight(feature, items);
-  if (typeof updateMapNearby === 'function') updateMapNearby(items, cfg);
+  if (aiPanel) resultsDiv.insertBefore(aiPanel, resultsDiv.firstChild);
 }
 
 function renderTransitResults(elements, meta = {}) {
