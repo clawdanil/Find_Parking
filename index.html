@@ -1434,6 +1434,30 @@
       white-space:nowrap;
     }
 
+    /* ── Fuel prices block ─────────────────────────────────────────────── */
+    .fuel-prices-block {
+      margin-top: 10px; padding: 10px 12px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(10,10,10,.08);
+      border-radius: 12px;
+    }
+    .fuel-prices-title {
+      font-size: .72rem; font-weight: 700; color: var(--t55);
+      margin-bottom: 7px; letter-spacing: .02em;
+    }
+    .fuel-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(10,10,10,.05);
+    }
+    .fuel-row:last-child { border-bottom: none; }
+    .fuel-grade { font-size: .75rem; font-weight: 600; color: var(--t55); }
+    .fuel-price { font-size: .82rem; font-weight: 700; color: #111118; }
+    .fuel-no-price {
+      margin-top: 10px; font-size: .74rem; font-weight: 500;
+      color: var(--t55); text-align: center;
+    }
+
     /* ── Google Maps button ─────────────────────────────────────────────── */
     .gmaps-btn {
       display: flex; align-items: center; justify-content: center; gap: 7px;
@@ -1687,6 +1711,9 @@
       transform: translateY(-3px);
     }
     [data-theme="dark"] .detail-item        { background: rgba(255,255,255,.07); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .fuel-prices-block  { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.09); }
+    [data-theme="dark"] .fuel-row           { border-color: rgba(255,255,255,.07); }
+    [data-theme="dark"] .fuel-price         { color: rgba(255,255,255,.92); }
     [data-theme="dark"] .tabs-bar           { background: rgba(255,255,255,.065); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .map-header         { background: rgba(14,14,14,.92); border-color: rgba(255,255,255,.09); }
     [data-theme="dark"] .map-panel          { border-color: rgba(255,255,255,.09); }
@@ -5536,6 +5563,7 @@
       it: function(c) { return '📍 Sei a ' + c + '! Qual è il tuo budget per oggi — cibo, bevande, caffè o altro?'; },
     };
 
+
     // ── Language picker ──────────────────────────────────────────────────────
     function setLang(code) {
       chatLang = code;
@@ -5556,6 +5584,7 @@
 
     // ── In-chat location button ───────────────────────────────────────────
     var LOC_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+
 
     function addLocationButton() {
       if (document.getElementById('chat-loc-quick')) return;
@@ -5770,15 +5799,9 @@
     document.addEventListener('keydown', function(e) { if (e.key==='Escape'&&isOpen) closeChat(); });
 
     // ── iOS keyboard: top-anchor popup inside visual viewport ────────────────
-    // Using bottom-based positioning was wrong: position:fixed bottom is
-    // relative to the layout viewport (full screen height), not the visible
-    // area above the keyboard. Flip to top-anchoring via visualViewport so
-    // the popup always stays in the visible slice regardless of whether the
-    // WebView shrinks or the keyboard overlays it.
     var _origVH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
     inp.addEventListener('focus', function() {
-      // overflow:hidden prevents iOS panning the page (no white strip)
       document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
     });
@@ -5793,13 +5816,10 @@
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', function() {
         var vvH = window.visualViewport.height;
-        // Keep baseline up to date when no keyboard
         if (vvH > _origVH) { _origVH = vvH; }
-        // Only reposition when keyboard has reduced visible height noticeably
         if (vvH > _origVH * 0.82 || !popup.classList.contains('is-open')) return;
-        // Anchor popup to the TOP of the visual viewport so it stays visible
         var topOffset = (window.visualViewport.offsetTop || 0) + 8;
-        var popupH    = Math.min(260, vvH - 72); // leave room below for input
+        var popupH    = Math.min(260, vvH - 72);
         popup.style.top    = topOffset + 'px';
         popup.style.bottom = 'auto';
         popup.style.height = Math.max(150, popupH) + 'px';

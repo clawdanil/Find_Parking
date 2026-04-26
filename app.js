@@ -794,11 +794,12 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       const dist        = haversineMiFE(searchLat, searchLng, lat, lon);
       const addr        = [tags['addr:housenumber'], tags['addr:street']].filter(Boolean).join(' ')
                        || tags['addr:full'] || '';
-      const openStatus  = tags.open_status  || '';   // 'Open now' | 'Closed now' | ''
-      const todayHours  = tags.today_hours  || '';   // e.g. '9:00 AM – 10:00 PM'
+      const openStatus  = tags.open_status  || '';
+      const todayHours  = tags.today_hours  || '';
       const rating      = tags.rating       || '';
       const cuisine     = tags.cuisine      || '';
-      return { name, dist, addr, openStatus, todayHours, rating, cuisine, lat, lon };
+      const fuelPrices  = tags.fuel_prices  || '';
+      return { name, dist, addr, openStatus, todayHours, rating, cuisine, fuelPrices, lat, lon };
     })
     .filter(Boolean)
     .sort((a, b) => a.dist - b.dist)
@@ -862,6 +863,28 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
       ? `<span class="detail-item">ℹ️ ${escHtml(item.cuisine.slice(0, 30))}</span>`
       : '';
 
+    // Fuel prices block (gas stations only)
+    let fuelHtml = '';
+    if (item.fuelPrices) {
+      try {
+        const fp = JSON.parse(item.fuelPrices);
+        const GRADE_ORDER = ['Regular','Midgrade','Premium','Diesel','SP91','SP95','SP98','LPG','E85','CNG'];
+        const entries = GRADE_ORDER
+          .filter(g => fp[g])
+          .map(g => {
+            const sym = fp[g].currency === 'USD' ? '$' : (fp[g].currency === 'EUR' ? '€' : fp[g].currency + ' ');
+            return `<div class="fuel-row"><span class="fuel-grade">${g}</span><span class="fuel-price">${sym}${fp[g].price}</span></div>`;
+          });
+        if (entries.length) {
+          fuelHtml = `<div class="fuel-prices-block"><div class="fuel-prices-title">⛽ Fuel Prices</div>${entries.join('')}</div>`;
+        } else {
+          fuelHtml = `<div class="fuel-no-price">⛽ Prices not available — tap Maps to check</div>`;
+        }
+      } catch { fuelHtml = ''; }
+    } else if (feature === 'gas') {
+      fuelHtml = `<div class="fuel-no-price">⛽ Prices not available — tap Maps to check</div>`;
+    }
+
     return `
       <div class="parking-card nearby-card" style="--status-color:#2563EB;--delay:${i * 0.06}s">
         <div class="spot-number">${num}</div>
@@ -873,6 +896,7 @@ function renderNearbyResults(elements, feature, searchLat, searchLng, meta = {})
             </div>
             ${openBadgeHtml || `<span class="status-badge" style="background:rgba(37,99,235,.10);color:#2563EB">${cfg.icon} ${cfg.label}</span>`}
           </div>
+          ${fuelHtml}
           <div class="card-details">
             <span class="detail-item">🗺️ ${formatDistFE(item.dist)}</span>
             ${hoursHtml}
