@@ -43,7 +43,8 @@ window._initGooglePlaces = function () {
     const { mapsKey } = await res.json();
     if (!mapsKey) return;
     const s = document.createElement('script');
-    s.src = `https://maps.googleapis.com/maps/api/js?key=${mapsKey}&libraries=places&loading=async&callback=_initGooglePlaces`;
+    s.async = true;
+    s.src = `https://maps.googleapis.com/maps/api/js?key=${mapsKey}&libraries=places&callback=_initGooglePlaces`;
     document.head.appendChild(s);
   } catch { /* autocomplete unavailable */ }
 })();
@@ -1319,7 +1320,11 @@ async function loadFeature(feature) {
     const res = await fetch('/api/nearby', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lat: selectedLat, lng: selectedLon, feature, units: getUnits() }),
+      body: JSON.stringify({
+        lat: selectedLat, lng: selectedLon, feature, units: getUnits(),
+        localDay:  new Date().getDay(),
+        localMins: new Date().getHours() * 60 + new Date().getMinutes(),
+      }),
     });
     clearInterval(loadingTimer);
     if (!res.ok) throw new Error('API error ' + res.status);

@@ -113,13 +113,16 @@ function json(data, status = 200) {
 
 
 // ── OSM opening_hours parser (handles most common formats) ───────────────────
-function parseOsmHours(ohStr) {
+// localDay: JS day 0=Sun…6=Sat from the user's browser (avoids UTC edge-server timezone bug)
+// localMins: minutes since midnight in the user's local timezone
+function parseOsmHours(ohStr, localDay, localMins) {
   if (!ohStr || typeof ohStr !== 'string') return null;
   const s = ohStr.trim();
   if (s === '24/7') return { open_status: 'Open now', today_hours: '24 hours' };
 
   const DAY = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
-  const jsDay = new Date().getDay();           // 0=Sun…6=Sat
+  const jsDay    = localDay  != null ? localDay  : new Date().getDay();
+  const now      = localMins != null ? localMins : (new Date().getHours() * 60 + new Date().getMinutes());
   const todayIdx = jsDay === 0 ? 6 : jsDay - 1; // Mo=0…Su=6
 
   for (const seg of s.split(';').map(r => r.trim())) {
@@ -134,7 +137,6 @@ function parseOsmHours(ohStr) {
     if (!inRange) continue;
     const [openH, openM] = m[3].split(':').map(Number);
     const [closeH, closeM] = m[4].split(':').map(Number);
-    const now = new Date().getHours() * 60 + new Date().getMinutes();
     const openMin  = openH  * 60 + openM;
     const closeMin = closeH * 60 + closeM;
     const isOpen = closeMin < openMin
@@ -146,7 +148,7 @@ function parseOsmHours(ohStr) {
 }
 
 // ── Places Details: today's hours for one place ───────────────────────────────
-async function fetchPlaceHours(placeId, key) {
+async function fetchPlaceHours(placeId, key, localDay) {
   try {
     const ctrl = new AbortController();
     const t    = setTimeout(() => ctrl.abort(), 6000);
@@ -160,7 +162,9 @@ async function fetchPlaceHours(placeId, key) {
     if (data.status !== 'OK') return null;
     const oh = data.result?.opening_hours;
     if (!oh) return null;
-    const todayIdx   = (new Date().getDay() + 6) % 7; // Mon=0 … Sun=6
+    // Use browser's local day to pick the right weekday text (server is UTC)
+    const jsDay    = localDay != null ? localDay : new Date().getDay();
+    const todayIdx = jsDay === 0 ? 6 : jsDay - 1; // Mon=0 … Sun=6
     const todayHours = (oh.weekday_text?.[todayIdx] || '').replace(/^[^:]+:\s*/, '').trim();
     return { open_now: oh.open_now, today_hours: todayHours || null };
   } catch { return null; }
@@ -245,7 +249,7 @@ async function queryGasStations(lat, lng, key, radius) {
 }
 
 // ── Google Places Nearby Search at a specific radius ─────────────────────────
-async function queryGooglePlaces(lat, lng, feature, key, radius) {
+async function queryGooglePlaces(lat, lng, feature, key, radius, localDay) {
   const types = GOOGLE_TYPES[feature];
   if (!types || !key) return null;
 
@@ -288,7 +292,7 @@ async function queryGooglePlaces(lat, lng, feature, key, radius) {
     .slice(0, 15);
 
   // Fetch today's hours in parallel
-  const hoursResults = await Promise.all(top.map(p => fetchPlaceHours(p.placeId, key)));
+  const hoursResults = await Promise.all(top.map(p => fetchPlaceHours(p.placeId, key, localDay)));
 
   return top.map((p, i) => {
     const hours      = hoursResults[i];
@@ -802,9 +806,9 @@ export default async function handler(req) {
     return json({ error: 'Method not allowed' }, 405);
   }
 
-  let lat, lng, feature, units;
+  let lat, lng, feature, units, localDay, localMins;
   if (req.method === 'POST') {
-    try { ({ lat, lng, feature, units } = await req.json()); } catch { return json({ error: 'Bad request' }, 400); }
+    try { ({ lat, lng, feature, units, localDay, localMins } = await req.json()); } catch { return json({ error: 'Bad request' }, 400); }
   } else {
     const p = new URL(req.url).searchParams;
     lat = parseFloat(p.get('lat')); lng = parseFloat(p.get('lng')); feature = p.get('feature'); units = p.get('units') || 'metric';
@@ -844,7 +848,7 @@ export default async function handler(req) {
       try {
         elements = feature === 'gas'
           ? await queryGasStations(lat, lng, key, radius)
-          : await queryGooglePlaces(lat, lng, feature, key, radius);
+          : await queryGooglePlaces(lat, lng, feature, key, radius, localDay);
       } catch { elements = null; }
     }
 
@@ -855,7 +859,7 @@ export default async function handler(req) {
       elements = raw.map(el => {
         if (!el.tags) return el;
         if (!el.tags.open_status && el.tags.opening_hours) {
-          const parsed = parseOsmHours(el.tags.opening_hours);
+          const parsed = parseOsmHours(el.tags.opening_hours, localDay, localMins);
           if (parsed) { el.tags.open_status = parsed.open_status; el.tags.today_hours = parsed.today_hours; }
         }
         return el;
