@@ -10,6 +10,7 @@ const FEATURE_LABEL = {
   parking:       'parking spots and garages',
   transit:       'transit stops and public transport options',
   shopping:      'shopping stores and retail venues',
+  gas:           'gas stations and fuel prices',
 };
 
 const LANG_NAMES = {

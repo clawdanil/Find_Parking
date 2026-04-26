@@ -13,9 +13,10 @@ const resultsWrapper = document.getElementById('results-wrapper');
 const mapPanel       = document.getElementById('map-panel');
 
 // ── Autocomplete state ────────────────────────────────────────────────────────
-let selectedCity = '';   // set when user picks an autocomplete suggestion or chip
-let selectedLat  = null;
-let selectedLon  = null;
+let selectedCity    = '';
+let selectedLat     = null;
+let selectedLon     = null;
+let selectedCountry = '';
 let acTimer      = null;
 
 // Expose location for budget chat
@@ -95,6 +96,7 @@ async function selectAC(s) {
             get('locality')?.long_name || get('sublocality')?.long_name,
             get('administrative_area_level_1')?.short_name,
           ].filter(Boolean).join(', ');
+          selectedCountry = get('country')?.short_name || '';
           selectedCity = city || selectedCity;
           selectedLat  = lat;
           selectedLon  = lon;
@@ -735,7 +737,9 @@ locationBtn.addEventListener('click', () => {
 
 // ── Unit detection: US/UK/Myanmar → imperial; everywhere else → metric ────────
 const IMPERIAL_STATES = /,\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WA|WV|WI|WY|DC)\b/i;
+const IMPERIAL_COUNTRIES = /^(US|GB|MM|LR)$/;
 function getUnits() {
+  if (selectedCountry && IMPERIAL_COUNTRIES.test(selectedCountry)) return 'imperial';
   const text = (streetInput.value || '') + ' ' + (selectedCity || '');
   if (IMPERIAL_STATES.test(text)) return 'imperial';
   if (/\b(USA|United States|United Kingdom|England|Scotland|Wales|Myanmar|Burma|Liberia)\b/i.test(text)) return 'imperial';
@@ -754,6 +758,7 @@ const FEATURE_CONFIG = {
   shopping:      { label: 'Shopping',      icon: '🛒' },
   entertainment: { label: 'Entertainment', icon: '🎬' },
   events:        { label: 'Events',        icon: '🎟️' },
+  gas:           { label: 'Gas',           icon: '⛽' },
 };
 
 function haversineMiFE(lat1, lon1, lat2, lon2) {

@@ -33,6 +33,7 @@ const RADIUS_TIERS = {
   gym:      [1200, 2500, 5000, 10000, 20000],
   shopping:      [2000, 4000, 8000, 16000, 25000],
   entertainment: [2000, 4000, 8000, 16000, 25000],
+  gas:      [1000, 2000, 5000, 10000, 20000],
 };
 
 // ── Google Places type mappings ───────────────────────────────────────────────
@@ -43,6 +44,7 @@ const GOOGLE_TYPES = {
   gym:      ['gym'],
   shopping:      ['shopping_mall', 'department_store'],
   entertainment: ['movie_theater', 'bowling_alley', 'amusement_park'],
+  gas:      ['gas_station'],
 };
 
 // ── Overpass fallback queries (radius is passed in) ───────────────────────────
@@ -89,6 +91,10 @@ const OVERPASS_QUERY = {
     way["sport"~"golf|bowling|billiards|laser_tag|climbing"](around:${r},${lat},${lng});
     node["name"~"Cinema|Theater|Theatre|Bowling|Golf|Arcade|Laser|Escape|Trampoline|Topgolf|Dave|Buster|Chuck|Regal|AMC|IMAX|Cineplex|Odeon|Cineworld",i](around:${r},${lat},${lng});
     way["name"~"Cinema|Theater|Theatre|Bowling|Golf|Arcade|Laser|Escape|Trampoline|Topgolf",i](around:${r},${lat},${lng});`,
+
+  gas: (lat, lng, r) => `
+    node["amenity"="fuel"](around:${r},${lat},${lng});
+    way["amenity"="fuel"](around:${r},${lat},${lng});`,
 };
 
 const OVERPASS_MIRRORS = [
@@ -105,6 +111,39 @@ function json(data, status = 200) {
 }
 
 
+
+// ── OSM opening_hours parser (handles most common formats) ───────────────────
+function parseOsmHours(ohStr) {
+  if (!ohStr || typeof ohStr !== 'string') return null;
+  const s = ohStr.trim();
+  if (s === '24/7') return { open_status: 'Open now', today_hours: '24 hours' };
+
+  const DAY = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+  const jsDay = new Date().getDay();           // 0=Sun…6=Sat
+  const todayIdx = jsDay === 0 ? 6 : jsDay - 1; // Mo=0…Su=6
+
+  for (const seg of s.split(';').map(r => r.trim())) {
+    if (!seg || /\boff\b/i.test(seg) || /^PH/.test(seg)) continue;
+    const m = seg.match(/^(?:([A-Z][a-z])(?:-([A-Z][a-z]))?)?\s*(\d{1,2}:\d{2})-(\d{1,2}:\d{2})/);
+    if (!m) continue;
+    const si = m[1] ? DAY.indexOf(m[1]) : 0;
+    const ei = m[2] ? DAY.indexOf(m[2]) : (m[1] ? si : 6);
+    if (m[1] && si === -1) continue;
+    const inRange = si <= ei ? todayIdx >= si && todayIdx <= ei
+                             : todayIdx >= si || todayIdx <= ei;
+    if (!inRange) continue;
+    const [openH, openM] = m[3].split(':').map(Number);
+    const [closeH, closeM] = m[4].split(':').map(Number);
+    const now = new Date().getHours() * 60 + new Date().getMinutes();
+    const openMin  = openH  * 60 + openM;
+    const closeMin = closeH * 60 + closeM;
+    const isOpen = closeMin < openMin
+      ? now >= openMin || now < closeMin   // overnight
+      : now >= openMin && now < closeMin;
+    return { open_status: isOpen ? 'Open now' : 'Closed now', today_hours: `${m[3]} – ${m[4]}` };
+  }
+  return null;
+}
 
 // ── Places Details: today's hours for one place ───────────────────────────────
 async function fetchPlaceHours(placeId, key) {
@@ -727,7 +766,16 @@ export default async function handler(req) {
 
     // 2. Overpass fallback at same radius if Places returned nothing
     if (!elements || elements.length === 0) {
-      elements = await queryOverpass(OVERPASS_QUERY[feature](lat, lng, radius));
+      const raw = await queryOverpass(OVERPASS_QUERY[feature](lat, lng, radius));
+      // Annotate Overpass elements with open_status from OSM opening_hours
+      elements = raw.map(el => {
+        if (!el.tags) return el;
+        if (!el.tags.open_status && el.tags.opening_hours) {
+          const parsed = parseOsmHours(el.tags.opening_hours);
+          if (parsed) { el.tags.open_status = parsed.open_status; el.tags.today_hours = parsed.today_hours; }
+        }
+        return el;
+      });
     }
 
     if (elements && elements.length > 0) break;
